@@ -60,6 +60,13 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Progression: Requirement met → Toast notification appears → Achievement unlocked and saved → Visible in Achievements tab with progress indicators
 - Success criteria: Achievements feel rewarding and achievable, clear feedback when unlocked, persistent across sessions
 
+**Daily & Weekly Challenges System**
+- Functionality: Rotating time-limited challenges across 4 difficulty tiers (Bronze, Silver, Gold, Platinum) with specific objectives (score targets, combo achievements, perfect rounds, difficulty clears). Players earn XP, time-limited badges (7-14 day expiry), and exclusive titles upon completion. Includes level progression system (XP-based) and challenge progress tracking that updates after each game.
+- Purpose: Drives daily engagement and return visits by providing fresh objectives beyond high scores, creating urgency through time limits and rewarding consistent play with visible progression and exclusive rewards
+- Trigger: Challenges auto-generate at daily (midnight) and weekly (Monday) resets, accessible via dedicated Challenges tab in menu
+- Progression: Game completes → Challenge progress calculated → UI updates with progress → Challenge completes → Notification appears → Player claims reward in Challenges tab → XP added → Level increases → Badges/titles unlocked → Equipped in profile
+- Success criteria: Challenges feel achievable but challenging, rewards feel valuable and exclusive, time limits create urgency without frustration, progress tracking is clear and accurate
+
 **Practice Mode**
 - Functionality: Non-competitive gameplay mode that doesn't affect leaderboard or most statistics, allowing players to warm up or learn mechanics
 - Purpose: Reduces pressure for new players and provides a space for skill development without performance anxiety
@@ -101,6 +108,13 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Mixed difficulty leaderboard**: All difficulty levels share one leaderboard with difficulty badges for context and fairness
 - **Practice mode scores**: Clearly marked, don't affect leaderboard to prevent sandbagging
 - **Achievement unlocks**: Queued and displayed one at a time to avoid overwhelming UI
+- **Challenge refresh timing**: Challenges auto-refresh at predetermined times (daily: midnight, weekly: Monday), with client-side checks on app load
+- **Expired badges**: Time-limited badges automatically removed from player inventory after expiry, with clear expiration countdown displayed
+- **Challenge progress in practice mode**: Practice mode games don't count toward challenge progress to prevent farming
+- **Multiple challenge completion**: Single game can complete multiple challenges simultaneously, all rewards claimable independently
+- **XP and level calculations**: Level progression uses quadratic formula for balanced scaling, level-up feedback provided via toast notifications
+- **Title equipping**: Players can unlock multiple titles but only equip one at a time, selection persists across sessions
+- **Challenge reward claiming**: Rewards must be manually claimed in Challenges tab, preventing accidental XP/badge acquisition
 - **Keyboard shortcuts**: Space for quick restart on game over, ESC for quit confirmation during gameplay
 - **Stats persistence**: All player statistics stored in KV and survive page refreshes, device changes
 

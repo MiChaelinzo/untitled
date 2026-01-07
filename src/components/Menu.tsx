@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -10,6 +10,7 @@ import { useKV } from '@github/spark/hooks'
 import { PlayerStats, ACHIEVEMENTS } from '@/lib/achievements'
 import { StatsPanel } from '@/components/StatsPanel'
 import { AchievementGrid } from '@/components/AchievementGrid'
+import { ChallengesPanel } from '@/components/ChallengesPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -26,15 +27,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
+import { PlayerChallengeData } from '@/lib/challenges'
 
 interface MenuProps {
   onStartGame: (difficulty: Difficulty, isPractice?: boolean) => void
   leaderboard: LeaderboardEntry[]
   stats: PlayerStats
   unlockedAchievements: string[]
+  challengeData: PlayerChallengeData
+  onClaimChallengeReward: (challengeId: string) => void
 }
 
-export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements }: MenuProps) {
+export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, challengeData, onClaimChallengeReward }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
@@ -156,6 +160,16 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements }: 
             <TabsTrigger value="achievements" className="flex items-center gap-2">
               <Medal size={16} weight="fill" />
               <span className="hidden sm:inline">Rewards</span>
+            </TabsTrigger>
+            <TabsTrigger value="challenges" className="flex items-center gap-2 relative">
+              <Target size={16} weight="fill" />
+              <span className="hidden sm:inline">Challenges</span>
+              {challengeData.activeChallenges.some(c => {
+                const progress = challengeData.progress[c.id]
+                return progress?.completed && !progress?.claimedReward
+              }) && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -339,6 +353,17 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements }: 
               Unlocked {unlockedAchievements.length} of {ACHIEVEMENTS.length}
             </div>
             <AchievementGrid unlockedIds={unlockedAchievements} />
+          </TabsContent>
+
+          <TabsContent value="challenges" className="space-y-4 mt-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Target weight="fill" size={24} className="text-primary" />
+              <h3 className="text-2xl font-bold text-foreground">Daily & Weekly Challenges</h3>
+            </div>
+            <ChallengesPanel 
+              challengeData={challengeData} 
+              onClaimReward={onClaimChallengeReward} 
+            />
           </TabsContent>
         </Tabs>
 
