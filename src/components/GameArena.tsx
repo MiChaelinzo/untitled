@@ -4,12 +4,13 @@ import { Target } from '@/components/Target'
 import { GameHUD } from '@/components/GameHUD'
 import { RoundTransition } from '@/components/RoundTransition'
 import { HitFeedback, HitParticles } from '@/components/HitEffects'
-import { GameState, ROUND_CONFIG, Target as TargetType } from '@/lib/game-types'
+import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
+  difficulty: Difficulty
 }
 
 interface Effect {
@@ -20,8 +21,10 @@ interface Effect {
   score?: number
 }
 
-export function GameArena({ onGameOver }: GameArenaProps) {
+export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
+  
   const [gameState, setGameState] = useState<GameState>({
     phase: 'roundTransition',
     round: 1,
@@ -30,7 +33,8 @@ export function GameArena({ onGameOver }: GameArenaProps) {
     targetsHit: 0,
     targetsMissed: 0,
     currentTarget: null,
-    roundTargetsRemaining: ROUND_CONFIG[1].targets
+    roundTargetsRemaining: difficultyConfig.rounds[1].targets,
+    difficulty
   })
   const [effects, setEffects] = useState<Effect[]>([])
 
@@ -38,18 +42,18 @@ export function GameArena({ onGameOver }: GameArenaProps) {
     if (!containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
-    const config = ROUND_CONFIG[gameState.round as keyof typeof ROUND_CONFIG]
-    const target = generateRandomTarget(rect.width, rect.height, config.duration, 80)
+    const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
+    const target = generateRandomTarget(rect.width, rect.height, config.duration, config.targetSize)
 
     setGameState(prev => ({
       ...prev,
       currentTarget: target
     }))
-  }, [gameState.round])
+  }, [gameState.round, difficultyConfig])
 
   const handleHit = useCallback((reactionTime: number) => {
-    const config = ROUND_CONFIG[gameState.round as keyof typeof ROUND_CONFIG]
-    const points = calculateScore(reactionTime, config.duration, gameState.combo)
+    const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
+    const points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
 
     soundSystem.play('hit', gameState.combo)
     
@@ -107,7 +111,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
             combo: newCombo,
             targetsHit: prev.targetsHit + 1,
             currentTarget: null,
-            roundTargetsRemaining: ROUND_CONFIG[(prev.round + 1) as keyof typeof ROUND_CONFIG].targets
+            roundTargetsRemaining: difficultyConfig.rounds[(prev.round + 1) as keyof typeof difficultyConfig.rounds].targets
           }
         }
       }
@@ -121,7 +125,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig])
 
   const handleMiss = useCallback(() => {
     soundSystem.play('miss')
@@ -150,7 +154,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
             combo: 0,
             targetsMissed: prev.targetsMissed + 1,
             currentTarget: null,
-            roundTargetsRemaining: ROUND_CONFIG[(prev.round + 1) as keyof typeof ROUND_CONFIG].targets
+            roundTargetsRemaining: difficultyConfig.rounds[(prev.round + 1) as keyof typeof difficultyConfig.rounds].targets
           }
         }
       }
@@ -163,7 +167,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [onGameOver])
+  }, [onGameOver, difficultyConfig])
 
   const handleStartRound = useCallback(() => {
     soundSystem.play('roundStart')
@@ -186,7 +190,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
     setEffects(prev => prev.filter(e => e.id !== id))
   }, [])
 
-  const config = ROUND_CONFIG[gameState.round as keyof typeof ROUND_CONFIG]
+  const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
@@ -206,7 +210,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
                 target={gameState.currentTarget}
                 onHit={handleHit}
                 onMiss={handleMiss}
-                size={80}
+                size={config.targetSize}
               />
             )}
           </AnimatePresence>

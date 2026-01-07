@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner'
 import { Menu } from '@/components/Menu'
 import { GameArena } from '@/components/GameArena'
 import { GameOver } from '@/components/GameOver'
-import { LeaderboardEntry } from '@/lib/game-types'
+import { LeaderboardEntry, Difficulty } from '@/lib/game-types'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
 
 type AppPhase = 'menu' | 'playing' | 'gameOver'
@@ -18,13 +18,15 @@ function App() {
   const [finalRound, setFinalRound] = useState(0)
   const [finalTargetsHit, setFinalTargetsHit] = useState(0)
   const [finalTargetsMissed, setFinalTargetsMissed] = useState(0)
+  const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty>('medium')
 
   useEffect(() => {
     if (soundTheme) soundSystem.setTheme(soundTheme)
     if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
   }, [soundTheme, soundEnabled])
 
-  const handleStartGame = () => {
+  const handleStartGame = (difficulty: Difficulty) => {
+    setCurrentDifficulty(difficulty)
     setPhase('playing')
   }
 
@@ -41,7 +43,8 @@ function App() {
       name: name.trim(),
       score: finalScore,
       timestamp: Date.now(),
-      rounds: finalRound
+      rounds: finalRound,
+      difficulty: currentDifficulty
     }
 
     setLeaderboard(current => {
@@ -72,7 +75,7 @@ function App() {
       )}
       
       {phase === 'playing' && (
-        <GameArena onGameOver={handleGameOver} />
+        <GameArena onGameOver={handleGameOver} difficulty={currentDifficulty} />
       )}
       
       {phase === 'gameOver' && (

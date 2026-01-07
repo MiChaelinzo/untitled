@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { formatScore } from '@/lib/game-utils'
 import { Trophy, Crown, Medal } from '@phosphor-icons/react'
-import { LeaderboardEntry } from '@/lib/game-types'
+import { LeaderboardEntry, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { soundSystem } from '@/lib/sound-system'
 
 interface GameOverProps {
@@ -195,7 +195,7 @@ export function GameOver({
                   <div>
                     <div className="font-bold text-foreground">{entry.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {entry.rounds} rounds
+                      {entry.rounds} rounds • {DIFFICULTY_CONFIG[entry.difficulty].name}
                     </div>
                   </div>
                 </div>

@@ -27,25 +27,31 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Success criteria: Targets feel responsive, fair, and visually satisfying when hit
 
 **Progressive Difficulty Rounds**
-- Functionality: Three rounds of increasing challenge (Round 1: 10 targets/3s each, Round 2: 15 targets/2s each, Round 3: 20 targets/1.5s each)
-- Purpose: Builds tension and separates casual players from pro-level reflexes
-- Trigger: Previous round completes successfully
-- Progression: Round intro animation → Target sequence → Round complete celebration → Next round or final score
-- Success criteria: Difficulty curve feels challenging but achievable, with clear progression
+- Functionality: Four difficulty levels (Easy, Medium, Hard, Insane) with three rounds each, varying target count, duration, target size, and score multipliers
+- Purpose: Accommodates players of all skill levels and provides progression paths from casual to pro-level gameplay
+- Trigger: Difficulty selection on menu screen before starting game
+- Progression: Menu difficulty selector → Round intro animation → Target sequence → Round complete celebration → Next round or final score
+- Success criteria: Each difficulty level feels distinct and appropriately challenging, with clear progression within rounds
+
+**Difficulty System**:
+- **Easy**: Generous timing (4s/3s/2.5s), larger targets (100px/90px/80px), 1x score multiplier - ideal for casual players and first-time players
+- **Medium**: Balanced challenge (3s/2s/1.5s), standard targets (80px/75px/70px), 1.5x score multiplier - the default experience for most players
+- **Hard**: Fast reflexes required (2s/1.5s/1s), smaller targets (70px/60px/55px), 2x score multiplier, more targets per round
+- **Insane**: Pro-level reflexes (1.5s/1s/0.8s), smallest targets (60px/50px/45px), 3x score multiplier, maximum target counts - for competitive players seeking the ultimate challenge
 
 **Player Registration & Leaderboard**
-- Functionality: Optional name/email entry to claim leaderboard position and receive score notification
-- Purpose: Captures leads for Cloud9 while giving players bragging rights
+- Functionality: Optional name/email entry to claim leaderboard position with difficulty tracking and receive score notification
+- Purpose: Captures leads for Cloud9 while giving players bragging rights, with separate recognition for different difficulty levels
 - Trigger: After completing a game with a competitive score
-- Progression: Score reveal → Leaderboard position shown → Registration prompt → Name/email entry → Confirmation with position → Social share option
-- Success criteria: Registration feels rewarding not mandatory, leaderboard updates in real-time
+- Progression: Score reveal → Leaderboard position shown → Registration prompt → Name/email entry → Confirmation with position and difficulty badge → Social share option
+- Success criteria: Registration feels rewarding not mandatory, leaderboard updates in real-time with clear difficulty indicators
 
 **Score Calculation System**
-- Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits and immersive sound effects for feedback
-- Purpose: Rewards precision and speed, creating competitive depth while providing satisfying audio feedback
+- Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits, difficulty multipliers (1x Easy, 1.5x Medium, 2x Hard, 3x Insane), and immersive sound effects for feedback
+- Purpose: Rewards precision, speed, and challenge selection while providing satisfying audio feedback that scales with difficulty
 - Trigger: Every target hit or miss during gameplay
-- Progression: Target hit → Calculate reaction time → Apply combo multiplier → Play hit sound + combo sound → Add to running score → Display with satisfying animation
-- Success criteria: Scoring feels fair and transparent, with clear visual and audio feedback on performance
+- Progression: Target hit → Calculate reaction time → Apply combo multiplier → Apply difficulty multiplier → Play hit sound + combo sound → Add to running score → Display with satisfying animation
+- Success criteria: Scoring feels fair and transparent with difficulty appropriately reflected in final scores, clear visual and audio feedback on performance
 
 **Sound Effects System**
 - Functionality: Web Audio API-powered sound effects with three distinct themes (Sci-Fi, Retro Arcade, Minimal) for hits (pitch increases with combo), misses (descending tone), combo milestones (ascending arpeggio), round starts (fanfare), and game over (descending sequence)
@@ -63,6 +69,8 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Leaderboard spam**: Rate limit submissions to 1 per minute per device
 - **Mobile responsiveness**: Touch targets automatically scale to minimum 44px regardless of screen size
 - **Audio context limitations**: Web Audio API auto-initializes on user interaction (browser requirement), sound preference and theme selection persist between sessions via KV storage
+- **Difficulty persistence**: Selected difficulty persists between sessions for consistent player experience
+- **Mixed difficulty leaderboard**: All difficulty levels share one leaderboard with difficulty badges for context and fairness
 
 ## Design Direction
 

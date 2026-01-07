@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform } from '@phosphor-icons/react'
-import { LeaderboardEntry } from '@/lib/game-types'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire } from '@phosphor-icons/react'
+import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
 import { useKV } from '@github/spark/hooks'
@@ -16,13 +16,14 @@ import {
 } from '@/components/ui/select'
 
 interface MenuProps {
-  onStartGame: () => void
+  onStartGame: (difficulty: Difficulty) => void
   leaderboard: LeaderboardEntry[]
 }
 
 export function Menu({ onStartGame, leaderboard }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
+  const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
 
   const toggleSound = () => {
     setSoundEnabled(current => {
@@ -42,6 +43,8 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
       soundSystem.play('hit', 0)
     }
   }
+
+  const difficultyConfig = DIFFICULTY_CONFIG[selectedDifficulty || 'medium']
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -110,16 +113,61 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="flex justify-center"
+          className="space-y-6"
         >
-          <Button
-            size="lg"
-            onClick={onStartGame}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-2xl px-12 py-8 glow-box group"
-          >
-            <Play weight="fill" className="mr-3 group-hover:scale-110 transition-transform" size={32} />
-            Start Game
-          </Button>
+          <div className="max-w-md mx-auto space-y-3">
+            <div className="text-center">
+              <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+                <Fire weight="fill" className="text-accent" size={20} />
+                Select Difficulty
+              </h3>
+            </div>
+            <Select value={selectedDifficulty} onValueChange={(value) => setSelectedDifficulty(value as Difficulty)}>
+              <SelectTrigger className="bg-card/50 backdrop-blur border-primary/50 text-lg font-semibold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="easy">
+                  <div className="flex flex-col items-start">
+                    <span className="font-bold">Easy</span>
+                    <span className="text-xs text-muted-foreground">Generous timing and larger targets</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="medium">
+                  <div className="flex flex-col items-start">
+                    <span className="font-bold">Medium</span>
+                    <span className="text-xs text-muted-foreground">Balanced challenge for most players</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="hard">
+                  <div className="flex flex-col items-start">
+                    <span className="font-bold">Hard</span>
+                    <span className="text-xs text-muted-foreground">Fast reflexes required</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="insane">
+                  <div className="flex flex-col items-start">
+                    <span className="font-bold text-accent">Insane</span>
+                    <span className="text-xs text-muted-foreground">Pro-level reflexes only</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="text-center text-sm text-muted-foreground">
+              Score multiplier: <span className="text-accent font-bold">{difficultyConfig.scoreMultiplier}x</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              size="lg"
+              onClick={() => onStartGame(selectedDifficulty || 'medium')}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-2xl px-12 py-8 glow-box group"
+            >
+              <Play weight="fill" className="mr-3 group-hover:scale-110 transition-transform" size={32} />
+              Start Game
+            </Button>
+          </div>
         </motion.div>
 
         <motion.div
@@ -130,18 +178,24 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
         >
           <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
             <Lightning weight="fill" size={32} className="text-accent mx-auto" />
-            <div className="font-bold text-foreground">Round 1: Warm Up</div>
-            <div className="text-sm text-muted-foreground">10 targets • 3s each</div>
+            <div className="font-bold text-foreground">Round 1: {difficultyConfig.rounds[1].name}</div>
+            <div className="text-sm text-muted-foreground">
+              {difficultyConfig.rounds[1].targets} targets • {(difficultyConfig.rounds[1].duration / 1000).toFixed(1)}s each
+            </div>
           </Card>
           <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
             <Lightning weight="fill" size={32} className="text-primary mx-auto" />
-            <div className="font-bold text-foreground">Round 2: Pro League</div>
-            <div className="text-sm text-muted-foreground">15 targets • 2s each</div>
+            <div className="font-bold text-foreground">Round 2: {difficultyConfig.rounds[2].name}</div>
+            <div className="text-sm text-muted-foreground">
+              {difficultyConfig.rounds[2].targets} targets • {(difficultyConfig.rounds[2].duration / 1000).toFixed(1)}s each
+            </div>
           </Card>
           <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
             <Lightning weight="fill" size={32} className="text-cyan mx-auto" />
-            <div className="font-bold text-foreground">Round 3: Championship</div>
-            <div className="text-sm text-muted-foreground">20 targets • 1.5s each</div>
+            <div className="font-bold text-foreground">Round 3: {difficultyConfig.rounds[3].name}</div>
+            <div className="text-sm text-muted-foreground">
+              {difficultyConfig.rounds[3].targets} targets • {(difficultyConfig.rounds[3].duration / 1000).toFixed(1)}s each
+            </div>
           </Card>
         </motion.div>
 
@@ -166,7 +220,10 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
                       {index + 1}
                     </div>
-                    <span className="font-semibold text-foreground">{entry.name}</span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-foreground">{entry.name}</span>
+                      <span className="text-xs text-muted-foreground uppercase">{DIFFICULTY_CONFIG[entry.difficulty].name}</span>
+                    </div>
                   </div>
                   <span className="text-xl font-bold text-cyan">
                     {formatScore(entry.score)}
