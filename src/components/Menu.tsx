@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -16,6 +16,7 @@ import { FilteredLeaderboard } from '@/components/FilteredLeaderboard'
 import { VisualThemeSelector } from '@/components/VisualThemeSelector'
 import { TargetSkinSelector } from '@/components/TargetSkinSelector'
 import { TournamentPanel } from '@/components/TournamentPanel'
+import { TeamTournamentPanel } from '@/components/TeamTournamentPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
@@ -163,7 +164,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-8 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-9 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
@@ -174,7 +175,11 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
             </TabsTrigger>
             <TabsTrigger value="tournament" className="flex items-center gap-2">
               <Trophy size={16} weight="fill" />
-              <span className="hidden sm:inline">Tournament</span>
+              <span className="hidden sm:inline">1v1</span>
+            </TabsTrigger>
+            <TabsTrigger value="teams" className="flex items-center gap-2">
+              <UsersThree size={16} weight="fill" />
+              <span className="hidden sm:inline">Teams</span>
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="flex items-center gap-2">
               <Medal size={16} weight="fill" />
@@ -338,6 +343,16 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
               currentUsername={currentUsername}
               currentAvatarUrl={currentAvatarUrl}
               onStartMatch={(difficulty, matchId) => onStartGame(difficulty, false, matchId)}
+              playerStats={stats}
+            />
+          </TabsContent>
+
+          <TabsContent value="teams" className="space-y-4 mt-6">
+            <TeamTournamentPanel
+              currentUserId={currentUserId}
+              currentUsername={currentUsername}
+              currentAvatarUrl={currentAvatarUrl}
+              onStartMatch={(difficulty, matchId, teamId) => onStartGame(difficulty, false, matchId)}
               playerStats={stats}
             />
           </TabsContent>

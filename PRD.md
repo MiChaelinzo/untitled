@@ -153,6 +153,29 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Interactive Group Preview**: Click groups to see detailed match predictions before tournament starts
 - **Confidence Metrics**: AI reports confidence scores on matchmaking decisions for transparency
 
+**Team-Based Tournament System** (NEW):
+- Functionality: Comprehensive 2v2 and 3v3 team tournament system with AI-powered team balancing, bracket generation, and match prediction. Players are grouped into teams based on skill profiles, with automatic captain assignment and synergy calculations. Teams compete in single-elimination brackets with combined scores determining winners. AI analyzes team compositions, predicts match outcomes with probability calculations, and identifies key competitive factors.
+- Purpose: Adds multiplayer team dimension to individual competition, enables social cooperative gameplay at events, creates deeper strategic engagement through team dynamics, and provides esports-style tournament experience fitting Cloud9's brand. Team format drives longer booth engagement and encourages groups of friends to play together.
+- Trigger: "Teams" tab in main menu, team size selection (2v2 or 3v3)
+- Progression: Teams tab → Select 2v2 or 3v3 format → AI Matchmaking panel → Select 4-9 players → AI analyzes and creates balanced teams → Review team compositions, synergy scores, and balance metrics → Preview potential matchups with predictions → Start tournament → Play team matches with combined scoring → Bracket advances automatically → Championship celebration for winning team
+- Success criteria: Teams feel balanced with <300 average skill variance between teams, balance scores consistently above 80%, team synergy scores accurately reflect skill distribution, match predictions provide engaging competitive context, bracket advancement works reliably, team celebrations highlight all team members
+
+**Team Tournament Features**:
+- **2v2 Format**: Two-player teams for fast-paced duo competition, minimum 4 players (2 teams), ideal for tight booth spaces
+- **3v3 Format**: Three-player teams for strategic trio gameplay, minimum 6 players (2 teams), better for larger event activations
+- **AI Team Balancing**: GPT-4o-mini analyzes player skills and creates balanced teams considering skill ratings, play styles, consistency scores, and strategic synergy potential
+- **Captain System**: Highest-skilled player auto-assigned as team captain with special crown badge and leadership representation
+- **Team Colors**: Unique color coding (8 vibrant colors) for easy visual identification throughout brackets
+- **Synergy Calculation**: Mathematical synergy score (0-100%) based on skill variance within team, higher = more balanced
+- **Combined Team Scoring**: Individual player scores aggregate to team total, all team members contribute equally
+- **Team Match Predictions**: AI predicts win probabilities, competitiveness scores, and identifies 3 key factors determining match outcomes
+- **Bracket Visualization**: Clean tournament bracket display with team rosters, current scores, match status, and winner badges
+- **Team Statistics**: Win/loss records, average skill, match history tracked per team
+- **Winner Celebration**: Special championship screen highlighting winning team with all player names, avatars, and team colors
+- **Balance Metrics**: Real-time balance score (0-100%) showing tournament fairness with AI reasoning and confidence levels
+- **Match Preview**: Click team matchups to see detailed predictions, key factors, and AI analysis before matches start
+- **Flexible Tournament Size**: Support for 2-8 teams in single-elimination brackets, scales from quick 2-team finals to full 8-team tournaments
+
 ## Edge Case Handling
 
 - **Accidental taps**: Outside-target clicks don't penalize but don't grant points either, preventing frustration
@@ -196,6 +219,20 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Match prediction display**: Only shows predictions for groups with 2+ players, handles solo player groups gracefully
 - **Tournament difficulty selection**: AI recommends difficulty based on average group skill, can be overridden by player
 - **Fairness score interpretation**: Scores >0.7 considered balanced (success toast), <0.7 triggers info toast about imbalance
+- **Team tournament minimum players**: 2v2 requires 4+ players, 3v3 requires 6+ players, clear error messages if insufficient
+- **Team balancing failure**: Falls back to sequential team creation (alternating best players) if AI unavailable
+- **Team size mismatch**: Cannot mix 2v2 and 3v3 teams in same tournament, enforced at creation
+- **Uneven player distribution**: Extra players (not divisible by team size) are excluded with notification, suggests adding/removing players
+- **Team captain determination**: Always highest skill rating, ties broken by consistency score then recent performance
+- **Team color assignment**: 8 unique colors cycle through teams, visually distinct for bracket clarity
+- **Incomplete team matches**: Match requires both team scores to complete, partial scores show "in-progress" status
+- **Team match scoring**: All team members' individual scores must be recorded for accurate aggregation
+- **Bracket advancement**: Only advances when all current round matches completed, prevents race conditions
+- **Team synergy edge cases**: Single-skill teams show 100% synergy, widely varied skills show lower synergy
+- **Match prediction timeouts**: If AI prediction takes >5s, shows fallback generic analysis
+- **Team tournament state**: All tournament data persists via useState, resets only when explicitly creating new tournament
+- **Mid-tournament exit**: Progress saved in component state but lost on page refresh (acceptable for event booth usage)
+- **Winner celebration**: Shows on tournament completion only when winnerId exists and all matches done
 
 ## Design Direction
 
