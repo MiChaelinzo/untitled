@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { formatScore } from '@/lib/game-utils'
-import { Trophy, Crown, Medal, ShareNetwork, XLogo, FacebookLogo, LinkedinLogo } from '@phosphor-icons/react'
+import { Trophy, Crown, Medal } from '@phosphor-icons/react'
 import { LeaderboardEntry, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { soundSystem } from '@/lib/sound-system'
 import { toast } from 'sonner'
+import { ShareButton } from '@/components/ShareButton'
+import { generateHighScoreShareText } from '@/lib/social-share'
 
 interface GameOverProps {
   score: number
@@ -19,6 +21,7 @@ interface GameOverProps {
   onPlayAgain: () => void
   onSubmitScore: (name: string, email: string) => void
   isPractice?: boolean
+  difficulty?: string
 }
 
 export function GameOver({
@@ -29,7 +32,8 @@ export function GameOver({
   leaderboard,
   onPlayAgain,
   onSubmitScore,
-  isPractice = false
+  isPractice = false,
+  difficulty = 'medium'
 }: GameOverProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -41,37 +45,6 @@ export function GameOver({
       onSubmitScore(name, email)
       setSubmitted(true)
     }
-  }
-
-  const handleShare = (platform: 'twitter' | 'facebook' | 'linkedin') => {
-    const text = `I just scored ${formatScore(score)} points in C9 Reflex Arena! 🎯 Think you can beat my score?`
-    const url = window.location.href
-    
-    let shareUrl = ''
-    
-    switch (platform) {
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
-        break
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`
-        break
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
-        break
-    }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400')
-    toast.success('Share window opened!')
-  }
-
-  const handleCopyScore = () => {
-    const text = `I scored ${formatScore(score)} points in C9 Reflex Arena! 🎯`
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success('Score copied to clipboard!')
-    }).catch(() => {
-      toast.error('Failed to copy score')
-    })
   }
 
   const accuracy = targetsHit + targetsMissed > 0
@@ -166,43 +139,12 @@ export function GameOver({
           </Card>
         </div>
 
-        <div className="flex flex-wrap gap-2 justify-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleShare('twitter')}
-            className="flex items-center gap-2"
-          >
-            <XLogo size={16} />
-            Share
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleShare('facebook')}
-            className="flex items-center gap-2"
-          >
-            <FacebookLogo size={16} />
-            Share
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleShare('linkedin')}
-            className="flex items-center gap-2"
-          >
-            <LinkedinLogo size={16} />
-            Share
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyScore}
-            className="flex items-center gap-2"
-          >
-            <ShareNetwork size={16} />
-            Copy
-          </Button>
+        <div className="flex justify-center">
+          <ShareButton 
+            content={generateHighScoreShareText(score, difficulty, name || undefined)}
+            size="lg"
+            className="px-8"
+          />
         </div>
 
         {!submitted && !isPractice ? (

@@ -75,11 +75,11 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Success criteria: Clear distinction from ranked play, no negative impact on player stats
 
 **Social Sharing Features**
-- Functionality: One-click sharing to Twitter, Facebook, LinkedIn with pre-formatted score text, plus copy-to-clipboard option
-- Purpose: Organic marketing through player social networks, increases booth visibility at events
-- Trigger: Share buttons on game over screen
-- Progression: Game completes → Share buttons available → Click platform → Share window opens with pre-filled content → Post shares score
-- Success criteria: Sharing is frictionless, text is compelling and includes score/branding
+- Functionality: Integrated Twitter/X sharing with one-click capability for earned badges, completed challenges, unlocked achievements, and high scores. Each share includes pre-formatted text with appropriate emojis, hashtags, and deep links. Copy-to-clipboard fallback for sharing to any platform. Share button components intelligently generate context-aware messages.
+- Purpose: Organic marketing through player social networks, increases booth visibility at events, creates FOMO for badges and challenges, drives viral engagement through competitive achievements
+- Trigger: Share buttons on game over screen (high scores), achievement unlock toasts (immediate sharing), completed challenges (Challenges tab), earned badges (Badges collection), and unlocked achievements (Achievements grid)
+- Progression: Achievement/badge/challenge earned → Share button appears → Click share → Dropdown menu with Twitter/X and Copy options → Twitter opens in popup with pre-filled content OR text copied to clipboard → Success toast confirms action
+- Success criteria: Sharing is frictionless with intelligent auto-generated text, includes relevant hashtags (#Cloud9, #ReflexArena, difficulty/badge-specific tags), creates compelling social proof, and maintains Cloud9 branding
 
 **Score Calculation System**
 - Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits, difficulty multipliers (1x Easy, 1.5x Medium, 2x Hard, 3x Insane), and immersive sound effects for feedback
@@ -114,9 +114,12 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Multiple challenge completion**: Single game can complete multiple challenges simultaneously, all rewards claimable independently
 - **XP and level calculations**: Level progression uses quadratic formula for balanced scaling, level-up feedback provided via toast notifications
 - **Title equipping**: Players can unlock multiple titles but only equip one at a time, selection persists across sessions
-- **Challenge reward claiming**: Rewards must be manually claimed in Challenges tab, preventing accidental XP/badge acquisition
+- **Challenge reward claiming**: Rewards must be manually claimed in Challenges tab, preventing accidental XP/badge acquisition, share button appears after claiming
 - **Keyboard shortcuts**: Space for quick restart on game over, ESC for quit confirmation during gameplay
 - **Stats persistence**: All player statistics stored in KV and survive page refreshes, device changes
+- **Social sharing window blocking**: If popup blockers prevent Twitter window, gracefully fallback to copy-to-clipboard with instructional toast
+- **Share text personalization**: Share messages include player name when available, fallback to "I" for anonymous shares
+- **Badge expiration and sharing**: Expired badges are removed from inventory but historical shares remain valid, creating scarcity-driven urgency
 
 ## Design Direction
 
@@ -214,6 +217,9 @@ Balance: Explosive moments on hits/scores create dopamine spikes with both visua
   - Crown: Top leaderboard positions
   - SpeakerHigh/SpeakerSlash: Audio control toggle
   - Waveform: Sound theme selector indicator
+  - ShareFat: Social sharing actions
+  - XLogo (Twitter/X): Platform-specific sharing
+  - Copy/Check: Copy-to-clipboard feedback states
 
 - **Spacing**:
   - Section gaps: 8-12 (32-48px)

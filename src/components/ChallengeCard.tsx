@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Trophy, Clock, Sparkle } from '@phosphor-icons/react'
 import { Challenge, ChallengeProgress, TimeLimitedBadge } from '@/lib/challenges'
+import { ShareButton } from '@/components/ShareButton'
+import { generateChallengeShareText, generateBadgeShareText } from '@/lib/social-share'
 
 interface ChallengeCardProps {
   challenge: Challenge
@@ -121,6 +123,13 @@ export function ChallengeCard({ challenge, progress, onClaimReward }: ChallengeC
               <Clock size={14} />
               <span>{hoursRemaining}h left</span>
             </div>
+            {isComplete && progress.claimedReward && (
+              <ShareButton 
+                content={generateChallengeShareText(challenge)}
+                size="sm"
+                showLabel={false}
+              />
+            )}
             {canClaim && (
               <Button 
                 size="sm" 
@@ -211,6 +220,13 @@ export function BadgeDisplay({ badge, isNew }: BadgeDisplayProps) {
         <div className={`flex items-center justify-center gap-1 text-xs mt-2 ${isExpiringSoon ? 'text-destructive' : 'text-muted-foreground'}`}>
           <Clock size={12} />
           <span>{daysRemaining}d left</span>
+        </div>
+        <div className="mt-3">
+          <ShareButton 
+            content={generateBadgeShareText(badge)}
+            size="sm"
+            className="w-full"
+          />
         </div>
       </Card>
       {isNew && (

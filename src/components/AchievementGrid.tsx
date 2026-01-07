@@ -2,6 +2,8 @@ import { Achievement, ACHIEVEMENTS } from '@/lib/achievements'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Lock } from '@phosphor-icons/react'
+import { ShareButton } from '@/components/ShareButton'
+import { generateAchievementShareText } from '@/lib/social-share'
 
 interface AchievementGridProps {
   unlockedIds: string[]
@@ -34,11 +36,18 @@ export function AchievementGrid({ unlockedIds }: AchievementGridProps) {
             </div>
             <div className="font-bold text-sm text-foreground">{achievement.name}</div>
             <div className="text-xs text-muted-foreground">{achievement.description}</div>
-            {isUnlocked && (
-              <Badge variant="outline" className="text-xs border-accent text-accent">
-                Unlocked
-              </Badge>
-            )}
+            {isUnlocked ? (
+              <div className="flex flex-col gap-2">
+                <Badge variant="outline" className="text-xs border-accent text-accent">
+                  Unlocked
+                </Badge>
+                <ShareButton 
+                  content={generateAchievementShareText(achievement)}
+                  size="sm"
+                  className="w-full"
+                />
+              </div>
+            ) : null}
           </Card>
         )
       })}

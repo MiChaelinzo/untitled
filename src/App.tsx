@@ -374,6 +374,7 @@ function App() {
           onPlayAgain={handlePlayAgain}
           onSubmitScore={handleSubmitScore}
           isPractice={isPracticeMode}
+          difficulty={currentDifficulty}
         />
       )}
     </>
