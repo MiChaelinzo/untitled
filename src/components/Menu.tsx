@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -12,7 +12,13 @@ import { StatsPanel } from '@/components/StatsPanel'
 import { AchievementGrid } from '@/components/AchievementGrid'
 import { ChallengesPanel } from '@/components/ChallengesPanel'
 import { FriendsPanel } from '@/components/FriendsPanel'
+import { FilteredLeaderboard } from '@/components/FilteredLeaderboard'
+import { VisualThemeSelector } from '@/components/VisualThemeSelector'
+import { TargetSkinSelector } from '@/components/TargetSkinSelector'
+import { TournamentPanel } from '@/components/TournamentPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
+import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
+import { TargetSkin } from '@/lib/target-skins'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -46,7 +52,15 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
+  const [visualTheme, setVisualTheme] = useKV<VisualTheme>('visual-theme', 'cyberpunk')
+  const [targetSkin, setTargetSkin] = useKV<TargetSkin>('target-skin', 'default')
   const [activeTab, setActiveTab] = useState('play')
+
+  useEffect(() => {
+    if (visualTheme) {
+      applyVisualTheme(visualTheme)
+    }
+  }, [visualTheme])
 
   const toggleSound = () => {
     setSoundEnabled(current => {
@@ -148,7 +162,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-6 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-8 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
@@ -157,8 +171,12 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
               <Users size={16} weight="fill" />
               <span className="hidden sm:inline">Friends</span>
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+            <TabsTrigger value="tournament" className="flex items-center gap-2">
               <Trophy size={16} weight="fill" />
+              <span className="hidden sm:inline">Tournament</span>
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+              <Medal size={16} weight="fill" />
               <span className="hidden sm:inline">Leaders</span>
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex items-center gap-2">
@@ -178,6 +196,10 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
               }) && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
               )}
+            </TabsTrigger>
+            <TabsTrigger value="customize" className="flex items-center gap-2">
+              <Palette size={16} weight="fill" />
+              <span className="hidden sm:inline">Customize</span>
             </TabsTrigger>
           </TabsList>
 
@@ -283,65 +305,37 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
           </TabsContent>
 
           <TabsContent value="leaderboard" className="space-y-4 mt-6">
-            {leaderboard.length > 0 ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Trophy weight="fill" size={24} className="text-accent" />
-                    <h3 className="text-2xl font-bold text-foreground">Top Players</h3>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
-                        <DownloadSimple size={16} />
-                        Export
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => handleExport('csv')}>
-                        Export as CSV
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExport('json')}>
-                        Export as JSON
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="grid gap-2 max-w-2xl mx-auto max-h-96 overflow-y-auto">
-                  {leaderboard.slice(0, 10).map((entry, index) => (
-                    <Card
-                      key={index}
-                      className="p-4 bg-card/30 backdrop-blur flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                          {index + 1}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">{entry.name}</span>
-                          <span className="text-xs text-muted-foreground uppercase">
-                            {entry.difficulty && DIFFICULTY_CONFIG[entry.difficulty] 
-                              ? DIFFICULTY_CONFIG[entry.difficulty].name 
-                              : 'Medium'}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-xl font-bold text-cyan">
-                        {formatScore(entry.score)}
-                      </span>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <Card className="p-12 bg-card/30 backdrop-blur text-center max-w-md mx-auto">
-                <Trophy size={48} weight="fill" className="text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-foreground mb-2">No Scores Yet</h3>
-                <p className="text-muted-foreground">
-                  Be the first to claim the top spot!
-                </p>
-              </Card>
-            )}
+            <FilteredLeaderboard leaderboard={leaderboard} onExport={handleExport} />
+          </TabsContent>
+
+          <TabsContent value="tournament" className="space-y-4 mt-6">
+            <TournamentPanel
+              currentUserId={currentUserId}
+              currentUsername={currentUsername}
+              currentAvatarUrl={currentAvatarUrl}
+              onStartMatch={(difficulty, matchId) => onStartGame(difficulty, false, matchId)}
+            />
+          </TabsContent>
+
+          <TabsContent value="customize" className="space-y-8 mt-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+              <VisualThemeSelector
+                currentTheme={visualTheme || 'cyberpunk'}
+                onThemeChange={(theme) => {
+                  setVisualTheme(theme)
+                  toast.success(`Visual theme changed to ${theme}`)
+                }}
+              />
+              
+              <TargetSkinSelector
+                currentSkin={targetSkin || 'default'}
+                onSkinChange={(skin) => {
+                  setTargetSkin(skin)
+                  toast.success(`Target skin changed to ${skin}`)
+                }}
+                stats={stats}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="stats" className="space-y-4 mt-6">
