@@ -195,7 +195,9 @@ export function GameOver({
                   <div>
                     <div className="font-bold text-foreground">{entry.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {entry.rounds} rounds • {DIFFICULTY_CONFIG[entry.difficulty].name}
+                      {entry.rounds} rounds • {entry.difficulty && DIFFICULTY_CONFIG[entry.difficulty] 
+                        ? DIFFICULTY_CONFIG[entry.difficulty].name 
+                        : 'Medium'}
                     </div>
                   </div>
                 </div>

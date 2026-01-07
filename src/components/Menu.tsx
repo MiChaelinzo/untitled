@@ -222,7 +222,11 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
                     </div>
                     <div className="flex flex-col">
                       <span className="font-semibold text-foreground">{entry.name}</span>
-                      <span className="text-xs text-muted-foreground uppercase">{DIFFICULTY_CONFIG[entry.difficulty].name}</span>
+                      <span className="text-xs text-muted-foreground uppercase">
+                        {entry.difficulty && DIFFICULTY_CONFIG[entry.difficulty] 
+                          ? DIFFICULTY_CONFIG[entry.difficulty].name 
+                          : 'Medium'}
+                      </span>
                     </div>
                   </div>
                   <span className="text-xl font-bold text-cyan">

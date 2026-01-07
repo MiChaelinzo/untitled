@@ -44,7 +44,7 @@ function App() {
       score: finalScore,
       timestamp: Date.now(),
       rounds: finalRound,
-      difficulty: currentDifficulty
+      difficulty: currentDifficulty || 'medium'
     }
 
     setLeaderboard(current => {
