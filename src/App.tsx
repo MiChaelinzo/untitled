@@ -31,7 +31,7 @@ function App() {
   const [leaderboard, setLeaderboard] = useKV<LeaderboardEntry[]>('leaderboard', [])
   const [soundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [soundEnabled] = useKV<boolean>('sound-enabled', true)
-  const [backgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon'>('background-variant', 'particles')
+  const [backgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon' | 'spirals' | 'binary-rain' | 'geometric'>('background-variant', 'particles')
   const [mouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
   const [mouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
   const [isLoggedIn, setIsLoggedIn] = useKV<boolean>('is-logged-in', false)

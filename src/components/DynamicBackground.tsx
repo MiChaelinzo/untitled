@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface DynamicBackgroundProps {
-  variant?: 'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon'
+  variant?: 'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon' | 'spirals' | 'binary-rain' | 'geometric'
 }
 
 export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundProps) {
@@ -26,6 +26,9 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
     let auroraLayers: AuroraLayer[] = []
     let stars: Star[] = []
     let hexagons: Hexagon[] = []
+    let spirals: Spiral[] = []
+    let binaryDrops: BinaryDrop[] = []
+    let geometricShapes: GeometricShape[] = []
 
     class Particle {
       x: number
@@ -335,6 +338,211 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
       }
     }
 
+    class Spiral {
+      centerX: number
+      centerY: number
+      angle: number
+      radius: number
+      maxRadius: number
+      rotationSpeed: number
+      expansionSpeed: number
+      color: string
+      opacity: number
+
+      constructor() {
+        if (!canvas) return
+        this.centerX = Math.random() * canvas.width
+        this.centerY = Math.random() * canvas.height
+        this.angle = 0
+        this.radius = 0
+        this.maxRadius = 150 + Math.random() * 100
+        this.rotationSpeed = 0.05 + Math.random() * 0.03
+        this.expansionSpeed = 0.5 + Math.random() * 0.3
+        const hue = Math.random() * 60 + 180
+        this.color = `hsl(${hue}, 70%, 60%)`
+        this.opacity = 0.3
+      }
+
+      update() {
+        this.angle += this.rotationSpeed
+        this.radius += this.expansionSpeed
+        
+        if (this.radius > this.maxRadius) {
+          this.radius = 0
+          this.angle = 0
+        }
+      }
+
+      draw() {
+        if (!ctx) return
+        ctx.strokeStyle = `${this.color.replace(')', `, ${this.opacity})`)}`
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        
+        for (let i = 0; i < this.radius; i += 5) {
+          const currentAngle = this.angle + (i / this.radius) * Math.PI * 4
+          const currentRadius = (i / this.radius) * this.maxRadius
+          const x = this.centerX + Math.cos(currentAngle) * currentRadius
+          const y = this.centerY + Math.sin(currentAngle) * currentRadius
+          
+          if (i === 0) {
+            ctx.moveTo(x, y)
+          } else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.stroke()
+      }
+    }
+
+    class BinaryDrop {
+      x: number
+      y: number
+      speed: number
+      length: number
+      chars: string[]
+      fontSize: number
+      glowIntensity: number
+
+      constructor() {
+        if (!canvas) return
+        this.x = Math.random() * canvas.width
+        this.y = Math.random() * canvas.height - canvas.height
+        this.speed = Math.random() * 4 + 3
+        this.length = Math.floor(Math.random() * 15) + 10
+        this.fontSize = 16
+        this.chars = []
+        this.glowIntensity = Math.random() * 0.5 + 0.5
+        
+        for (let i = 0; i < this.length; i++) {
+          this.chars.push(Math.random() > 0.5 ? '1' : '0')
+        }
+      }
+
+      update() {
+        if (!canvas) return
+        this.y += this.speed
+        
+        if (Math.random() > 0.95) {
+          const randomIndex = Math.floor(Math.random() * this.chars.length)
+          this.chars[randomIndex] = Math.random() > 0.5 ? '1' : '0'
+        }
+        
+        if (this.y > canvas.height + this.length * this.fontSize) {
+          this.y = -this.length * this.fontSize
+          this.x = Math.random() * canvas.width
+        }
+      }
+
+      draw() {
+        if (!ctx) return
+        ctx.font = `bold ${this.fontSize}px monospace`
+        
+        this.chars.forEach((char, i) => {
+          const alpha = (1 - (i / this.chars.length)) * 0.8
+          const y = this.y + i * this.fontSize
+          
+          if (i === 0) {
+            ctx.shadowBlur = 10 * this.glowIntensity
+            ctx.shadowColor = `rgba(0, 255, 150, ${alpha})`
+            ctx.fillStyle = `rgba(150, 255, 200, ${alpha})`
+          } else {
+            ctx.shadowBlur = 0
+            ctx.fillStyle = `rgba(0, 255, 150, ${alpha * 0.5})`
+          }
+          
+          ctx.fillText(char, this.x, y)
+        })
+        
+        ctx.shadowBlur = 0
+      }
+    }
+
+    class GeometricShape {
+      x: number
+      y: number
+      size: number
+      type: 'triangle' | 'square' | 'pentagon' | 'circle'
+      rotation: number
+      rotationSpeed: number
+      speedX: number
+      speedY: number
+      opacity: number
+      pulsePhase: number
+      pulseSpeed: number
+      color: string
+
+      constructor() {
+        if (!canvas) return
+        this.x = Math.random() * canvas.width
+        this.y = Math.random() * canvas.height
+        this.size = Math.random() * 40 + 20
+        const types: ('triangle' | 'square' | 'pentagon' | 'circle')[] = ['triangle', 'square', 'pentagon', 'circle']
+        this.type = types[Math.floor(Math.random() * types.length)]
+        this.rotation = Math.random() * Math.PI * 2
+        this.rotationSpeed = (Math.random() - 0.5) * 0.02
+        this.speedX = (Math.random() - 0.5) * 0.5
+        this.speedY = (Math.random() - 0.5) * 0.5
+        this.opacity = Math.random() * 0.3 + 0.1
+        this.pulsePhase = Math.random() * Math.PI * 2
+        this.pulseSpeed = 0.02 + Math.random() * 0.02
+        const hue = Math.random() * 360
+        this.color = `hsl(${hue}, 70%, 60%)`
+      }
+
+      update() {
+        if (!canvas) return
+        this.x += this.speedX
+        this.y += this.speedY
+        this.rotation += this.rotationSpeed
+        this.pulsePhase += this.pulseSpeed
+        
+        if (this.x < -this.size) this.x = canvas.width + this.size
+        if (this.x > canvas.width + this.size) this.x = -this.size
+        if (this.y < -this.size) this.y = canvas.height + this.size
+        if (this.y > canvas.height + this.size) this.y = -this.size
+      }
+
+      draw() {
+        if (!ctx) return
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        
+        const currentOpacity = this.opacity + Math.sin(this.pulsePhase) * 0.1
+        ctx.strokeStyle = `${this.color.replace(')', `, ${currentOpacity})`)}`
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        
+        if (this.type === 'triangle') {
+          for (let i = 0; i < 3; i++) {
+            const angle = (Math.PI * 2 / 3) * i - Math.PI / 2
+            const x = Math.cos(angle) * this.size
+            const y = Math.sin(angle) * this.size
+            if (i === 0) ctx.moveTo(x, y)
+            else ctx.lineTo(x, y)
+          }
+          ctx.closePath()
+        } else if (this.type === 'square') {
+          ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size)
+        } else if (this.type === 'pentagon') {
+          for (let i = 0; i < 5; i++) {
+            const angle = (Math.PI * 2 / 5) * i - Math.PI / 2
+            const x = Math.cos(angle) * this.size
+            const y = Math.sin(angle) * this.size
+            if (i === 0) ctx.moveTo(x, y)
+            else ctx.lineTo(x, y)
+          }
+          ctx.closePath()
+        } else if (this.type === 'circle') {
+          ctx.arc(0, 0, this.size, 0, Math.PI * 2)
+        }
+        
+        ctx.stroke()
+        ctx.restore()
+      }
+    }
+
     if (variant === 'particles') {
       particles = Array.from({ length: 100 }, () => new Particle())
     } else if (variant === 'waves') {
@@ -352,6 +560,12 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
       stars = Array.from({ length: 200 }, () => new Star())
     } else if (variant === 'hexagon') {
       hexagons = Array.from({ length: 30 }, () => new Hexagon())
+    } else if (variant === 'spirals') {
+      spirals = Array.from({ length: 8 }, () => new Spiral())
+    } else if (variant === 'binary-rain') {
+      binaryDrops = Array.from({ length: 60 }, () => new BinaryDrop())
+    } else if (variant === 'geometric') {
+      geometricShapes = Array.from({ length: 40 }, () => new GeometricShape())
     }
 
     const animate = () => {
@@ -439,6 +653,21 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         hexagons.forEach(hex => {
           hex.update()
           hex.draw()
+        })
+      } else if (variant === 'spirals') {
+        spirals.forEach(spiral => {
+          spiral.update()
+          spiral.draw()
+        })
+      } else if (variant === 'binary-rain') {
+        binaryDrops.forEach(drop => {
+          drop.update()
+          drop.draw()
+        })
+      } else if (variant === 'geometric') {
+        geometricShapes.forEach(shape => {
+          shape.update()
+          shape.draw()
         })
       }
 
