@@ -56,7 +56,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
   const [visualTheme, setVisualTheme] = useKV<VisualTheme>('visual-theme', 'cyberpunk')
   const [targetSkin, setTargetSkin] = useKV<TargetSkin>('target-skin', 'default')
   const [useAdaptiveDifficulty, setUseAdaptiveDifficulty] = useKV<boolean>('use-adaptive-difficulty', false)
-  const [backgroundVariant, setBackgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix'>('background-variant', 'particles')
+  const [backgroundVariant, setBackgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon'>('background-variant', 'particles')
   const [mouseTrailEnabled, setMouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
   const [mouseTrailVariant, setMouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
   const [activeTab, setActiveTab] = useState('play')
@@ -405,6 +405,9 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
                         <SelectItem value="grid">Grid</SelectItem>
                         <SelectItem value="nebula">Nebula</SelectItem>
                         <SelectItem value="matrix">Matrix</SelectItem>
+                        <SelectItem value="aurora">Aurora</SelectItem>
+                        <SelectItem value="constellation">Constellation</SelectItem>
+                        <SelectItem value="hexagon">Hexagon</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

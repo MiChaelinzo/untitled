@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface DynamicBackgroundProps {
-  variant?: 'particles' | 'waves' | 'grid' | 'nebula' | 'matrix'
+  variant?: 'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon'
 }
 
 export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundProps) {
@@ -23,6 +23,9 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
     let waves: Wave[] = []
     let gridLines: GridLine[] = []
     let matrixColumns: MatrixColumn[] = []
+    let auroraLayers: AuroraLayer[] = []
+    let stars: Star[] = []
+    let hexagons: Hexagon[] = []
 
     class Particle {
       x: number
@@ -193,6 +196,145 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
       }
     }
 
+    class AuroraLayer {
+      y: number
+      amplitude: number
+      frequency: number
+      phase: number
+      speed: number
+      height: number
+      color1: string
+      color2: string
+
+      constructor(index: number) {
+        if (!canvas) return
+        this.y = canvas.height * 0.3 + index * 50
+        this.amplitude = 60 + Math.random() * 40
+        this.frequency = 0.001 + Math.random() * 0.001
+        this.phase = Math.random() * Math.PI * 2
+        this.speed = 0.005 + Math.random() * 0.01
+        this.height = 100 + Math.random() * 150
+        const hue1 = 150 + index * 30
+        const hue2 = hue1 + 40
+        this.color1 = `hsla(${hue1}, 70%, 60%, 0.15)`
+        this.color2 = `hsla(${hue2}, 70%, 50%, 0.1)`
+      }
+
+      update() {
+        this.phase += this.speed
+      }
+
+      draw() {
+        if (!ctx || !canvas) return
+        const gradient = ctx.createLinearGradient(0, this.y, 0, this.y + this.height)
+        gradient.addColorStop(0, this.color1)
+        gradient.addColorStop(0.5, this.color2)
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        
+        ctx.fillStyle = gradient
+        ctx.beginPath()
+        
+        for (let x = 0; x <= canvas.width; x += 10) {
+          const y = this.y + Math.sin(x * this.frequency + this.phase) * this.amplitude
+          if (x === 0) {
+            ctx.moveTo(x, y)
+          } else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.lineTo(canvas.width, this.y + this.height)
+        ctx.lineTo(0, this.y + this.height)
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+
+    class Star {
+      x: number
+      y: number
+      size: number
+      opacity: number
+      twinkleSpeed: number
+      twinklePhase: number
+
+      constructor() {
+        if (!canvas) return
+        this.x = Math.random() * canvas.width
+        this.y = Math.random() * canvas.height
+        this.size = Math.random() * 2 + 0.5
+        this.opacity = Math.random() * 0.8 + 0.2
+        this.twinkleSpeed = 0.02 + Math.random() * 0.03
+        this.twinklePhase = Math.random() * Math.PI * 2
+      }
+
+      update() {
+        this.twinklePhase += this.twinkleSpeed
+        this.opacity = 0.3 + Math.sin(this.twinklePhase) * 0.5
+      }
+
+      draw() {
+        if (!ctx) return
+        ctx.fillStyle = `rgba(220, 230, 255, ${this.opacity})`
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    class Hexagon {
+      x: number
+      y: number
+      size: number
+      rotation: number
+      rotationSpeed: number
+      opacity: number
+      pulsePhase: number
+      pulseSpeed: number
+
+      constructor() {
+        if (!canvas) return
+        this.x = Math.random() * canvas.width
+        this.y = Math.random() * canvas.height
+        this.size = Math.random() * 30 + 20
+        this.rotation = Math.random() * Math.PI * 2
+        this.rotationSpeed = (Math.random() - 0.5) * 0.01
+        this.opacity = Math.random() * 0.2 + 0.1
+        this.pulsePhase = Math.random() * Math.PI * 2
+        this.pulseSpeed = 0.02 + Math.random() * 0.02
+      }
+
+      update() {
+        this.rotation += this.rotationSpeed
+        this.pulsePhase += this.pulseSpeed
+        this.opacity = 0.1 + Math.sin(this.pulsePhase) * 0.1
+      }
+
+      draw() {
+        if (!ctx) return
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        
+        ctx.strokeStyle = `rgba(100, 150, 255, ${this.opacity})`
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i
+          const x = Math.cos(angle) * this.size
+          const y = Math.sin(angle) * this.size
+          if (i === 0) {
+            ctx.moveTo(x, y)
+          } else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.closePath()
+        ctx.stroke()
+        ctx.restore()
+      }
+    }
+
     if (variant === 'particles') {
       particles = Array.from({ length: 100 }, () => new Particle())
     } else if (variant === 'waves') {
@@ -204,6 +346,12 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
       }
     } else if (variant === 'matrix') {
       matrixColumns = Array.from({ length: 50 }, () => new MatrixColumn())
+    } else if (variant === 'aurora') {
+      auroraLayers = Array.from({ length: 4 }, (_, i) => new AuroraLayer(i))
+    } else if (variant === 'constellation') {
+      stars = Array.from({ length: 200 }, () => new Star())
+    } else if (variant === 'hexagon') {
+      hexagons = Array.from({ length: 30 }, () => new Hexagon())
     }
 
     const animate = () => {
@@ -259,6 +407,38 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         matrixColumns.forEach(col => {
           col.update()
           col.draw()
+        })
+      } else if (variant === 'aurora') {
+        auroraLayers.forEach(layer => {
+          layer.update()
+          layer.draw()
+        })
+      } else if (variant === 'constellation') {
+        stars.forEach(star => {
+          star.update()
+          star.draw()
+        })
+
+        for (let i = 0; i < stars.length; i++) {
+          for (let j = i + 1; j < stars.length; j++) {
+            const dx = stars[i].x - stars[j].x
+            const dy = stars[i].y - stars[j].y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+
+            if (distance < 150) {
+              ctx.strokeStyle = `rgba(220, 230, 255, ${0.1 * (1 - distance / 150)})`
+              ctx.lineWidth = 0.5
+              ctx.beginPath()
+              ctx.moveTo(stars[i].x, stars[i].y)
+              ctx.lineTo(stars[j].x, stars[j].y)
+              ctx.stroke()
+            }
+          }
+        }
+      } else if (variant === 'hexagon') {
+        hexagons.forEach(hex => {
+          hex.update()
+          hex.draw()
         })
       }
 
