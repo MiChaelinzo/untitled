@@ -34,6 +34,7 @@ function App() {
   const [finalTargetsMissed, setFinalTargetsMissed] = useState(0)
   const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty>('medium')
   const [isPracticeMode, setIsPracticeMode] = useState(false)
+  const [useAdaptiveDifficulty, setUseAdaptiveDifficulty] = useState(false)
   const [gameStartTime, setGameStartTime] = useState(0)
   const [currentCombo, setCurrentCombo] = useState(0)
   const [activeChallengeId, setActiveChallengeId] = useState<string | undefined>()
@@ -141,12 +142,13 @@ function App() {
     }
   }, [challengeData, setChallengeData])
 
-  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string) => {
+  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string, useAdaptiveDifficulty?: boolean) => {
     setCurrentDifficulty(difficulty)
     setIsPracticeMode(isPractice)
     setActiveChallengeId(challengeId)
     setGameStartTime(Date.now())
     setCurrentCombo(0)
+    setUseAdaptiveDifficulty(useAdaptiveDifficulty || false)
     setPhase('playing')
   }
 
@@ -456,6 +458,7 @@ function App() {
           difficulty={currentDifficulty}
           onComboUpdate={setCurrentCombo}
           isPractice={isPracticeMode}
+          useAdaptiveDifficulty={useAdaptiveDifficulty}
         />
       )}
       

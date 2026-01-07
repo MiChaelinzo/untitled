@@ -37,7 +37,7 @@ import { toast } from 'sonner'
 import { PlayerChallengeData } from '@/lib/challenges'
 
 interface MenuProps {
-  onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string) => void
+  onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string, useAdaptiveDifficulty?: boolean) => void
   leaderboard: LeaderboardEntry[]
   stats: PlayerStats
   unlockedAchievements: string[]
@@ -54,6 +54,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
   const [visualTheme, setVisualTheme] = useKV<VisualTheme>('visual-theme', 'cyberpunk')
   const [targetSkin, setTargetSkin] = useKV<TargetSkin>('target-skin', 'default')
+  const [useAdaptiveDifficulty, setUseAdaptiveDifficulty] = useKV<boolean>('use-adaptive-difficulty', false)
   const [activeTab, setActiveTab] = useState('play')
 
   useEffect(() => {
@@ -248,6 +249,29 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                
+                <Card className="p-4 bg-primary/10 border-primary/30">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="adaptive-difficulty"
+                      checked={useAdaptiveDifficulty || false}
+                      onChange={(e) => setUseAdaptiveDifficulty(e.target.checked)}
+                      className="mt-1 w-5 h-5 rounded border-primary/50 bg-card/50 checked:bg-primary cursor-pointer"
+                    />
+                    <label htmlFor="adaptive-difficulty" className="flex-1 cursor-pointer">
+                      <div className="font-bold text-primary flex items-center gap-2">
+                        <Lightning weight="fill" size={16} />
+                        AI Adaptive Difficulty
+                        <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">NEW</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        AI analyzes your performance and adjusts target speed & size in real-time for optimal challenge
+                      </div>
+                    </label>
+                  </div>
+                </Card>
+                
                 <div className="text-center text-sm text-muted-foreground">
                   Score multiplier: <span className="text-accent font-bold">{difficultyConfig.scoreMultiplier}x</span>
                 </div>
@@ -256,7 +280,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   size="lg"
-                  onClick={() => onStartGame(selectedDifficulty || 'medium', false)}
+                  onClick={() => onStartGame(selectedDifficulty || 'medium', false, undefined, useAdaptiveDifficulty || false)}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-2xl px-12 py-8 glow-box group"
                 >
                   <Play weight="fill" className="mr-3 group-hover:scale-110 transition-transform" size={32} />
@@ -265,7 +289,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => onStartGame(selectedDifficulty || 'medium', true)}
+                  onClick={() => onStartGame(selectedDifficulty || 'medium', true, undefined, useAdaptiveDifficulty || false)}
                   className="border-primary/50 hover:bg-primary/10 font-bold text-lg px-8 py-8"
                 >
                   <Lightning weight="fill" className="mr-2" size={24} />

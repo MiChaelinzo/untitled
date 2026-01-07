@@ -39,6 +39,31 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Hard**: Fast reflexes required (2s/1.5s/1s), smaller targets (70px/60px/55px), 2x score multiplier, more targets per round
 - **Insane**: Pro-level reflexes (1.5s/1s/0.8s), smallest targets (60px/50px/45px), 3x score multiplier, maximum target counts - for competitive players seeking the ultimate challenge
 
+**AI Adaptive Difficulty** (NEW):
+- Functionality: Machine learning-powered system that analyzes player performance in real-time and dynamically adjusts game difficulty to maintain optimal challenge
+- Purpose: Keeps players in their "flow state" by preventing frustration from being too hard or boredom from being too easy, maximizing engagement and replay value
+- Trigger: Optional checkbox on difficulty selection screen before starting game
+- Progression: Base difficulty selected → Game starts → AI tracks reaction times, accuracy, hit/miss streaks → Every 15 seconds with 5+ targets, AI analyzes performance → Adjusts target duration, size, and spawn timing → Visual indicator shows adjustment direction → Player stays optimally challenged
+- Success criteria: Players report better engagement, longer play sessions, and feel the game adapts to their skill level naturally
+
+**AI Analysis Metrics**:
+- **Reaction Time Tracking**: Records time between target spawn and hit for every successful click
+- **Accuracy Rate**: Calculates hits vs total targets to measure consistency
+- **Streak Analysis**: Monitors consecutive hits (suggests too easy at 8+) and misses (suggests too hard at 3+)
+- **Consistency Score**: Measures standard deviation in reaction times to detect if player is maintaining steady performance
+- **Performance Thresholds**: 
+  - Too Easy: 85%+ accuracy, <800ms average reaction time, 8+ hit streak
+  - Too Hard: <60% accuracy, >2500ms average reaction time, 3+ miss streak
+  - Optimal: 75% target accuracy, ~1500ms target reaction time
+
+**AI Adjustment Behavior**:
+- **Making Harder**: Decreases target duration by 15%, reduces target size by 15%, shortens spawn delays - triggered by exceptional performance
+- **Making Easier**: Increases target duration by 15%, enlarges target size by 15%, extends spawn delays - triggered by struggling performance
+- **Visual Feedback**: Toast notification with direction indicator (📈 harder, 📉 easier), persistent "AI Adaptive" badge with trend icon during gameplay
+- **Confidence Scoring**: AI reports 0-1 confidence score on adjustments, only applies changes above confidence threshold
+- **Adjustment Limits**: Respects minimum/maximum bounds (800-5000ms duration, 40-120px size, 200-1200ms spawn delay) to prevent extreme difficulty swings
+- **LLM Integration**: Uses GPT-4o-mini in JSON mode to analyze metrics and recommend specific parameter changes with reasoning
+
 **Player Registration & Leaderboard**
 - Functionality: Optional name/email entry to claim leaderboard position with difficulty tracking and receive score notification
 - Purpose: Captures leads for Cloud9 while giving players bragging rights, with separate recognition for different difficulty levels

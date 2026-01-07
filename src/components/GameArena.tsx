@@ -10,15 +10,18 @@ import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { X } from '@phosphor-icons/react'
+import { X, TrendUp, TrendDown, Equals } from '@phosphor-icons/react'
 import { TargetSkin } from '@/lib/target-skins'
 import { useKV } from '@github/spark/hooks'
+import { AdaptiveDifficultySystem } from '@/lib/adaptive-difficulty'
+import { toast } from 'sonner'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
   difficulty: Difficulty
   onComboUpdate?: (combo: number) => void
   isPractice?: boolean
+  useAdaptiveDifficulty?: boolean
 }
 
 interface Effect {
@@ -29,11 +32,20 @@ interface Effect {
   score?: number
 }
 
-export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = false }: GameArenaProps) {
+export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = false, useAdaptiveDifficulty = false }: GameArenaProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [targetSkin] = useKV<TargetSkin>('target-skin', 'default')
+  const adaptiveSystemRef = useRef<AdaptiveDifficultySystem | null>(null)
+  const [showAdaptiveIndicator, setShowAdaptiveIndicator] = useState(false)
+  const [lastAdjustmentDirection, setLastAdjustmentDirection] = useState<'easier' | 'harder' | 'maintain'>('maintain')
+  
+  useEffect(() => {
+    if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
+      adaptiveSystemRef.current = new AdaptiveDifficultySystem(difficulty)
+    }
+  }, [useAdaptiveDifficulty, difficulty])
   
   const [gameState, setGameState] = useState<GameState>({
     phase: 'roundTransition',
@@ -47,23 +59,56 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     difficulty
   })
   const [effects, setEffects] = useState<Effect[]>([])
+  
+  const [currentTargetDuration, setCurrentTargetDuration] = useState(difficultyConfig.rounds[1].duration)
+  const [currentTargetSize, setCurrentTargetSize] = useState(difficultyConfig.rounds[1].targetSize)
 
   const spawnTarget = useCallback(() => {
     if (!containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
-    const target = generateRandomTarget(rect.width, rect.height, config.duration, config.targetSize)
+    
+    let duration = config.duration
+    let targetSize = config.targetSize
+    
+    if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
+      const adaptiveConfig = adaptiveSystemRef.current.getCurrentConfig()
+      duration = adaptiveConfig.targetDuration
+      targetSize = adaptiveConfig.targetSize
+      setCurrentTargetDuration(duration)
+      setCurrentTargetSize(targetSize)
+    }
+    
+    const target = generateRandomTarget(rect.width, rect.height, duration, targetSize)
 
     setGameState(prev => ({
       ...prev,
       currentTarget: target
     }))
-  }, [gameState.round, difficultyConfig])
+  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty])
 
-  const handleHit = useCallback((reactionTime: number) => {
+  const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
     const points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
+
+    if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
+      adaptiveSystemRef.current.recordHit(reactionTime)
+      
+      const adjustment = await adaptiveSystemRef.current.analyzePerformance()
+      if (adjustment.shouldAdjust) {
+        setLastAdjustmentDirection(adjustment.direction)
+        setShowAdaptiveIndicator(true)
+        
+        const icon = adjustment.direction === 'harder' ? '📈' : adjustment.direction === 'easier' ? '📉' : '➡️'
+        toast.info(`${icon} AI Difficulty Adjusted`, {
+          description: adjustment.reason,
+          duration: 3000
+        })
+        
+        setTimeout(() => setShowAdaptiveIndicator(false), 3000)
+      }
+    }
 
     soundSystem.play('hit', gameState.combo)
     
@@ -139,9 +184,27 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty])
 
-  const handleMiss = useCallback(() => {
+  const handleMiss = useCallback(async () => {
+    if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
+      adaptiveSystemRef.current.recordMiss()
+      
+      const adjustment = await adaptiveSystemRef.current.analyzePerformance()
+      if (adjustment.shouldAdjust) {
+        setLastAdjustmentDirection(adjustment.direction)
+        setShowAdaptiveIndicator(true)
+        
+        const icon = adjustment.direction === 'harder' ? '📈' : adjustment.direction === 'easier' ? '📉' : '➡️'
+        toast.info(`${icon} AI Difficulty Adjusted`, {
+          description: adjustment.reason,
+          duration: 3000
+        })
+        
+        setTimeout(() => setShowAdaptiveIndicator(false), 3000)
+      }
+    }
+    
     soundSystem.play('miss')
     
     setGameState(prev => {
@@ -181,7 +244,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [onGameOver, difficultyConfig])
+  }, [onGameOver, difficultyConfig, useAdaptiveDifficulty])
 
   const handleStartRound = useCallback(() => {
     soundSystem.play('roundStart')
@@ -226,6 +289,26 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       {isPractice && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-accent/20 border border-accent rounded-lg px-4 py-2">
           <span className="text-accent font-bold uppercase tracking-wider text-sm">Practice Mode</span>
+        </div>
+      )}
+      
+      {useAdaptiveDifficulty && (
+        <div className="absolute top-4 left-4 z-20 bg-primary/20 border border-primary rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2">
+            <span className="text-primary font-bold uppercase tracking-wider text-sm">AI Adaptive</span>
+            {showAdaptiveIndicator && (
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                {lastAdjustmentDirection === 'harder' && <TrendUp className="text-accent" weight="bold" size={18} />}
+                {lastAdjustmentDirection === 'easier' && <TrendDown className="text-cyan" weight="bold" size={18} />}
+                {lastAdjustmentDirection === 'maintain' && <Equals className="text-primary" weight="bold" size={18} />}
+              </motion.div>
+            )}
+          </div>
         </div>
       )}
 
