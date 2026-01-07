@@ -34,6 +34,7 @@ export function Target({ target, onHit, onMiss, size = 80 }: TargetProps) {
 
   const progress = (timeRemaining / target.duration) * 100
   const scale = 0.5 + (progress / 100) * 0.5
+  const urgencyColor = progress < 30 ? 'oklch(0.55 0.25 15)' : progress < 60 ? 'oklch(0.70 0.25 350)' : 'oklch(0.65 0.24 240)'
 
   return (
     <motion.div
@@ -52,7 +53,7 @@ export function Target({ target, onHit, onMiss, size = 80 }: TargetProps) {
     >
       <div className="relative w-full h-full">
         <motion.div
-          className="absolute inset-0 rounded-full bg-primary glow-box"
+          className="absolute inset-0 rounded-full glow-box"
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.8, 1, 0.8]
@@ -63,19 +64,31 @@ export function Target({ target, onHit, onMiss, size = 80 }: TargetProps) {
             ease: 'easeInOut'
           }}
           style={{
-            boxShadow: `0 0 ${20 * (progress / 100)}px oklch(0.65 0.24 240), 0 0 ${40 * (progress / 100)}px oklch(0.65 0.24 240)`
+            backgroundColor: urgencyColor,
+            boxShadow: `0 0 ${20 * (progress / 100)}px ${urgencyColor}, 0 0 ${40 * (progress / 100)}px ${urgencyColor}`
           }}
         />
         
-        <div className="absolute inset-0 rounded-full bg-primary/30 backdrop-blur-sm border-2 border-primary" />
-        
-        <motion.div
-          className="absolute inset-0 rounded-full border-4 border-cyan"
+        <div 
+          className="absolute inset-0 rounded-full backdrop-blur-sm border-2" 
           style={{
-            transform: `scale(${scale})`,
-            opacity: progress / 100
+            backgroundColor: `${urgencyColor}30`,
+            borderColor: urgencyColor
           }}
         />
+        
+        <svg className="absolute inset-0 w-full h-full -rotate-90">
+          <circle
+            cx="50%"
+            cy="50%"
+            r="40%"
+            fill="none"
+            stroke={urgencyColor}
+            strokeWidth="3"
+            strokeDasharray={`${progress * 2.5} 250`}
+            opacity="0.8"
+          />
+        </svg>
         
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-4 h-4 rounded-full bg-accent animate-pulse" />

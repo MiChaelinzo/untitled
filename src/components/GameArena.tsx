@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Target } from '@/components/Target'
 import { GameHUD } from '@/components/GameHUD'
 import { RoundTransition } from '@/components/RoundTransition'
@@ -7,10 +7,15 @@ import { HitFeedback, HitParticles } from '@/components/HitEffects'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { X } from '@phosphor-icons/react'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
   difficulty: Difficulty
+  onComboUpdate?: (combo: number) => void
+  isPractice?: boolean
 }
 
 interface Effect {
@@ -21,9 +26,10 @@ interface Effect {
   score?: number
 }
 
-export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
+export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = false }: GameArenaProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   
   const [gameState, setGameState] = useState<GameState>({
     phase: 'roundTransition',
@@ -88,6 +94,10 @@ export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
       const newCombo = prev.combo + 1
       const newScore = prev.score + points
 
+      if (onComboUpdate) {
+        onComboUpdate(newCombo)
+      }
+
       if (newTargetsRemaining === 0) {
         if (prev.round === 3) {
           setTimeout(() => {
@@ -125,7 +135,7 @@ export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate])
 
   const handleMiss = useCallback(() => {
     soundSystem.play('miss')
@@ -186,6 +196,21 @@ export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
     }
   }, [gameState.phase, gameState.currentTarget, spawnTarget])
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === 'Escape' && gameState.phase === 'playing') {
+        setShowQuitConfirm(true)
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [gameState.phase])
+
+  const handleQuit = () => {
+    onGameOver(gameState.score, gameState.round, gameState.targetsHit, gameState.targetsMissed)
+  }
+
   const removeEffect = useCallback((id: string) => {
     setEffects(prev => prev.filter(e => e.id !== id))
   }, [])
@@ -194,6 +219,12 @@ export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
+      {isPractice && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-accent/20 border border-accent rounded-lg px-4 py-2">
+          <span className="text-accent font-bold uppercase tracking-wider text-sm">Practice Mode</span>
+        </div>
+      )}
+
       {gameState.phase === 'playing' && (
         <>
           <GameHUD
@@ -242,6 +273,42 @@ export function GameArena({ onGameOver, difficulty }: GameArenaProps) {
           roundName={config.name}
           onContinue={handleStartRound}
         />
+      )}
+
+      {showQuitConfirm && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-30"
+        >
+          <Card className="p-6 bg-card border-border max-w-md mx-4">
+            <div className="space-y-4">
+              <div className="text-center">
+                <X size={48} weight="fill" className="text-destructive mx-auto mb-2" />
+                <h3 className="text-xl font-bold text-foreground mb-2">Quit Game?</h3>
+                <p className="text-muted-foreground">
+                  Your current progress will be saved, but you won't complete all rounds.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowQuitConfirm(false)}
+                  className="flex-1"
+                >
+                  Continue Playing
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleQuit}
+                  className="flex-1"
+                >
+                  Quit Game
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
       )}
     </div>
   )

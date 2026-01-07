@@ -2,11 +2,16 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
 import { useKV } from '@github/spark/hooks'
+import { PlayerStats, ACHIEVEMENTS } from '@/lib/achievements'
+import { StatsPanel } from '@/components/StatsPanel'
+import { AchievementGrid } from '@/components/AchievementGrid'
+import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
   SelectContent,
@@ -14,16 +19,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { toast } from 'sonner'
 
 interface MenuProps {
-  onStartGame: (difficulty: Difficulty) => void
+  onStartGame: (difficulty: Difficulty, isPractice?: boolean) => void
   leaderboard: LeaderboardEntry[]
+  stats: PlayerStats
+  unlockedAchievements: string[]
 }
 
-export function Menu({ onStartGame, leaderboard }: MenuProps) {
+export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
+  const [activeTab, setActiveTab] = useState('play')
 
   const toggleSound = () => {
     setSoundEnabled(current => {
@@ -45,6 +60,21 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
   }
 
   const difficultyConfig = DIFFICULTY_CONFIG[selectedDifficulty || 'medium']
+
+  const handleExport = (format: 'csv' | 'json') => {
+    if (leaderboard.length === 0) {
+      toast.error('No leaderboard data to export')
+      return
+    }
+    
+    if (format === 'csv') {
+      exportLeaderboardToCSV(leaderboard)
+      toast.success('Leaderboard exported as CSV')
+    } else {
+      exportLeaderboardToJSON(leaderboard)
+      toast.success('Leaderboard exported as JSON')
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -83,7 +113,7 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl space-y-8 relative z-10"
+        className="w-full max-w-6xl space-y-6 relative z-10"
       >
         <div className="text-center space-y-4">
           <motion.div
@@ -109,134 +139,208 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
           </motion.p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="space-y-6"
-        >
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                <Fire weight="fill" className="text-accent" size={20} />
-                Select Difficulty
-              </h3>
-            </div>
-            <Select value={selectedDifficulty} onValueChange={(value) => setSelectedDifficulty(value as Difficulty)}>
-              <SelectTrigger className="bg-card/50 backdrop-blur border-primary/50 text-lg font-semibold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">
-                  <div className="flex flex-col items-start">
-                    <span className="font-bold">Easy</span>
-                    <span className="text-xs text-muted-foreground">Generous timing and larger targets</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="medium">
-                  <div className="flex flex-col items-start">
-                    <span className="font-bold">Medium</span>
-                    <span className="text-xs text-muted-foreground">Balanced challenge for most players</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="hard">
-                  <div className="flex flex-col items-start">
-                    <span className="font-bold">Hard</span>
-                    <span className="text-xs text-muted-foreground">Fast reflexes required</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="insane">
-                  <div className="flex flex-col items-start">
-                    <span className="font-bold text-accent">Insane</span>
-                    <span className="text-xs text-muted-foreground">Pro-level reflexes only</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="text-center text-sm text-muted-foreground">
-              Score multiplier: <span className="text-accent font-bold">{difficultyConfig.scoreMultiplier}x</span>
-            </div>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-4 bg-card/50 backdrop-blur">
+            <TabsTrigger value="play" className="flex items-center gap-2">
+              <Play size={16} weight="fill" />
+              <span className="hidden sm:inline">Play</span>
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+              <Trophy size={16} weight="fill" />
+              <span className="hidden sm:inline">Leaders</span>
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="flex items-center gap-2">
+              <ChartBar size={16} weight="fill" />
+              <span className="hidden sm:inline">Stats</span>
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center gap-2">
+              <Medal size={16} weight="fill" />
+              <span className="hidden sm:inline">Rewards</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="flex justify-center">
-            <Button
-              size="lg"
-              onClick={() => onStartGame(selectedDifficulty || 'medium')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-2xl px-12 py-8 glow-box group"
+          <TabsContent value="play" className="space-y-6 mt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="space-y-6"
             >
-              <Play weight="fill" className="mr-3 group-hover:scale-110 transition-transform" size={32} />
-              Start Game
-            </Button>
-          </div>
-        </motion.div>
+              <div className="max-w-md mx-auto space-y-3">
+                <div className="text-center">
+                  <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+                    <Fire weight="fill" className="text-accent" size={20} />
+                    Select Difficulty
+                  </h3>
+                </div>
+                <Select value={selectedDifficulty} onValueChange={(value) => setSelectedDifficulty(value as Difficulty)}>
+                  <SelectTrigger className="bg-card/50 backdrop-blur border-primary/50 text-lg font-semibold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="easy">
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Easy</span>
+                        <span className="text-xs text-muted-foreground">Generous timing and larger targets</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Medium</span>
+                        <span className="text-xs text-muted-foreground">Balanced challenge for most players</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="hard">
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Hard</span>
+                        <span className="text-xs text-muted-foreground">Fast reflexes required</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="insane">
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold text-accent">Insane</span>
+                        <span className="text-xs text-muted-foreground">Pro-level reflexes only</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="text-center text-sm text-muted-foreground">
+                  Score multiplier: <span className="text-accent font-bold">{difficultyConfig.scoreMultiplier}x</span>
+                </div>
+              </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto"
-        >
-          <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
-            <Lightning weight="fill" size={32} className="text-accent mx-auto" />
-            <div className="font-bold text-foreground">Round 1: {difficultyConfig.rounds[1].name}</div>
-            <div className="text-sm text-muted-foreground">
-              {difficultyConfig.rounds[1].targets} targets • {(difficultyConfig.rounds[1].duration / 1000).toFixed(1)}s each
-            </div>
-          </Card>
-          <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
-            <Lightning weight="fill" size={32} className="text-primary mx-auto" />
-            <div className="font-bold text-foreground">Round 2: {difficultyConfig.rounds[2].name}</div>
-            <div className="text-sm text-muted-foreground">
-              {difficultyConfig.rounds[2].targets} targets • {(difficultyConfig.rounds[2].duration / 1000).toFixed(1)}s each
-            </div>
-          </Card>
-          <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
-            <Lightning weight="fill" size={32} className="text-cyan mx-auto" />
-            <div className="font-bold text-foreground">Round 3: {difficultyConfig.rounds[3].name}</div>
-            <div className="text-sm text-muted-foreground">
-              {difficultyConfig.rounds[3].targets} targets • {(difficultyConfig.rounds[3].duration / 1000).toFixed(1)}s each
-            </div>
-          </Card>
-        </motion.div>
-
-        {leaderboard.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="space-y-4"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Trophy weight="fill" size={24} className="text-accent" />
-              <h3 className="text-2xl font-bold text-foreground">Top Players</h3>
-            </div>
-            <div className="grid gap-2 max-w-2xl mx-auto max-h-64 overflow-y-auto">
-              {leaderboard.slice(0, 5).map((entry, index) => (
-                <Card
-                  key={index}
-                  className="p-4 bg-card/30 backdrop-blur flex items-center justify-between"
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="lg"
+                  onClick={() => onStartGame(selectedDifficulty || 'medium', false)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-2xl px-12 py-8 glow-box group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                      {index + 1}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-foreground">{entry.name}</span>
-                      <span className="text-xs text-muted-foreground uppercase">
-                        {entry.difficulty && DIFFICULTY_CONFIG[entry.difficulty] 
-                          ? DIFFICULTY_CONFIG[entry.difficulty].name 
-                          : 'Medium'}
-                      </span>
-                    </div>
+                  <Play weight="fill" className="mr-3 group-hover:scale-110 transition-transform" size={32} />
+                  Start Game
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => onStartGame(selectedDifficulty || 'medium', true)}
+                  className="border-primary/50 hover:bg-primary/10 font-bold text-lg px-8 py-8"
+                >
+                  <Lightning weight="fill" className="mr-2" size={24} />
+                  Practice
+                </Button>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto"
+            >
+              <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
+                <Lightning weight="fill" size={32} className="text-accent mx-auto" />
+                <div className="font-bold text-foreground">Round 1: {difficultyConfig.rounds[1].name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {difficultyConfig.rounds[1].targets} targets • {(difficultyConfig.rounds[1].duration / 1000).toFixed(1)}s each
+                </div>
+              </Card>
+              <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
+                <Lightning weight="fill" size={32} className="text-primary mx-auto" />
+                <div className="font-bold text-foreground">Round 2: {difficultyConfig.rounds[2].name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {difficultyConfig.rounds[2].targets} targets • {(difficultyConfig.rounds[2].duration / 1000).toFixed(1)}s each
+                </div>
+              </Card>
+              <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
+                <Lightning weight="fill" size={32} className="text-cyan mx-auto" />
+                <div className="font-bold text-foreground">Round 3: {difficultyConfig.rounds[3].name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {difficultyConfig.rounds[3].targets} targets • {(difficultyConfig.rounds[3].duration / 1000).toFixed(1)}s each
+                </div>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="leaderboard" className="space-y-4 mt-6">
+            {leaderboard.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy weight="fill" size={24} className="text-accent" />
+                    <h3 className="text-2xl font-bold text-foreground">Top Players</h3>
                   </div>
-                  <span className="text-xl font-bold text-cyan">
-                    {formatScore(entry.score)}
-                  </span>
-                </Card>
-              ))}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex items-center gap-2">
+                        <DownloadSimple size={16} />
+                        Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleExport('csv')}>
+                        Export as CSV
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport('json')}>
+                        Export as JSON
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="grid gap-2 max-w-2xl mx-auto max-h-96 overflow-y-auto">
+                  {leaderboard.slice(0, 10).map((entry, index) => (
+                    <Card
+                      key={index}
+                      className="p-4 bg-card/30 backdrop-blur flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                          {index + 1}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-foreground">{entry.name}</span>
+                          <span className="text-xs text-muted-foreground uppercase">
+                            {entry.difficulty && DIFFICULTY_CONFIG[entry.difficulty] 
+                              ? DIFFICULTY_CONFIG[entry.difficulty].name 
+                              : 'Medium'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-xl font-bold text-cyan">
+                        {formatScore(entry.score)}
+                      </span>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Card className="p-12 bg-card/30 backdrop-blur text-center max-w-md mx-auto">
+                <Trophy size={48} weight="fill" className="text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-foreground mb-2">No Scores Yet</h3>
+                <p className="text-muted-foreground">
+                  Be the first to claim the top spot!
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="stats" className="space-y-4 mt-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <ChartBar weight="fill" size={24} className="text-primary" />
+              <h3 className="text-2xl font-bold text-foreground">Your Statistics</h3>
             </div>
-          </motion.div>
-        )}
+            <StatsPanel stats={stats} />
+          </TabsContent>
+
+          <TabsContent value="achievements" className="space-y-4 mt-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Medal weight="fill" size={24} className="text-accent" />
+              <h3 className="text-2xl font-bold text-foreground">Achievements</h3>
+            </div>
+            <div className="text-center text-sm text-muted-foreground mb-4">
+              Unlocked {unlockedAchievements.length} of {ACHIEVEMENTS.length}
+            </div>
+            <AchievementGrid unlockedIds={unlockedAchievements} />
+          </TabsContent>
+        </Tabs>
 
         <motion.div
           initial={{ opacity: 0 }}

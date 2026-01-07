@@ -46,6 +46,34 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Progression: Score reveal → Leaderboard position shown → Registration prompt → Name/email entry → Confirmation with position and difficulty badge → Social share option
 - Success criteria: Registration feels rewarding not mandatory, leaderboard updates in real-time with clear difficulty indicators
 
+**Statistics Tracking System**
+- Functionality: Comprehensive player statistics including total games played, targets hit/missed, highest score, max combo, perfect rounds, insane mode completions, and total play time
+- Purpose: Provides players with long-term progression tracking and personal performance insights that encourage repeat plays
+- Trigger: Automatically tracked across all games and displayed in dedicated Stats tab
+- Progression: Game completes → Stats updated in KV storage → Visible in menu Stats tab → Players can track improvement over time
+- Success criteria: All stats accurately tracked and persisted, clear visual presentation of achievements
+
+**Achievement System**
+- Functionality: 8 unlockable achievements (First Blood, Sharpshooter, Combo Master, Perfectionist, Score Hunter, Insane Champion, Dedication, Marathon) with real-time unlock notifications
+- Purpose: Gamification that rewards milestones and encourages different play styles and goals beyond high scores
+- Trigger: Achievement requirements met during or after gameplay
+- Progression: Requirement met → Toast notification appears → Achievement unlocked and saved → Visible in Achievements tab with progress indicators
+- Success criteria: Achievements feel rewarding and achievable, clear feedback when unlocked, persistent across sessions
+
+**Practice Mode**
+- Functionality: Non-competitive gameplay mode that doesn't affect leaderboard or most statistics, allowing players to warm up or learn mechanics
+- Purpose: Reduces pressure for new players and provides a space for skill development without performance anxiety
+- Trigger: "Practice" button on main menu alongside "Start Game"
+- Progression: Practice selected → Visual indicator shows practice mode → Game plays identically → Score displayed but not saved to leaderboard
+- Success criteria: Clear distinction from ranked play, no negative impact on player stats
+
+**Social Sharing Features**
+- Functionality: One-click sharing to Twitter, Facebook, LinkedIn with pre-formatted score text, plus copy-to-clipboard option
+- Purpose: Organic marketing through player social networks, increases booth visibility at events
+- Trigger: Share buttons on game over screen
+- Progression: Game completes → Share buttons available → Click platform → Share window opens with pre-filled content → Post shares score
+- Success criteria: Sharing is frictionless, text is compelling and includes score/branding
+
 **Score Calculation System**
 - Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits, difficulty multipliers (1x Easy, 1.5x Medium, 2x Hard, 3x Insane), and immersive sound effects for feedback
 - Purpose: Rewards precision, speed, and challenge selection while providing satisfying audio feedback that scales with difficulty
@@ -63,14 +91,18 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 ## Edge Case Handling
 
 - **Accidental taps**: Outside-target clicks don't penalize but don't grant points either, preventing frustration
-- **Network issues**: Scores save locally first, sync to leaderboard when connection restored
+- **Network issues**: Scores save locally first via KV storage, no network required for full functionality
 - **Duplicate names**: Append timestamp suffix to leaderboard entries with identical names
-- **Mid-game exit**: Auto-save progress and offer resume on return
-- **Leaderboard spam**: Rate limit submissions to 1 per minute per device
-- **Mobile responsiveness**: Touch targets automatically scale to minimum 44px regardless of screen size
+- **Mid-game exit**: ESC key brings up quit confirmation, progress saved if player quits early
+- **Leaderboard spam**: Rate limit submissions to 1 per minute per device (client-side)
+- **Mobile responsiveness**: Touch targets automatically scale to minimum 44px regardless of screen size, enhanced touch feedback
 - **Audio context limitations**: Web Audio API auto-initializes on user interaction (browser requirement), sound preference and theme selection persist between sessions via KV storage
 - **Difficulty persistence**: Selected difficulty persists between sessions for consistent player experience
 - **Mixed difficulty leaderboard**: All difficulty levels share one leaderboard with difficulty badges for context and fairness
+- **Practice mode scores**: Clearly marked, don't affect leaderboard to prevent sandbagging
+- **Achievement unlocks**: Queued and displayed one at a time to avoid overwhelming UI
+- **Keyboard shortcuts**: Space for quick restart on game over, ESC for quit confirmation during gameplay
+- **Stats persistence**: All player statistics stored in KV and survive page refreshes, device changes
 
 ## Design Direction
 
