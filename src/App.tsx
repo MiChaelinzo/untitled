@@ -6,6 +6,9 @@ import { Menu } from '@/components/Menu'
 import { GameArena } from '@/components/GameArena'
 import { GameOver } from '@/components/GameOver'
 import { AchievementToast } from '@/components/AchievementToast'
+import { Login } from '@/components/Login'
+import { DynamicBackground } from '@/components/DynamicBackground'
+import { MouseTrail } from '@/components/MouseTrail'
 import { LeaderboardEntry, Difficulty } from '@/lib/game-types'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
 import { PlayerStats, Achievement, checkNewAchievements } from '@/lib/achievements'
@@ -21,13 +24,17 @@ import {
   Challenge
 } from '@/lib/challenges'
 
-type AppPhase = 'menu' | 'playing' | 'gameOver'
+type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
 function App() {
-  const [phase, setPhase] = useState<AppPhase>('menu')
+  const [phase, setPhase] = useState<AppPhase>('login')
   const [leaderboard, setLeaderboard] = useKV<LeaderboardEntry[]>('leaderboard', [])
   const [soundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [soundEnabled] = useKV<boolean>('sound-enabled', true)
+  const [backgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix'>('background-variant', 'particles')
+  const [mouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
+  const [mouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
+  const [isLoggedIn, setIsLoggedIn] = useKV<boolean>('is-logged-in', false)
   const [finalScore, setFinalScore] = useState(0)
   const [finalRound, setFinalRound] = useState(0)
   const [finalTargetsHit, setFinalTargetsHit] = useState(0)
@@ -87,6 +94,8 @@ function App() {
             username: user.login || 'Player',
             avatarUrl: user.avatarUrl || undefined
           })
+          setIsLoggedIn(true)
+          setPhase('menu')
         }
       } catch (error) {
         console.error('Failed to load user:', error)
@@ -141,6 +150,21 @@ function App() {
       })
     }
   }, [challengeData, setChallengeData])
+
+  const handleLogin = (user: { id: string; username: string; email?: string; avatarUrl?: string }) => {
+    setCurrentUser({
+      id: user.id,
+      username: user.username,
+      avatarUrl: user.avatarUrl
+    })
+    setIsLoggedIn(true)
+    setPhase('menu')
+  }
+
+  const handleSkipLogin = () => {
+    setIsLoggedIn(false)
+    setPhase('menu')
+  }
 
   const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string, useAdaptiveDifficulty?: boolean) => {
     setCurrentDifficulty(difficulty)
@@ -407,6 +431,12 @@ function App() {
 
   return (
     <>
+      <DynamicBackground variant={backgroundVariant || 'particles'} />
+      <MouseTrail 
+        enabled={mouseTrailEnabled !== false} 
+        variant={mouseTrailVariant || 'glow'} 
+        color="primary" 
+      />
       <Toaster theme="dark" position="top-center" />
       
       <AnimatePresence>
@@ -417,6 +447,10 @@ function App() {
           />
         )}
       </AnimatePresence>
+      
+      {phase === 'login' && (
+        <Login onLogin={handleLogin} onSkip={handleSkipLogin} />
+      )}
       
       {phase === 'menu' && (
         <Menu

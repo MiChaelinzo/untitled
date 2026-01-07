@@ -1,16 +1,37 @@
 # Planning Guide
 
-C9 Reflex Arena is an electrifying reaction-time challenge game designed for Cloud9 event booths where fans compete to prove they have pro-player reflexes by tapping glowing targets as fast as possible in increasingly difficult rounds.
+C9 Reflex Arena is an electrifying reaction-time challenge game designed for Cloud9 event booths where fans compete to prove they have pro-player reflexes by tapping glowing targets as fast as possible in increasingly difficult rounds. The game features comprehensive multiplayer capabilities, dynamic visual customization, and a robust social system that creates a competitive community experience.
 
 **Experience Qualities**: 
 1. **Adrenaline-pumping** - Fast-paced gameplay with immediate feedback creates an intense, exciting experience that mirrors the pressure of competitive esports moments
 2. **Competitive** - Persistent leaderboards and score tracking fuel friendly rivalry between booth visitors, encouraging repeat plays and social sharing
 3. **Accessible** - Intuitive tap-to-play mechanics require zero learning curve, welcoming casual fans while still rewarding skilled players with high scores
 
-**Complexity Level**: Light Application (multiple features with basic state)
-The game features multiple rounds with increasing difficulty, score tracking, leaderboards, and player registration - all centered around a single core mechanic that's easy to understand but challenging to master.
+**Complexity Level**: Complex Application (advanced functionality with multiple views)
+The game features extensive multiplayer systems (1v1 tournaments, team competitions), social features (friends, challenges, matchmaking), dynamic backgrounds, persistent progression, customization options, and AI-powered adaptive difficulty - all built around competitive reflex gameplay.
 
 ## Essential Features
+
+**Authentication & User Profiles**
+- Functionality: Optional login system with GitHub authentication or custom account creation, guest play available, persistent user profiles with avatars and statistics
+- Purpose: Enable social features, friend systems, and cross-session progression while maintaining accessibility for casual players
+- Trigger: App launch shows login screen with GitHub sign-in, account creation, or skip to guest mode
+- Progression: Login screen → Authentication → Profile creation/loading → Main menu with personalized data → Friends and challenges available
+- Success criteria: Seamless GitHub integration, guest mode fully functional, profiles persist across sessions, avatars display correctly
+
+**Dynamic Background System** (NEW)
+- Functionality: Five animated background variants (Particles with connection lines, Flowing Waves, Pulsing Grid, Nebula gradients, Matrix rain) that run on canvas with 60fps performance
+- Purpose: Creates immersive atmosphere and visual variety, allows players to customize their experience, enhances the cyberpunk/esports aesthetic
+- Trigger: Selected in Customize tab, persists across all app screens and game modes
+- Progression: Customize tab → Background dropdown → Preview effect → Selection saved → Background animates across all views
+- Success criteria: Smooth 60fps animations, no performance impact on gameplay, transitions seamless, all variants visually distinct and polished
+
+**Mouse Trail Effects** (NEW)
+- Functionality: Four trail variants (Glow particles, Dots, Sparkles, Line path) that follow cursor movement with customizable enable/disable and color options
+- Purpose: Enhances visual feedback, improves cursor tracking during fast gameplay, adds personality and customization
+- Trigger: Enabled/styled in Customize tab, active across menu and gameplay
+- Progression: Customize tab → Toggle trail → Select variant → Trail follows mouse immediately → Settings persist
+- Success criteria: Trails smooth and responsive, no lag or stutter, easy to disable, variants feel distinct, minimal performance overhead
 
 **Quick Play Mode**
 - Functionality: Instant gameplay without registration - tap glowing targets before they disappear

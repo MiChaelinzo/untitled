@@ -56,6 +56,9 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
   const [visualTheme, setVisualTheme] = useKV<VisualTheme>('visual-theme', 'cyberpunk')
   const [targetSkin, setTargetSkin] = useKV<TargetSkin>('target-skin', 'default')
   const [useAdaptiveDifficulty, setUseAdaptiveDifficulty] = useKV<boolean>('use-adaptive-difficulty', false)
+  const [backgroundVariant, setBackgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix'>('background-variant', 'particles')
+  const [mouseTrailEnabled, setMouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
+  const [mouseTrailVariant, setMouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
   const [activeTab, setActiveTab] = useState('play')
 
   useEffect(() => {
@@ -375,6 +378,74 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
                 }}
                 stats={stats}
               />
+
+              <Card className="p-6 bg-card/50 backdrop-blur">
+                <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Palette weight="fill" size={24} className="text-primary" />
+                  Background & Effects
+                </h3>
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">
+                      Background Style
+                    </label>
+                    <Select 
+                      value={backgroundVariant || 'particles'} 
+                      onValueChange={(value: any) => {
+                        setBackgroundVariant(value)
+                        toast.success(`Background changed to ${value}`)
+                      }}
+                    >
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="particles">Particles</SelectItem>
+                        <SelectItem value="waves">Waves</SelectItem>
+                        <SelectItem value="grid">Grid</SelectItem>
+                        <SelectItem value="nebula">Nebula</SelectItem>
+                        <SelectItem value="matrix">Matrix</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Mouse Trail
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={mouseTrailEnabled !== false}
+                        onChange={(e) => {
+                          setMouseTrailEnabled(e.target.checked)
+                          toast.success(`Mouse trail ${e.target.checked ? 'enabled' : 'disabled'}`)
+                        }}
+                        className="w-5 h-5 rounded border-primary/50 bg-card/50 checked:bg-primary cursor-pointer"
+                      />
+                    </div>
+                    {mouseTrailEnabled !== false && (
+                      <Select 
+                        value={mouseTrailVariant || 'glow'} 
+                        onValueChange={(value: any) => {
+                          setMouseTrailVariant(value)
+                          toast.success(`Mouse trail style: ${value}`)
+                        }}
+                      >
+                        <SelectTrigger className="bg-background/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="glow">Glow</SelectItem>
+                          <SelectItem value="dots">Dots</SelectItem>
+                          <SelectItem value="sparkle">Sparkle</SelectItem>
+                          <SelectItem value="line">Line</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
+              </Card>
             </div>
           </TabsContent>
 
