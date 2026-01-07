@@ -3,13 +3,16 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Target } from '@/components/Target'
 import { GameHUD } from '@/components/GameHUD'
 import { RoundTransition } from '@/components/RoundTransition'
-import { HitFeedback, HitParticles } from '@/components/HitEffects'
+import { HitFeedback } from '@/components/HitEffects'
+import { TargetParticles } from '@/components/TargetParticles'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { X } from '@phosphor-icons/react'
+import { TargetSkin } from '@/lib/target-skins'
+import { useKV } from '@github/spark/hooks'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -30,6 +33,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const containerRef = useRef<HTMLDivElement>(null)
   const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
+  const [targetSkin] = useKV<TargetSkin>('target-skin', 'default')
   
   const [gameState, setGameState] = useState<GameState>({
     phase: 'roundTransition',
@@ -242,6 +246,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
                 onHit={handleHit}
                 onMiss={handleMiss}
                 size={config.targetSize}
+                skin={targetSkin || 'default'}
               />
             )}
           </AnimatePresence>
@@ -256,8 +261,9 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
                 onComplete={() => removeEffect(effect.id)}
               />
             ) : effect.type === 'particles' ? (
-              <HitParticles
+              <TargetParticles
                 key={effect.id}
+                skin={targetSkin || 'default'}
                 x={effect.x}
                 y={effect.y}
                 onComplete={() => removeEffect(effect.id)}

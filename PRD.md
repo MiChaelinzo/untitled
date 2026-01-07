@@ -20,11 +20,11 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Success criteria: Players can complete a full game session in under 60 seconds
 
 **Target Spawning System**
-- Functionality: Circles appear randomly across the play area with shrinking timers and visual intensity
-- Purpose: Creates the core challenge and visual excitement of the game
+- Functionality: Circles appear randomly across the play area with shrinking timers and visual intensity, with customizable target skins (Classic Circle, Bullseye, Crosshair, Hexagon, Rising Star, Pulse Wave) unlocked through gameplay achievements. Each skin features unique visual design and animated particle effects on hit.
+- Purpose: Creates the core challenge and visual excitement of the game while rewarding player progression with cosmetic customization
 - Trigger: Game round starts or previous target is hit
-- Progression: Target spawns with glow effect → Timer counts down → Target shrinks and fades → Hit registers points or miss penalizes → Next target spawns
-- Success criteria: Targets feel responsive, fair, and visually satisfying when hit
+- Progression: Target spawns with glow effect → Timer counts down → Target shrinks and fades → Hit registers points with skin-specific particle explosion → Next target spawns
+- Success criteria: Targets feel responsive, fair, and visually satisfying when hit with distinct particle effects for each skin type
 
 **Progressive Difficulty Rounds**
 - Functionality: Four difficulty levels (Easy, Medium, Hard, Insane) with three rounds each, varying target count, duration, target size, and score multipliers
@@ -102,6 +102,13 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Progression: Action occurs → Sound synthesized in real-time with selected theme → Audio plays with appropriate volume and pitch
 - Success criteria: Sounds feel responsive and satisfying without being overwhelming, with persistent user preferences for theme selection and enabling/disabling
 
+**Target Skin System**
+- Functionality: Six unlockable target skins (Classic Circle, Bullseye, Crosshair, Hexagon, Rising Star, Pulse Wave) with unique visual designs and animated particle effects. Each skin features distinct shapes, animations, and particle explosion patterns when hit. Skins unlock based on achievements: hitting target counts, achieving combos, reaching score milestones, and completing difficulty challenges.
+- Purpose: Provides cosmetic customization that rewards player progression and skill milestones, adds visual variety to gameplay, enhances hit satisfaction with unique particle effects
+- Trigger: Skins unlock automatically when requirements met, selectable in Customization tab, active skin persists across sessions
+- Progression: Achievement requirement met → Skin unlocks → Available in Target Skins selector → Player selects preferred skin → Active in all future games → Unique particle effects trigger on each hit
+- Success criteria: Each skin feels visually distinct with characteristic particle patterns (circular bursts, star explosions, hexagonal shards, crosshair lines, etc.), unlock requirements feel achievable and rewarding, skin selection persists across sessions, particle effects enhance hit satisfaction without obscuring gameplay
+
 ## Edge Case Handling
 
 - **Accidental taps**: Outside-target clicks don't penalize but don't grant points either, preventing frustration
@@ -115,6 +122,9 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Mixed difficulty leaderboard**: All difficulty levels share one leaderboard with difficulty badges for context and fairness
 - **Practice mode scores**: Clearly marked, don't affect leaderboard to prevent sandbagging
 - **Achievement unlocks**: Queued and displayed one at a time to avoid overwhelming UI
+- **Target skin unlocks**: Automatically unlock when requirements met, with toast notifications similar to achievements
+- **Particle effect performance**: Limited particle count per explosion (12-24 particles) with efficient animation cleanup to maintain 60fps
+- **Skin-specific particle timing**: Particle animations complete within 600-700ms to avoid cluttering screen between targets
 - **Challenge refresh timing**: Challenges auto-refresh at predetermined times (daily: midnight, weekly: Monday), with client-side checks on app load
 - **Expired badges**: Time-limited badges automatically removed from player inventory after expiry, with clear expiration countdown displayed
 - **Challenge progress in practice mode**: Practice mode games don't count toward challenge progress to prevent farming
