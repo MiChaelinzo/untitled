@@ -18,6 +18,7 @@ import { TargetSkinSelector } from '@/components/TargetSkinSelector'
 import { ThemedBackgroundSelector } from '@/components/ThemedBackgroundSelector'
 import { TournamentPanel } from '@/components/TournamentPanel'
 import { TeamTournamentPanel } from '@/components/TeamTournamentPanel'
+import { RewardsVaultPanel } from '@/components/RewardsVaultPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
@@ -444,14 +445,13 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-4 mt-6">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Medal weight="fill" size={24} className="text-accent" />
-              <h3 className="text-2xl font-bold text-foreground">Achievements</h3>
-            </div>
-            <div className="text-center text-sm text-muted-foreground mb-4">
-              Unlocked {unlockedAchievements.length} of {ACHIEVEMENTS.length}
-            </div>
-            <AchievementGrid unlockedIds={unlockedAchievements} />
+            <RewardsVaultPanel
+              stats={stats}
+              unlockedAchievements={unlockedAchievements}
+              playerLevel={challengeData.level}
+              totalXP={challengeData.currentXP}
+              challengeData={challengeData}
+            />
           </TabsContent>
 
           <TabsContent value="challenges" className="space-y-4 mt-6">

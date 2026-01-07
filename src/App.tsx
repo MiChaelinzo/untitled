@@ -6,6 +6,7 @@ import { Menu } from '@/components/Menu'
 import { GameArena } from '@/components/GameArena'
 import { GameOver } from '@/components/GameOver'
 import { AchievementToast } from '@/components/AchievementToast'
+import { UnlockNotification } from '@/components/UnlockNotification'
 import { Login } from '@/components/Login'
 import { DynamicBackground } from '@/components/DynamicBackground'
 import { MouseTrail } from '@/components/MouseTrail'
@@ -23,6 +24,12 @@ import {
   calculateLevel,
   Challenge
 } from '@/lib/challenges'
+import {
+  ThemeUnlockable,
+  PlayerUnlocks,
+  getNewlyUnlocked,
+  THEME_UNLOCKABLES
+} from '@/lib/theme-rewards'
 
 type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
@@ -65,6 +72,23 @@ function App() {
   
   const [unlockedAchievements, setUnlockedAchievements] = useKV<string[]>('unlocked-achievements', [])
   const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([])
+  const [unlockQueue, setUnlockQueue] = useState<ThemeUnlockable[]>([])
+  
+  const [playerUnlocks, setPlayerUnlocks] = useKV<PlayerUnlocks>('player-unlocks', {
+    unlockedThemes: ['visual-cyberpunk'],
+    unlockedBackgrounds: ['bg-particles'],
+    unlockedSoundThemes: ['sound-sci-fi'],
+    unlockedTargetSkins: ['skin-default'],
+    unlockedMouseTrails: ['trail-dots'],
+    unlockedProfileBadges: [],
+    unlockedTitles: ['title-rookie'],
+    equippedVisualTheme: 'visual-cyberpunk',
+    equippedBackground: 'bg-particles',
+    equippedSoundTheme: 'sound-sci-fi',
+    equippedTargetSkin: 'skin-default',
+    equippedMouseTrail: 'trail-dots',
+    equippedTitle: 'title-rookie'
+  })
   
   const [challengeData, setChallengeData] = useKV<PlayerChallengeData>('challenge-data', {
     activeChallenges: [],
@@ -279,6 +303,59 @@ function App() {
       setUnlockedAchievements(current => [...(current || []), ...newAchievements.map(a => a.id)])
       setAchievementQueue(newAchievements)
     }
+
+    const defaultUnlocks: PlayerUnlocks = {
+      unlockedThemes: ['visual-cyberpunk'],
+      unlockedBackgrounds: ['bg-particles'],
+      unlockedSoundThemes: ['sound-sci-fi'],
+      unlockedTargetSkins: ['skin-default'],
+      unlockedMouseTrails: ['trail-dots'],
+      unlockedProfileBadges: [],
+      unlockedTitles: ['title-rookie']
+    }
+
+    const newlyUnlocked = getNewlyUnlocked(
+      THEME_UNLOCKABLES,
+      playerUnlocks || defaultUnlocks,
+      newStats,
+      unlockedAchievements || [],
+      challengeData?.level || 1,
+      challengeData?.currentXP || 0,
+      challengeData
+    )
+
+    if (newlyUnlocked.length > 0) {
+      setPlayerUnlocks(current => {
+        const updated = { ...(current || defaultUnlocks) }
+        newlyUnlocked.forEach(unlockable => {
+          switch (unlockable.type) {
+            case 'visual-theme':
+              updated.unlockedThemes = [...updated.unlockedThemes, unlockable.id]
+              break
+            case 'background':
+              updated.unlockedBackgrounds = [...updated.unlockedBackgrounds, unlockable.id]
+              break
+            case 'sound-theme':
+              updated.unlockedSoundThemes = [...updated.unlockedSoundThemes, unlockable.id]
+              break
+            case 'target-skin':
+              updated.unlockedTargetSkins = [...updated.unlockedTargetSkins, unlockable.id]
+              break
+            case 'mouse-trail':
+              updated.unlockedMouseTrails = [...updated.unlockedMouseTrails, unlockable.id]
+              break
+            case 'profile-badge':
+              updated.unlockedProfileBadges = [...updated.unlockedProfileBadges, unlockable.id]
+              break
+            case 'title':
+              updated.unlockedTitles = [...updated.unlockedTitles, unlockable.id]
+              break
+          }
+        })
+        return updated
+      })
+      setUnlockQueue(newlyUnlocked)
+    }
     
     if (!isPracticeMode && challengeData) {
       setChallengeData(current => {
@@ -429,6 +506,10 @@ function App() {
     setAchievementQueue(current => current.slice(1))
   }
 
+  const removeUnlock = () => {
+    setUnlockQueue(current => current.slice(1))
+  }
+
   return (
     <>
       <DynamicBackground variant={backgroundVariant || 'particles'} />
@@ -444,6 +525,15 @@ function App() {
           <AchievementToast
             achievement={achievementQueue[0]}
             onComplete={removeAchievement}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {unlockQueue.length > 0 && (
+          <UnlockNotification
+            unlockable={unlockQueue[0]}
+            onComplete={removeUnlock}
           />
         )}
       </AnimatePresence>

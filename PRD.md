@@ -155,6 +155,31 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 - Progression: Achievement requirement met → Skin unlocks → Available in Target Skins selector → Player selects preferred skin → Active in all future games → Unique particle effects trigger on each hit
 - Success criteria: Each skin feels visually distinct with characteristic particle patterns (circular bursts, star explosions, hexagonal shards, crosshair lines, etc.), unlock requirements feel achievable and rewarding, skin selection persists across sessions, particle effects enhance hit satisfaction without obscuring gameplay
 
+**Theme-Based Achievement Rewards System** (NEW):
+- Functionality: Comprehensive progression system with 42 unlockable cosmetic rewards across 7 categories: Visual Themes (5), Backgrounds (11), Sound Themes (3), Target Skins (6), Mouse Trails (4), Profile Badges (5), and Titles (8). Rewards unlock through gameplay achievements, level progression, score milestones, combo streaks, and challenge completions. Each reward has rarity classification (Common/Rare/Epic/Legendary/Mythic) with corresponding visual effects and unlock difficulty. Centralized "Rewards Vault" for browsing, tracking progress, and equipping unlocks.
+- Purpose: Creates long-term progression incentives beyond single-session gameplay, rewards skill mastery with meaningful cosmetic customization, encourages diverse playstyles through varied unlock requirements, provides collection-driven goals that increase replay value, enhances player identity through customization choices
+- Trigger: Rewards unlock automatically after meeting requirements (post-game, level-up, achievement), accessed via "Rewards" tab in main menu
+- Progression: Complete requirement (level up/achievement/challenge) → Unlock notification appears with rarity celebration → Item added to collection → Browse Rewards Vault organized by category tabs → View locked items with progress bars showing requirements → Equip unlocked rewards → Customizations applied across all game modes → Share unlocks socially
+- Success criteria: All 42 rewards feel meaningful and visually distinct, unlock requirements span beginner to master skill levels, Rewards Vault is intuitive to navigate with clear progress tracking, unlock notifications feel celebratory with rarity-appropriate effects, equipped items persist across sessions, progression curve encourages continued play from Level 1 to 25+
+
+**Reward Categories and Examples**:
+- **Visual Themes**: Complete color palette changes (Cyberpunk/Neon City/Matrix/Sunset/Ice) unlocked via level progression and achievements
+- **Backgrounds**: 11 animated backgrounds in Nature/Tech/Space collections, ranging from Common (Particles) to Mythic (Geometric Shapes)
+- **Sound Themes**: Audio feedback styles (Sci-Fi/Retro/Minimal) unlocked through gameplay milestones
+- **Target Skins**: Visual target variations with unique particles, unlocked via combos and score achievements
+- **Mouse Trails**: Cursor effect styles (Dots/Glow/Sparkle/Line) for enhanced visual feedback
+- **Profile Badges**: Prestige indicators (Founder/Speedster/Perfectionist/Insane Master) showing accomplishment level
+- **Titles**: Displayable player ranks (Rookie→Pro→Elite→Legend→Mythic) plus specialty titles (Combo King/Sharpshooter)
+
+**Rewards Vault Features**:
+- Seven category tabs with unlock counters (e.g., "3/5 Visual Themes Unlocked")
+- Progress bars and requirement details for locked items
+- Rarity-based visual presentation with glowing effects and color coding
+- One-click equip functionality for unlocked items
+- "Check for Unlocks" button to scan for newly available rewards
+- Current equipment clearly highlighted with ring indicators
+- Multi-requirement tracking for legendary/mythic items
+
 **AI-Powered Tournament Matchmaking** (NEW):
 - Functionality: Intelligent matchmaking system powered by GPT-4o-mini that analyzes player skill profiles (skill rating, consistency, play style, reaction time) to create balanced tournament groups and predict match outcomes. System calculates comprehensive skill metrics from player statistics, determines play styles (aggressive/consistent/adaptive), and uses AI to optimize player pairings for fair competition. Includes detailed match predictions with win probabilities and competitive analysis.
 - Purpose: Ensures tournaments are competitive and engaging by matching players of similar skill levels, reducing frustration from skill mismatches, and creating exciting competitive brackets. Increases replay value through intelligent pairing and provides insights into player strengths and matchup dynamics.
@@ -254,6 +279,21 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 - **Team tournament state**: All tournament data persists via useState, resets only when explicitly creating new tournament
 - **Mid-tournament exit**: Progress saved in component state but lost on page refresh (acceptable for event booth usage)
 - **Winner celebration**: Shows on tournament completion only when winnerId exists and all matches done
+- **Theme reward unlocks**: Automatically checked post-game, queued notifications prevent UI spam, unlock state persists via KV storage
+- **Rarity visual effects**: Each tier has distinct glow colors and animations, higher rarities feature more dramatic unlock celebrations
+- **Reward equip conflicts**: Only one item per category can be equipped at a time, equipping new item automatically unequips previous
+- **Progress bar calculations**: Real-time progress tracking shows exact requirements (e.g., "Level 8/10", "15,000/25,000 points")
+- **Multi-requirement unlocks**: Legendary/mythic items requiring multiple conditions check all requirements simultaneously, partial progress shown
+- **Vault category persistence**: Last viewed tab persists between sessions for quick return to favorite category
+- **Unlock notification queue**: Multiple simultaneous unlocks display sequentially with 5-second intervals, preventing overlap
+- **Default starter items**: All players begin with Common tier basics (Cyberpunk theme, Particles background, Sci-Fi sounds, etc.) for immediate customization
+- **Locked item preview**: Hovering locked items shows requirements and current progress without needing to open details
+- **Theme application**: Visual theme changes take effect immediately across all UI elements, no page refresh required
+- **Achievement-based unlocks**: Items requiring specific achievements check unlock status on achievements tab interaction
+- **Level-based gating**: Higher level requirements create aspirational long-term goals, no exploits to skip progression
+- **Collection statistics**: Accurate count of unlocked vs total items per category, updates in real-time
+- **Duplicate unlock prevention**: System checks existing unlocks before triggering notifications, prevents re-unlock bugs
+- **Equipped item indicators**: Currently active cosmetics clearly marked in vault and persist across game sessions
 
 ## Design Direction
 
