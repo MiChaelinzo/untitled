@@ -9,6 +9,7 @@ import { AchievementToast } from '@/components/AchievementToast'
 import { LeaderboardEntry, Difficulty } from '@/lib/game-types'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
 import { PlayerStats, Achievement, checkNewAchievements } from '@/lib/achievements'
+import { Challenge as ChallengeType } from '@/lib/friends-system'
 import {
   PlayerChallengeData,
   generateDailyChallenges,
@@ -35,6 +36,13 @@ function App() {
   const [isPracticeMode, setIsPracticeMode] = useState(false)
   const [gameStartTime, setGameStartTime] = useState(0)
   const [currentCombo, setCurrentCombo] = useState(0)
+  const [activeChallengeId, setActiveChallengeId] = useState<string | undefined>()
+  const [challenges, setChallenges] = useKV<ChallengeType[]>('challenges', [])
+  const [currentUser, setCurrentUser] = useState<{ id: string; username: string; avatarUrl?: string }>({
+    id: `user_${Date.now()}`,
+    username: 'Player',
+    avatarUrl: undefined
+  })
   
   const [stats, setStats] = useKV<PlayerStats>('player-stats', {
     totalGamesPlayed: 0,
@@ -67,6 +75,24 @@ function App() {
     if (soundTheme) soundSystem.setTheme(soundTheme)
     if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
   }, [soundTheme, soundEnabled])
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await window.spark.user()
+        if (user) {
+          setCurrentUser({
+            id: String(user.id),
+            username: user.login || 'Player',
+            avatarUrl: user.avatarUrl || undefined
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error)
+      }
+    }
+    loadUser()
+  }, [])
 
   useEffect(() => {
     if (!challengeData) return
@@ -115,9 +141,10 @@ function App() {
     }
   }, [challengeData, setChallengeData])
 
-  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false) => {
+  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string) => {
     setCurrentDifficulty(difficulty)
     setIsPracticeMode(isPractice)
+    setActiveChallengeId(challengeId)
     setGameStartTime(Date.now())
     setCurrentCombo(0)
     setPhase('playing')
@@ -131,6 +158,71 @@ function App() {
     
     const gameTime = Date.now() - gameStartTime
     const isPerfectRound = targetsMissed === 0 && targetsHit > 0
+    
+    if (activeChallengeId) {
+      setChallenges(current => {
+        return (current || []).map(challenge => {
+          if (challenge.id === activeChallengeId) {
+            const isFromUser = challenge.fromUserId === currentUser.id
+            const updatedChallenge = {
+              ...challenge,
+              status: 'completed' as const
+            }
+            
+            if (isFromUser) {
+              updatedChallenge.fromScore = score
+              updatedChallenge.fromGameData = {
+                score,
+                targetsHit,
+                targetsMissed,
+                highestCombo: currentCombo,
+                completedAt: Date.now()
+              }
+            } else {
+              updatedChallenge.toScore = score
+              updatedChallenge.toGameData = {
+                score,
+                targetsHit,
+                targetsMissed,
+                highestCombo: currentCombo,
+                completedAt: Date.now()
+              }
+            }
+            
+            if (updatedChallenge.fromScore && updatedChallenge.toScore) {
+              if (updatedChallenge.fromScore > updatedChallenge.toScore) {
+                updatedChallenge.winner = updatedChallenge.fromUserId
+              } else if (updatedChallenge.toScore > updatedChallenge.fromScore) {
+                updatedChallenge.winner = updatedChallenge.toUserId
+              } else {
+                updatedChallenge.winner = 'tie'
+              }
+              
+              const isWinner = updatedChallenge.winner === currentUser.id
+              const isDraw = updatedChallenge.winner === 'tie'
+              
+              if (isWinner) {
+                toast.success('Challenge Complete - You Won!', {
+                  description: `You beat ${isFromUser ? updatedChallenge.toUsername : updatedChallenge.fromUsername}!`
+                })
+              } else if (isDraw) {
+                toast.info('Challenge Complete - Draw!', {
+                  description: 'You tied with your opponent!'
+                })
+              } else {
+                toast.info('Challenge Complete', {
+                  description: 'Better luck next time!'
+                })
+              }
+            }
+            
+            return updatedChallenge
+          }
+          return challenge
+        })
+      })
+      setActiveChallengeId(undefined)
+    }
     
     const previousStats = stats || {
       totalGamesPlayed: 0,
@@ -352,6 +444,9 @@ function App() {
             activeTitle: undefined
           }}
           onClaimChallengeReward={handleClaimChallengeReward}
+          currentUserId={currentUser.id}
+          currentUsername={currentUser.username}
+          currentAvatarUrl={currentUser.avatarUrl}
         />
       )}
       

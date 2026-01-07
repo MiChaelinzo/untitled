@@ -81,6 +81,13 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Progression: Achievement/badge/challenge earned → Share button appears → Click share → Dropdown menu with Twitter/X and Copy options → Twitter opens in popup with pre-filled content OR text copied to clipboard → Success toast confirms action
 - Success criteria: Sharing is frictionless with intelligent auto-generated text, includes relevant hashtags (#Cloud9, #ReflexArena, difficulty/badge-specific tags), creates compelling social proof, and maintains Cloud9 branding
 
+**Friend System & Direct Challenges**
+- Functionality: Complete friend management system including player search, friend requests (send/accept/decline), friends list management, and direct 1v1 challenges. Players can search for other users by username, send friend requests, and challenge friends to compete on specific difficulties. Challenges include 24-hour expiration, score tracking for both players, automatic winner determination, and detailed match history with win/loss/draw records.
+- Purpose: Drives player retention through social competition, creates personal rivalries that encourage return visits, enables skill-matched competition beyond global leaderboards, and adds multiplayer dimension to single-player reflex testing
+- Trigger: Friends tab in main menu, player search bar, challenge button on friend profiles, incoming challenge notifications
+- Progression: Player searches username → Sends friend request → Friend accepts → Challenge button available → Sender selects difficulty → Friend receives notification → Friend accepts challenge → Both play same difficulty → Scores compared → Winner determined → Results shown in history tab → Win/loss stats updated
+- Success criteria: Friend requests deliver reliably, challenges don't expire prematurely, scores accurately tracked for both players, winner determination is clear and fair, challenge history persists across sessions, notifications alert players to pending challenges
+
 **Score Calculation System**
 - Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits, difficulty multipliers (1x Easy, 1.5x Medium, 2x Hard, 3x Insane), and immersive sound effects for feedback
 - Purpose: Rewards precision, speed, and challenge selection while providing satisfying audio feedback that scales with difficulty
@@ -120,6 +127,13 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Social sharing window blocking**: If popup blockers prevent Twitter window, gracefully fallback to copy-to-clipboard with instructional toast
 - **Share text personalization**: Share messages include player name when available, fallback to "I" for anonymous shares
 - **Badge expiration and sharing**: Expired badges are removed from inventory but historical shares remain valid, creating scarcity-driven urgency
+- **Friend system offline mode**: All friend data stored locally via KV storage, no server required for full functionality
+- **Challenge expiration**: Challenges automatically expire after 24 hours, removed from active list but preserved in history
+- **Duplicate challenge prevention**: Cannot send multiple active challenges to same friend, must wait for completion or expiration
+- **Challenge score validation**: Both players must complete challenge on same difficulty, scores verified against difficulty multipliers
+- **Friend search mock data**: Demo implementation uses mock player profiles for search functionality, easily extensible to real backend
+- **Win/loss statistics**: Tracks total wins, losses, and current win streak for competitive leaderboard integration
+- **Challenge notification badges**: Visual indicators on Friends tab show pending friend requests and incoming challenges
 
 ## Design Direction
 

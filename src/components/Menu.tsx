@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -11,6 +11,7 @@ import { PlayerStats, ACHIEVEMENTS } from '@/lib/achievements'
 import { StatsPanel } from '@/components/StatsPanel'
 import { AchievementGrid } from '@/components/AchievementGrid'
 import { ChallengesPanel } from '@/components/ChallengesPanel'
+import { FriendsPanel } from '@/components/FriendsPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -30,15 +31,18 @@ import { toast } from 'sonner'
 import { PlayerChallengeData } from '@/lib/challenges'
 
 interface MenuProps {
-  onStartGame: (difficulty: Difficulty, isPractice?: boolean) => void
+  onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string) => void
   leaderboard: LeaderboardEntry[]
   stats: PlayerStats
   unlockedAchievements: string[]
   challengeData: PlayerChallengeData
   onClaimChallengeReward: (challengeId: string) => void
+  currentUserId: string
+  currentUsername: string
+  currentAvatarUrl?: string
 }
 
-export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, challengeData, onClaimChallengeReward }: MenuProps) {
+export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, challengeData, onClaimChallengeReward, currentUserId, currentUsername, currentAvatarUrl }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
@@ -144,10 +148,14 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-4 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-6 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
+            </TabsTrigger>
+            <TabsTrigger value="friends" className="flex items-center gap-2">
+              <Users size={16} weight="fill" />
+              <span className="hidden sm:inline">Friends</span>
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="flex items-center gap-2">
               <Trophy size={16} weight="fill" />
@@ -363,6 +371,15 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
             <ChallengesPanel 
               challengeData={challengeData} 
               onClaimReward={onClaimChallengeReward} 
+            />
+          </TabsContent>
+
+          <TabsContent value="friends" className="space-y-4 mt-6">
+            <FriendsPanel
+              currentUserId={currentUserId}
+              currentUsername={currentUsername}
+              currentAvatarUrl={currentAvatarUrl}
+              onStartChallenge={(challengeId, difficulty) => onStartGame(difficulty, false, challengeId)}
             />
           </TabsContent>
         </Tabs>
