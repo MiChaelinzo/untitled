@@ -15,6 +15,7 @@ import { FriendsPanel } from '@/components/FriendsPanel'
 import { FilteredLeaderboard } from '@/components/FilteredLeaderboard'
 import { VisualThemeSelector } from '@/components/VisualThemeSelector'
 import { TargetSkinSelector } from '@/components/TargetSkinSelector'
+import { ThemedBackgroundSelector } from '@/components/ThemedBackgroundSelector'
 import { TournamentPanel } from '@/components/TournamentPanel'
 import { TeamTournamentPanel } from '@/components/TeamTournamentPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
@@ -379,41 +380,20 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
                 stats={stats}
               />
 
+              <ThemedBackgroundSelector
+                currentBackground={backgroundVariant || 'particles'}
+                onBackgroundChange={(bg) => {
+                  setBackgroundVariant(bg)
+                  toast.success(`Background changed!`)
+                }}
+              />
+
               <Card className="p-6 bg-card/50 backdrop-blur">
                 <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                   <Palette weight="fill" size={24} className="text-primary" />
-                  Background & Effects
+                  Mouse Effects
                 </h3>
                 <div className="space-y-6">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Background Style
-                    </label>
-                    <Select 
-                      value={backgroundVariant || 'particles'} 
-                      onValueChange={(value: any) => {
-                        setBackgroundVariant(value)
-                        toast.success(`Background changed to ${value}`)
-                      }}
-                    >
-                      <SelectTrigger className="bg-background/50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="particles">Particles</SelectItem>
-                        <SelectItem value="waves">Waves</SelectItem>
-                        <SelectItem value="grid">Grid</SelectItem>
-                        <SelectItem value="nebula">Nebula</SelectItem>
-                        <SelectItem value="matrix">Matrix</SelectItem>
-                        <SelectItem value="aurora">Aurora</SelectItem>
-                        <SelectItem value="constellation">Constellation</SelectItem>
-                        <SelectItem value="hexagon">Hexagon</SelectItem>
-                        <SelectItem value="spirals">Spirals</SelectItem>
-                        <SelectItem value="binary-rain">Binary Rain</SelectItem>
-                        <SelectItem value="geometric">Geometric Shapes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-2">

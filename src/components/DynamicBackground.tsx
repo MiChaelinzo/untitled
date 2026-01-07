@@ -689,6 +689,40 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
     }
   }, [variant])
 
+  const getThemeColors = () => {
+    const natureThemes = ['waves', 'aurora', 'spirals']
+    const techThemes = ['grid', 'matrix', 'binary-rain', 'hexagon', 'geometric']
+    const spaceThemes = ['constellation', 'nebula', 'particles']
+
+    if (natureThemes.includes(variant)) {
+      return {
+        color1: 'bg-emerald-500/20',
+        color2: 'bg-teal-500/20',
+        color3: 'bg-cyan-400/15'
+      }
+    } else if (spaceThemes.includes(variant)) {
+      return {
+        color1: 'bg-purple-500/20',
+        color2: 'bg-indigo-500/20',
+        color3: 'bg-blue-400/15'
+      }
+    } else if (techThemes.includes(variant)) {
+      return {
+        color1: 'bg-primary/20',
+        color2: 'bg-accent/20',
+        color3: 'bg-cyan/15'
+      }
+    }
+    
+    return {
+      color1: 'bg-primary/20',
+      color2: 'bg-accent/20',
+      color3: 'bg-cyan/15'
+    }
+  }
+
+  const colors = getThemeColors()
+
   return (
     <>
       <canvas
@@ -701,13 +735,13 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${colors.color1} rounded-full blur-3xl animate-pulse`} />
         <div 
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" 
+          className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${colors.color2} rounded-full blur-3xl animate-pulse`}
           style={{ animationDelay: '1s' }} 
         />
         <div 
-          className="absolute top-1/2 right-1/3 w-80 h-80 bg-cyan/15 rounded-full blur-3xl animate-pulse" 
+          className={`absolute top-1/2 right-1/3 w-80 h-80 ${colors.color3} rounded-full blur-3xl animate-pulse`}
           style={{ animationDelay: '2s' }} 
         />
       </motion.div>

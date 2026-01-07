@@ -19,12 +19,12 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 - Progression: Login screen → Authentication → Profile creation/loading → Main menu with personalized data → Friends and challenges available
 - Success criteria: Seamless GitHub integration, guest mode fully functional, profiles persist across sessions, avatars display correctly
 
-**Dynamic Background System** (NEW)
-- Functionality: Five animated background variants (Particles with connection lines, Flowing Waves, Pulsing Grid, Nebula gradients, Matrix rain) that run on canvas with 60fps performance
-- Purpose: Creates immersive atmosphere and visual variety, allows players to customize their experience, enhances the cyberpunk/esports aesthetic
-- Trigger: Selected in Customize tab, persists across all app screens and game modes
-- Progression: Customize tab → Background dropdown → Preview effect → Selection saved → Background animates across all views
-- Success criteria: Smooth 60fps animations, no performance impact on gameplay, transitions seamless, all variants visually distinct and polished
+**Dynamic Background System** (ENHANCED)
+- Functionality: Eleven animated background variants organized into three themed collections - Nature (Ocean Waves, Aurora Borealis, Nautilus Spirals), Tech (Cyber Grid, Matrix Code, Binary Rain, Hex Network, Geometric Shapes), and Space (Star Constellation, Cosmic Nebula, Stellar Particles). Each theme features coordinated ambient gradient colors that complement the canvas animations for a cohesive visual experience.
+- Purpose: Creates immersive atmosphere and visual variety, allows players to easily discover backgrounds that match their preferred aesthetic through curated collections, enhances the cyberpunk/esports aesthetic while offering natural and cosmic alternatives
+- Trigger: Selected in Customize tab through themed tabs (Nature/Tech/Space), persists across all app screens and game modes
+- Progression: Customize tab → Select theme category tab → View collection description → Choose background from curated set → Preview effect with theme-matched gradients → Selection saved → Background animates across all views
+- Success criteria: Smooth 60fps animations, no performance impact on gameplay, transitions seamless, all variants visually distinct and polished, theme groupings intuitive, ambient gradients complement animations
 
 **Mouse Trail Effects** (NEW)
 - Functionality: Four trail variants (Glow particles, Dots, Sparkles, Line path) that follow cursor movement with customizable enable/disable and color options
