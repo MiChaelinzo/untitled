@@ -48,11 +48,11 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Success criteria: Scoring feels fair and transparent, with clear visual and audio feedback on performance
 
 **Sound Effects System**
-- Functionality: Web Audio API-powered sound effects for hits (pitch increases with combo), misses (descending tone), combo milestones (ascending arpeggio), round starts (three-note fanfare), and game over (descending sequence)
-- Purpose: Enhances immersion and provides instant audio feedback that reinforces player actions
+- Functionality: Web Audio API-powered sound effects with three distinct themes (Sci-Fi, Retro Arcade, Minimal) for hits (pitch increases with combo), misses (descending tone), combo milestones (ascending arpeggio), round starts (fanfare), and game over (descending sequence)
+- Purpose: Enhances immersion and provides instant audio feedback that reinforces player actions, with customizable themes to match player preferences
 - Trigger: Game events (target hit, miss, round transition, game completion)
-- Progression: Action occurs → Sound synthesized in real-time → Audio plays with appropriate volume and pitch
-- Success criteria: Sounds feel responsive and satisfying without being overwhelming, with persistent user preference for enabling/disabling
+- Progression: Action occurs → Sound synthesized in real-time with selected theme → Audio plays with appropriate volume and pitch
+- Success criteria: Sounds feel responsive and satisfying without being overwhelming, with persistent user preferences for theme selection and enabling/disabling
 
 ## Edge Case Handling
 
@@ -62,7 +62,7 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Mid-game exit**: Auto-save progress and offer resume on return
 - **Leaderboard spam**: Rate limit submissions to 1 per minute per device
 - **Mobile responsiveness**: Touch targets automatically scale to minimum 44px regardless of screen size
-- **Audio context limitations**: Web Audio API auto-initializes on user interaction (browser requirement), sound preference persists between sessions
+- **Audio context limitations**: Web Audio API auto-initializes on user interaction (browser requirement), sound preference and theme selection persist between sessions via KV storage
 
 ## Design Direction
 
@@ -115,11 +115,16 @@ Animations should create moments of explosive feedback and cyberpunk flair witho
 - Leaderboard updates: Slide in from right with highlight pulse
 
 **Audio Design**:
-- Hit sounds: Synthesized high-frequency pops that increase in pitch with combo level
-- Miss sounds: Low sawtooth wave with descending pitch for disappointment
-- Combo sounds: Ascending arpeggio pattern using square waves
-- Round start: Three-note ascending fanfare
-- Game over: Four-note descending sequence with filtered triangle waves
+- Three distinct sound themes available via dropdown selector:
+  - **Sci-Fi** (default): Synthesized high-frequency sine waves with noise bursts and filtered modulations - futuristic and spacey
+  - **Retro Arcade**: Classic square and triangle wave chiptune sounds - nostalgic 8-bit gaming aesthetic
+  - **Minimal**: Pure sine wave tones - clean and subtle for focus-oriented players
+- Hit sounds: Pitch increases with combo level across all themes
+- Miss sounds: Descending tones with theme-appropriate wave shapes
+- Combo sounds: Theme-specific celebratory sequences
+- Round start: Ascending fanfares with theme variation
+- Game over: Descending sequences with theme-appropriate synthesis
+- Sound preference and theme selection persist between sessions
 
 Balance: Explosive moments on hits/scores create dopamine spikes with both visual and audio feedback, while UI animations are swift and purposeful to maintain pace.
 
@@ -154,6 +159,7 @@ Balance: Explosive moments on hits/scores create dopamine spikes with both visua
   - ArrowRight: CTAs and progression
   - Crown: Top leaderboard positions
   - SpeakerHigh/SpeakerSlash: Audio control toggle
+  - Waveform: Sound theme selector indicator
 
 - **Spacing**:
   - Section gaps: 8-12 (32-48px)

@@ -5,16 +5,24 @@ import { Menu } from '@/components/Menu'
 import { GameArena } from '@/components/GameArena'
 import { GameOver } from '@/components/GameOver'
 import { LeaderboardEntry } from '@/lib/game-types'
+import { soundSystem, SoundTheme } from '@/lib/sound-system'
 
 type AppPhase = 'menu' | 'playing' | 'gameOver'
 
 function App() {
   const [phase, setPhase] = useState<AppPhase>('menu')
   const [leaderboard, setLeaderboard] = useKV<LeaderboardEntry[]>('leaderboard', [])
+  const [soundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
+  const [soundEnabled] = useKV<boolean>('sound-enabled', true)
   const [finalScore, setFinalScore] = useState(0)
   const [finalRound, setFinalRound] = useState(0)
   const [finalTargetsHit, setFinalTargetsHit] = useState(0)
   const [finalTargetsMissed, setFinalTargetsMissed] = useState(0)
+
+  useEffect(() => {
+    if (soundTheme) soundSystem.setTheme(soundTheme)
+    if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
+  }, [soundTheme, soundEnabled])
 
   const handleStartGame = () => {
     setPhase('playing')

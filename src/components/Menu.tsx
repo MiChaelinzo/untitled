@@ -2,11 +2,18 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform } from '@phosphor-icons/react'
 import { LeaderboardEntry } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
-import { soundSystem } from '@/lib/sound-system'
+import { soundSystem, SoundTheme } from '@/lib/sound-system'
 import { useKV } from '@github/spark/hooks'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface MenuProps {
   onStartGame: () => void
@@ -15,6 +22,7 @@ interface MenuProps {
 
 export function Menu({ onStartGame, leaderboard }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
+  const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
 
   const toggleSound = () => {
     setSoundEnabled(current => {
@@ -27,20 +35,42 @@ export function Menu({ onStartGame, leaderboard }: MenuProps) {
     })
   }
 
+  const handleThemeChange = (theme: SoundTheme) => {
+    setSoundTheme(theme)
+    soundSystem.setTheme(theme)
+    if (soundEnabled) {
+      soundSystem.play('hit', 0)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={toggleSound}
-        className="absolute top-4 right-4 z-20 bg-card/50 backdrop-blur border-primary/50 hover:bg-card/70"
-      >
-        {soundEnabled ? (
-          <SpeakerHigh size={24} className="text-primary" />
-        ) : (
-          <SpeakerSlash size={24} className="text-muted-foreground" />
-        )}
-      </Button>
+      <div className="absolute top-4 right-4 z-20 flex gap-2">
+        <Select value={soundTheme} onValueChange={handleThemeChange}>
+          <SelectTrigger className="w-40 bg-card/50 backdrop-blur border-primary/50">
+            <Waveform size={20} className="mr-2 text-primary" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sci-fi">Sci-Fi</SelectItem>
+            <SelectItem value="retro">Retro Arcade</SelectItem>
+            <SelectItem value="minimal">Minimal</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleSound}
+          className="bg-card/50 backdrop-blur border-primary/50 hover:bg-card/70"
+        >
+          {soundEnabled ? (
+            <SpeakerHigh size={24} className="text-primary" />
+          ) : (
+            <SpeakerSlash size={24} className="text-muted-foreground" />
+          )}
+        </Button>
+      </div>
 
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-pulse" />
