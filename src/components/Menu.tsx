@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 import { LeaderboardEntry } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
+import { soundSystem } from '@/lib/sound-system'
+import { useKV } from '@github/spark/hooks'
 
 interface MenuProps {
   onStartGame: () => void
@@ -11,8 +14,34 @@ interface MenuProps {
 }
 
 export function Menu({ onStartGame, leaderboard }: MenuProps) {
+  const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
+
+  const toggleSound = () => {
+    setSoundEnabled(current => {
+      const newValue = !current
+      soundSystem.setEnabled(newValue)
+      if (newValue) {
+        soundSystem.play('hit', 0)
+      }
+      return newValue
+    })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={toggleSound}
+        className="absolute top-4 right-4 z-20 bg-card/50 backdrop-blur border-primary/50 hover:bg-card/70"
+      >
+        {soundEnabled ? (
+          <SpeakerHigh size={24} className="text-primary" />
+        ) : (
+          <SpeakerSlash size={24} className="text-muted-foreground" />
+        )}
+      </Button>
+
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />

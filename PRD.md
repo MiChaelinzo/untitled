@@ -41,11 +41,18 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Success criteria: Registration feels rewarding not mandatory, leaderboard updates in real-time
 
 **Score Calculation System**
-- Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits
-- Purpose: Rewards precision and speed, creating competitive depth
+- Functionality: Points awarded based on reaction speed (faster = more points), with combo multipliers for consecutive hits and immersive sound effects for feedback
+- Purpose: Rewards precision and speed, creating competitive depth while providing satisfying audio feedback
 - Trigger: Every target hit or miss during gameplay
-- Progression: Target hit → Calculate reaction time → Apply combo multiplier → Add to running score → Display with satisfying animation
-- Success criteria: Scoring feels fair and transparent, with clear feedback on performance
+- Progression: Target hit → Calculate reaction time → Apply combo multiplier → Play hit sound + combo sound → Add to running score → Display with satisfying animation
+- Success criteria: Scoring feels fair and transparent, with clear visual and audio feedback on performance
+
+**Sound Effects System**
+- Functionality: Web Audio API-powered sound effects for hits (pitch increases with combo), misses (descending tone), combo milestones (ascending arpeggio), round starts (three-note fanfare), and game over (descending sequence)
+- Purpose: Enhances immersion and provides instant audio feedback that reinforces player actions
+- Trigger: Game events (target hit, miss, round transition, game completion)
+- Progression: Action occurs → Sound synthesized in real-time → Audio plays with appropriate volume and pitch
+- Success criteria: Sounds feel responsive and satisfying without being overwhelming, with persistent user preference for enabling/disabling
 
 ## Edge Case Handling
 
@@ -55,6 +62,7 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Mid-game exit**: Auto-save progress and offer resume on return
 - **Leaderboard spam**: Rate limit submissions to 1 per minute per device
 - **Mobile responsiveness**: Touch targets automatically scale to minimum 44px regardless of screen size
+- **Audio context limitations**: Web Audio API auto-initializes on user interaction (browser requirement), sound preference persists between sessions
 
 ## Design Direction
 
@@ -96,17 +104,24 @@ Animations should create moments of explosive feedback and cyberpunk flair witho
 
 **Gameplay Animations**:
 - Target spawn: Scale from 0 with electric glow pulse (200ms cubic-bezier)
-- Target hit: Explosive particle burst radiating outward with screen shake
-- Miss penalty: Red flash with subtle recoil animation
-- Combo multiplier: Numbers scale up with electric arc effects
+- Target hit: Explosive particle burst radiating outward with screen shake and satisfying audio pop
+- Miss penalty: Red flash with subtle recoil animation and low descending tone
+- Combo multiplier: Numbers scale up with electric arc effects and ascending note sequence
 
 **UI Animations**:
 - Button hover: Lift with neon underglow intensifying
-- Screen transitions: Glitch wipe effect with RGB split
+- Screen transitions: Glitch wipe effect with RGB split and musical transition
 - Score counting: Rapid numeric increment with electric crackle sound
 - Leaderboard updates: Slide in from right with highlight pulse
 
-Balance: Explosive moments on hits/scores create dopamine spikes, while UI animations are swift and purposeful to maintain pace.
+**Audio Design**:
+- Hit sounds: Synthesized high-frequency pops that increase in pitch with combo level
+- Miss sounds: Low sawtooth wave with descending pitch for disappointment
+- Combo sounds: Ascending arpeggio pattern using square waves
+- Round start: Three-note ascending fanfare
+- Game over: Four-note descending sequence with filtered triangle waves
+
+Balance: Explosive moments on hits/scores create dopamine spikes with both visual and audio feedback, while UI animations are swift and purposeful to maintain pace.
 
 ## Component Selection
 
@@ -138,6 +153,7 @@ Balance: Explosive moments on hits/scores create dopamine spikes, while UI anima
   - User: Player registration
   - ArrowRight: CTAs and progression
   - Crown: Top leaderboard positions
+  - SpeakerHigh/SpeakerSlash: Audio control toggle
 
 - **Spacing**:
   - Section gaps: 8-12 (32-48px)

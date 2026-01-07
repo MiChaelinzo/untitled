@@ -6,6 +6,7 @@ import { RoundTransition } from '@/components/RoundTransition'
 import { HitFeedback, HitParticles } from '@/components/HitEffects'
 import { GameState, ROUND_CONFIG, Target as TargetType } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
+import { soundSystem } from '@/lib/sound-system'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -49,6 +50,12 @@ export function GameArena({ onGameOver }: GameArenaProps) {
   const handleHit = useCallback((reactionTime: number) => {
     const config = ROUND_CONFIG[gameState.round as keyof typeof ROUND_CONFIG]
     const points = calculateScore(reactionTime, config.duration, gameState.combo)
+
+    soundSystem.play('hit', gameState.combo)
+    
+    if (gameState.combo > 0 && gameState.combo % 3 === 0) {
+      soundSystem.play('combo', gameState.combo)
+    }
 
     if (gameState.currentTarget && containerRef.current) {
       const target = gameState.currentTarget
@@ -117,6 +124,8 @@ export function GameArena({ onGameOver }: GameArenaProps) {
   }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver])
 
   const handleMiss = useCallback(() => {
+    soundSystem.play('miss')
+    
     setGameState(prev => {
       const newTargetsRemaining = prev.roundTargetsRemaining - 1
 
@@ -157,6 +166,7 @@ export function GameArena({ onGameOver }: GameArenaProps) {
   }, [onGameOver])
 
   const handleStartRound = useCallback(() => {
+    soundSystem.play('roundStart')
     setGameState(prev => ({
       ...prev,
       phase: 'playing'

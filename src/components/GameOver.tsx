@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { formatScore } from '@/lib/game-utils'
 import { Trophy, Crown, Medal } from '@phosphor-icons/react'
 import { LeaderboardEntry } from '@/lib/game-types'
+import { soundSystem } from '@/lib/sound-system'
 
 interface GameOverProps {
   score: number
@@ -45,6 +46,10 @@ export function GameOver({
 
   const position = leaderboard.findIndex(entry => entry.score < score) + 1
   const isTopScore = position > 0 && position <= 10
+
+  useEffect(() => {
+    soundSystem.play('gameOver')
+  }, [])
 
   return (
     <motion.div
