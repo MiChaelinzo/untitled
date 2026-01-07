@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Trophy, Crown, Medal, Play, Check } from '@phosphor-icons/react'
+import { Trophy, Crown, Medal, Play, Check, Sparkle } from '@phosphor-icons/react'
 import {
   Tournament,
   Match,
@@ -26,25 +26,31 @@ import {
 import { Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { toast } from 'sonner'
+import { MatchmakingPanel } from '@/components/MatchmakingPanel'
+import { PlayerSkillProfile, TournamentMatchup, createPlayerSkillProfile } from '@/lib/ai-matchmaking'
+import { PlayerStats } from '@/lib/achievements'
 
 interface TournamentPanelProps {
   currentUserId: string
   currentUsername: string
   currentAvatarUrl?: string
   onStartMatch: (difficulty: Difficulty, matchId: string) => void
+  playerStats?: PlayerStats
 }
 
 export function TournamentPanel({
   currentUserId,
   currentUsername,
   currentAvatarUrl,
-  onStartMatch
+  onStartMatch,
+  playerStats
 }: TournamentPanelProps) {
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [tournamentName, setTournamentName] = useState('')
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('medium')
   const [playerCount, setPlayerCount] = useState<string>('4')
   const [isCreating, setIsCreating] = useState(false)
+  const [showMatchmaking, setShowMatchmaking] = useState(false)
 
   const handleCreateTournament = () => {
     if (!tournamentName.trim()) {
@@ -121,6 +127,104 @@ export function TournamentPanel({
 
   const nextMatch = tournament ? getPlayerNextMatch(tournament, currentUserId) : null
 
+  const generateMockPlayers = (): PlayerSkillProfile[] => {
+    const mockStats = playerStats || {
+      totalGamesPlayed: 10,
+      totalTargetsHit: 100,
+      totalTargetsMissed: 20,
+      highestScore: 25000,
+      highestCombo: 12,
+      perfectRounds: 2,
+      insaneModeCompleted: 0,
+      totalPlayTime: 120000
+    }
+
+    const currentPlayer = createPlayerSkillProfile(
+      currentUserId,
+      currentUsername,
+      mockStats,
+      [20000, 22000, 25000, 23000, 24000],
+      currentAvatarUrl
+    )
+
+    const mockPlayerProfiles: PlayerSkillProfile[] = [
+      currentPlayer,
+      createPlayerSkillProfile(
+        'player_2',
+        'SpeedRunner',
+        { ...mockStats, highestScore: 28000, highestCombo: 15, insaneModeCompleted: 2 },
+        [26000, 27000, 28000, 27500, 28000]
+      ),
+      createPlayerSkillProfile(
+        'player_3',
+        'SteadyShot',
+        { ...mockStats, highestScore: 22000, perfectRounds: 5 },
+        [21000, 22000, 21500, 22000, 21800]
+      ),
+      createPlayerSkillProfile(
+        'player_4',
+        'Newbie',
+        { ...mockStats, totalGamesPlayed: 3, highestScore: 12000, highestCombo: 5 },
+        [10000, 11000, 12000]
+      ),
+      createPlayerSkillProfile(
+        'player_5',
+        'ProGamer',
+        { ...mockStats, highestScore: 35000, highestCombo: 20, insaneModeCompleted: 5, perfectRounds: 8 },
+        [33000, 34000, 35000, 34500, 35000]
+      ),
+      createPlayerSkillProfile(
+        'player_6',
+        'CasualPlayer',
+        { ...mockStats, highestScore: 18000, highestCombo: 8 },
+        [16000, 17000, 18000, 17500, 18000]
+      )
+    ]
+
+    return mockPlayerProfiles
+  }
+
+  const handleStartAITournament = (matchups: TournamentMatchup[], difficulty: Difficulty) => {
+    const players: TournamentPlayer[] = []
+    
+    matchups.forEach((matchup, idx) => {
+      if (!players.find(p => p.id === matchup.player1.userId)) {
+        players.push({
+          id: matchup.player1.userId,
+          username: matchup.player1.username,
+          avatarUrl: matchup.player1.avatarUrl,
+          seed: idx * 2 + 1
+        })
+      }
+      if (!players.find(p => p.id === matchup.player2.userId)) {
+        players.push({
+          id: matchup.player2.userId,
+          username: matchup.player2.username,
+          avatarUrl: matchup.player2.avatarUrl,
+          seed: idx * 2 + 2
+        })
+      }
+    })
+
+    const aiTournament = createTournament('AI Matchmade Tournament', difficulty, players)
+    setTournament(aiTournament)
+    setShowMatchmaking(false)
+    toast.success('AI-powered tournament created!', {
+      description: `${players.length} skill-matched players`
+    })
+  }
+
+  if (showMatchmaking) {
+    const mockPlayers = generateMockPlayers()
+    return (
+      <MatchmakingPanel
+        availablePlayers={mockPlayers}
+        onStartTournament={handleStartAITournament}
+        onClose={() => setShowMatchmaking(false)}
+      />
+    )
+  }
+
   if (!tournament && !isCreating) {
     return (
       <div className="space-y-6">
@@ -139,14 +243,24 @@ export function TournamentPanel({
               Create tournaments and compete against multiple players in elimination-style brackets.
               Advance through each round to become the champion!
             </p>
-            <Button
-              size="lg"
-              className="mt-4"
-              onClick={() => setIsCreating(true)}
-            >
-              <Trophy size={20} className="mr-2" />
-              Create Tournament
-            </Button>
+            <div className="flex flex-col gap-3 mt-4">
+              <Button
+                size="lg"
+                onClick={() => setIsCreating(true)}
+              >
+                <Trophy size={20} className="mr-2" />
+                Create Tournament
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setShowMatchmaking(true)}
+                className="gap-2 border-primary text-primary hover:bg-primary/10"
+              >
+                <Sparkle size={20} weight="fill" />
+                AI Matchmaking
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

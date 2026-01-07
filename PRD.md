@@ -134,6 +134,25 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - Progression: Achievement requirement met → Skin unlocks → Available in Target Skins selector → Player selects preferred skin → Active in all future games → Unique particle effects trigger on each hit
 - Success criteria: Each skin feels visually distinct with characteristic particle patterns (circular bursts, star explosions, hexagonal shards, crosshair lines, etc.), unlock requirements feel achievable and rewarding, skin selection persists across sessions, particle effects enhance hit satisfaction without obscuring gameplay
 
+**AI-Powered Tournament Matchmaking** (NEW):
+- Functionality: Intelligent matchmaking system powered by GPT-4o-mini that analyzes player skill profiles (skill rating, consistency, play style, reaction time) to create balanced tournament groups and predict match outcomes. System calculates comprehensive skill metrics from player statistics, determines play styles (aggressive/consistent/adaptive), and uses AI to optimize player pairings for fair competition. Includes detailed match predictions with win probabilities and competitive analysis.
+- Purpose: Ensures tournaments are competitive and engaging by matching players of similar skill levels, reducing frustration from skill mismatches, and creating exciting competitive brackets. Increases replay value through intelligent pairing and provides insights into player strengths and matchup dynamics.
+- Trigger: "AI Matchmaking" button on Tournament tab main screen
+- Progression: Tournament tab → AI Matchmaking button → Player selection screen with skill profiles → Select 2-16 players → Click Analyze → AI processes skill data → Matchmaking results displayed with fairness score → View group details and match predictions → Start AI-matched tournament → Players compete in skill-balanced brackets
+- Success criteria: Matchmaking algorithm creates balanced groups with <500 skill rating variance, fairness scores consistently above 70%, match predictions feel accurate based on observed outcomes, AI reasoning is transparent and understandable, system gracefully falls back to rule-based matching if AI unavailable
+
+**AI Matchmaking Features**:
+- **Skill Rating Calculation**: Comprehensive scoring system based on accuracy, average score, perfect rounds, combo achievements, and difficulty completions - produces ratings from 100-5000
+- **Consistency Analysis**: Measures performance variance across recent games using coefficient of variation to identify reliable vs volatile players
+- **Play Style Detection**: Categorizes players as "aggressive" (high combos, many targets), "consistent" (high accuracy, low variance), or "adaptive" (balanced approach)
+- **AI Group Formation**: Uses LLM to analyze player profiles and create 2-4 player groups optimized for skill similarity, play style diversity, and difficulty alignment
+- **Match Outcome Prediction**: AI generates win probability calculations and exciting match analysis highlighting key factors and player strengths
+- **Fairness Scoring**: 0-1 score indicating tournament balance quality with detailed reasoning explaining matchmaking decisions
+- **Tournament Seeding**: Automatic seeding based on multi-factor ranking (skill rating → consistency → recent performance)
+- **Visual Skill Tiers**: Color-coded tier badges (Beginner/Intermediate/Advanced/Pro) for quick player assessment
+- **Interactive Group Preview**: Click groups to see detailed match predictions before tournament starts
+- **Confidence Metrics**: AI reports confidence scores on matchmaking decisions for transparency
+
 ## Edge Case Handling
 
 - **Accidental taps**: Outside-target clicks don't penalize but don't grant points either, preventing frustration
@@ -169,6 +188,14 @@ The game features multiple rounds with increasing difficulty, score tracking, le
 - **Friend search mock data**: Demo implementation uses mock player profiles for search functionality, easily extensible to real backend
 - **Win/loss statistics**: Tracks total wins, losses, and current win streak for competitive leaderboard integration
 - **Challenge notification badges**: Visual indicators on Friends tab show pending friend requests and incoming challenges
+- **AI matchmaking player pool**: Demo implementation uses mix of current player stats and mock player profiles, easily extensible to real multiplayer backend
+- **AI matchmaking failure**: System falls back to rule-based skill sorting if LLM API unavailable, ensuring tournaments can always be created
+- **Insufficient players for matchmaking**: Requires minimum 2 players, displays clear error message if fewer selected
+- **Player selection limits**: Maximum 16 players enforced with toast notification when limit reached
+- **Skill profile generation**: Uses actual player stats when available, generates realistic mock data for demo players
+- **Match prediction display**: Only shows predictions for groups with 2+ players, handles solo player groups gracefully
+- **Tournament difficulty selection**: AI recommends difficulty based on average group skill, can be overridden by player
+- **Fairness score interpretation**: Scores >0.7 considered balanced (success toast), <0.7 triggers info toast about imbalance
 
 ## Design Direction
 
