@@ -379,6 +379,17 @@ export const EVENT_GAME_MODES: EventGameMode[] = [
           sequenceBonus: 2.0,
           sequenceWindow: 1500
         }
+      },
+      {
+        type: 'power-up',
+        name: 'Ocean Power-Ups',
+        description: 'Collect power-ups for special abilities',
+        config: {
+          types: ['time-slow', 'shield', 'score-boost', 'magnet'],
+          spawnChance: 0.3,
+          minInterval: 8000,
+          maxInterval: 15000
+        }
       }
     ],
     visualEffects: [
@@ -435,6 +446,17 @@ export const EVENT_GAME_MODES: EventGameMode[] = [
         config: {
           pattern: 'constellation',
           formations: ['orion', 'cassiopeia', 'ursa']
+        }
+      },
+      {
+        type: 'power-up',
+        name: 'Cosmic Power-Ups',
+        description: 'Collect power-ups for special abilities',
+        config: {
+          types: ['freeze', 'multi-shot', 'chain-lightning', 'score-boost'],
+          spawnChance: 0.3,
+          minInterval: 8000,
+          maxInterval: 15000
         }
       }
     ],

@@ -7,6 +7,8 @@ import { HitFeedback } from '@/components/HitEffects'
 import { TargetParticles } from '@/components/TargetParticles'
 import { EventChallengeProgress } from '@/components/EventChallengeProgress'
 import { EventModeEffects } from '@/components/EventModeEffects'
+import { PowerUp } from '@/components/PowerUp'
+import { ActivePowerUpsDisplay } from '@/components/ActivePowerUpsDisplay'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -27,6 +29,16 @@ import {
   COSMIC_PHYSICS_CONFIG,
   applyImpulse
 } from '@/lib/target-physics'
+import {
+  PowerUp as PowerUpType,
+  ActivePowerUp,
+  shouldSpawnPowerUp,
+  createPowerUp,
+  isPowerUpExpired,
+  isActivePowerUpExpired,
+  getPowerUpModifiers,
+  POWER_UP_CONFIG
+} from '@/lib/power-ups'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -71,6 +83,11 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const isPhysicsMode = eventGameModeId === 'ocean-wave' || eventGameModeId === 'cosmic-gravity'
   const [physicsTargets, setPhysicsTargets] = useState<PhysicsTarget[]>([])
   const physicsAnimationRef = useRef<number | null>(null)
+  
+  const [powerUps, setPowerUps] = useState<PowerUpType[]>([])
+  const [activePowerUps, setActivePowerUps] = useState<ActivePowerUp[]>([])
+  const [lastPowerUpSpawn, setLastPowerUpSpawn] = useState(0)
+  const [multiShotCounter, setMultiShotCounter] = useState(0)
   
   useEffect(() => {
     if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
@@ -171,6 +188,18 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
     let points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
+
+    const powerUpMods = getPowerUpModifiers(activePowerUps)
+    
+    if (powerUpMods.multiShotActive && multiShotCounter > 0) {
+      points *= 2
+      setMultiShotCounter(prev => prev - 1)
+      toast.info(`⚡ Multi-Shot: ${multiShotCounter - 1} left`, { duration: 1000 })
+    }
+    
+    if (powerUpMods.scoreMultiplier > 1) {
+      points *= powerUpMods.scoreMultiplier
+    }
 
     if (eventGameMode) {
       let eventMultiplier = eventGameMode.scoreModifier
@@ -342,9 +371,31 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState, isPhysicsMode, eventGameModeId])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState, isPhysicsMode, eventGameModeId, activePowerUps, multiShotCounter])
 
   const handleMiss = useCallback(async () => {
+    const powerUpMods = getPowerUpModifiers(activePowerUps)
+    
+    if (powerUpMods.hasShield) {
+      setActivePowerUps(prev => prev.filter(p => p.type !== 'shield'))
+      toast.success('🛡️ Shield Protected!', {
+        description: 'Miss absorbed by shield',
+        duration: 2000
+      })
+      soundSystem.play('hit', 0)
+      
+      if (isPhysicsMode) {
+        setPhysicsTargets([])
+      }
+      
+      setGameState(prev => ({
+        ...prev,
+        currentTarget: null,
+        roundTargetsRemaining: prev.roundTargetsRemaining - 1
+      }))
+      return
+    }
+    
     if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
       adaptiveSystemRef.current.recordMiss()
       
@@ -406,7 +457,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [onGameOver, difficultyConfig, useAdaptiveDifficulty, isPhysicsMode])
+  }, [onGameOver, difficultyConfig, useAdaptiveDifficulty, isPhysicsMode, activePowerUps])
 
   const handleStartRound = useCallback(() => {
     soundSystem.play('roundStart')
@@ -416,6 +467,31 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     }))
   }, [])
 
+  const handlePowerUpCollect = useCallback((powerUpId: string) => {
+    const powerUp = powerUps.find(p => p.id === powerUpId)
+    if (!powerUp) return
+
+    setPowerUps(prev => prev.filter(p => p.id !== powerUpId))
+    
+    const newActivePowerUp: ActivePowerUp = {
+      type: powerUp.type,
+      startTime: Date.now(),
+      duration: powerUp.duration
+    }
+    
+    setActivePowerUps(prev => [...prev, newActivePowerUp])
+    
+    if (powerUp.type === 'multi-shot') {
+      setMultiShotCounter(5)
+    }
+    
+    soundSystem.play('combo', 5)
+    toast.success(`${powerUp.icon} ${powerUp.name}!`, {
+      description: powerUp.description,
+      duration: 2000
+    })
+  }, [powerUps])
+
   useEffect(() => {
     if (gameState.phase === 'playing' && !gameState.currentTarget && physicsTargets.length === 0) {
       const timeout = setTimeout(() => {
@@ -424,6 +500,35 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       return () => clearTimeout(timeout)
     }
   }, [gameState.phase, gameState.currentTarget, spawnTarget, physicsTargets.length])
+
+  useEffect(() => {
+    if (!isPhysicsMode || gameState.phase !== 'playing') {
+      return
+    }
+
+    if (containerRef.current && shouldSpawnPowerUp(
+      eventGameModeId as 'ocean-wave' | 'cosmic-gravity',
+      lastPowerUpSpawn,
+      Date.now()
+    )) {
+      const rect = containerRef.current.getBoundingClientRect()
+      const newPowerUp = createPowerUp(
+        eventGameModeId as 'ocean-wave' | 'cosmic-gravity',
+        rect.width,
+        rect.height
+      )
+      setPowerUps(prev => [...prev, newPowerUp])
+      setLastPowerUpSpawn(Date.now())
+    }
+
+    const interval = setInterval(() => {
+      const now = Date.now()
+      setPowerUps(prev => prev.filter(p => !isPowerUpExpired(p, now)))
+      setActivePowerUps(prev => prev.filter(p => !isActivePowerUpExpired(p, now)))
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [isPhysicsMode, gameState.phase, lastPowerUpSpawn, eventGameModeId])
 
   useEffect(() => {
     if (!isPhysicsMode || physicsTargets.length === 0 || gameState.phase !== 'playing') {
@@ -444,15 +549,50 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         height: containerRef.current.clientHeight
       }
 
+      const powerUpMods = getPowerUpModifiers(activePowerUps)
+
       setPhysicsTargets(targets => {
         if (targets.length === 0) return targets
 
         const physicsType = eventGameModeId === 'ocean-wave' ? 'ocean' : 'cosmic'
-        const config = physicsType === 'ocean' ? OCEAN_PHYSICS_CONFIG : COSMIC_PHYSICS_CONFIG
+        let config = physicsType === 'ocean' ? OCEAN_PHYSICS_CONFIG : COSMIC_PHYSICS_CONFIG
 
-        return targets.map(target => 
-          updatePhysicsTarget(target, config, bounds, deltaTime, physicsType)
+        if (powerUpMods.freezeActive) {
+          config = { ...config, friction: 0.95 }
+        }
+
+        if (powerUpMods.timeMultiplier < 1) {
+          config = { ...config, friction: config.friction * 0.98 }
+        }
+
+        let updatedTargets = targets.map(target => 
+          updatePhysicsTarget(target, config, bounds, deltaTime * powerUpMods.timeMultiplier, physicsType)
         )
+
+        if (powerUpMods.magnetActive && updatedTargets.length > 1) {
+          const centerX = bounds.width / 2
+          const centerY = bounds.height / 2
+          
+          updatedTargets = updatedTargets.map(target => {
+            const dx = centerX - target.x
+            const dy = centerY - target.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            
+            if (distance > 50) {
+              const force = 0.3
+              return {
+                ...target,
+                velocity: {
+                  x: target.velocity.x + (dx / distance) * force,
+                  y: target.velocity.y + (dy / distance) * force
+                }
+              }
+            }
+            return target
+          })
+        }
+
+        return updatedTargets
       })
 
       physicsAnimationRef.current = requestAnimationFrame(updatePhysics)
@@ -465,7 +605,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         cancelAnimationFrame(physicsAnimationRef.current)
       }
     }
-  }, [isPhysicsMode, physicsTargets.length, gameState.phase, eventGameModeId])
+  }, [isPhysicsMode, physicsTargets.length, gameState.phase, eventGameModeId, activePowerUps])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -538,6 +678,20 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
             round={gameState.round}
             targetsRemaining={gameState.roundTargetsRemaining}
           />
+
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
+            <ActivePowerUpsDisplay activePowerUps={activePowerUps} />
+          </div>
+
+          <AnimatePresence>
+            {powerUps.map(powerUp => (
+              <PowerUp
+                key={powerUp.id}
+                powerUp={powerUp}
+                onClick={() => handlePowerUpCollect(powerUp.id)}
+              />
+            ))}
+          </AnimatePresence>
 
           <AnimatePresence>
             {gameState.currentTarget && !isPhysicsMode && (
