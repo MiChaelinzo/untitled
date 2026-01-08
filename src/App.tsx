@@ -209,7 +209,7 @@ function App() {
     setPhase('menu')
   }
 
-  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string, useAdaptiveDifficulty?: boolean) => {
+  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string, useAdaptiveDifficulty?: boolean, gameModeId?: string) => {
     setCurrentDifficulty(difficulty)
     setIsPracticeMode(isPractice)
     setActiveChallengeId(challengeId)

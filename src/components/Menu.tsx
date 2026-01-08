@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -20,6 +20,9 @@ import { TournamentPanel } from '@/components/TournamentPanel'
 import { TeamTournamentPanel } from '@/components/TeamTournamentPanel'
 import { RewardsVaultPanel } from '@/components/RewardsVaultPanel'
 import { SeasonalEventsPanel } from '@/components/SeasonalEventsPanel'
+import { SpecialGameModePanel } from '@/components/SpecialGameModePanel'
+import { SpecialGameModeBanner } from '@/components/SpecialGameModeBanner'
+import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
@@ -41,7 +44,7 @@ import { toast } from 'sonner'
 import { PlayerChallengeData } from '@/lib/challenges'
 
 interface MenuProps {
-  onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string, useAdaptiveDifficulty?: boolean) => void
+  onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string, useAdaptiveDifficulty?: boolean, gameModeId?: string) => void
   leaderboard: LeaderboardEntry[]
   stats: PlayerStats
   unlockedAchievements: string[]
@@ -63,6 +66,10 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
   const [mouseTrailEnabled, setMouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
   const [mouseTrailVariant, setMouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
   const [activeTab, setActiveTab] = useState('play')
+  const [showSpecialModeBanner, setShowSpecialModeBanner] = useState(true)
+  const [bannerDismissed, setBannerDismissed] = useKV<boolean>('special-mode-banner-dismissed', false)
+  
+  const activeGameModes = getActiveGameModes(SPECIAL_GAME_MODES)
 
   useEffect(() => {
     if (visualTheme) {
@@ -108,6 +115,20 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {activeGameModes.length > 0 && showSpecialModeBanner && !bannerDismissed && (
+        <SpecialGameModeBanner
+          mode={activeGameModes[0]}
+          onPlayNow={() => {
+            onStartGame(activeGameModes[0].difficulty, false, undefined, false, activeGameModes[0].id)
+            setShowSpecialModeBanner(false)
+          }}
+          onDismiss={() => {
+            setShowSpecialModeBanner(false)
+            setBannerDismissed(true)
+          }}
+        />
+      )}
+      
       <div className="absolute top-4 right-4 z-20 flex gap-2">
         <Select value={soundTheme} onValueChange={handleThemeChange}>
           <SelectTrigger className="w-40 bg-card/50 backdrop-blur border-primary/50">
@@ -170,10 +191,15 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-10 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-11 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
+            </TabsTrigger>
+            <TabsTrigger value="special-modes" className="flex items-center gap-2 relative">
+              <Sparkle size={16} weight="fill" />
+              <span className="hidden sm:inline">Special</span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
             </TabsTrigger>
             <TabsTrigger value="friends" className="flex items-center gap-2">
               <Users size={16} weight="fill" />
@@ -482,6 +508,16 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
 
           <TabsContent value="events" className="space-y-4 mt-6">
             <SeasonalEventsPanel />
+          </TabsContent>
+
+          <TabsContent value="special-modes" className="space-y-4 mt-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkle weight="fill" size={24} className="text-primary" />
+              <h3 className="text-2xl font-bold text-foreground">Special Game Modes</h3>
+            </div>
+            <SpecialGameModePanel 
+              onStartGameMode={(modeId, difficulty) => onStartGame(difficulty, false, undefined, false, modeId)} 
+            />
           </TabsContent>
         </Tabs>
 
