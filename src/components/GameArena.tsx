@@ -18,7 +18,15 @@ import { useKV } from '@github/spark/hooks'
 import { AdaptiveDifficultySystem } from '@/lib/adaptive-difficulty'
 import { toast } from 'sonner'
 import { getActiveEvents, SEASONAL_EVENTS, PlayerEventProgress } from '@/lib/seasonal-events'
-import { EventGameMode, getGameModeById, EventGameModeId } from '@/lib/event-game-modes'
+import { EventGameMode, getGameModeById, EventGameModeId, EventTarget } from '@/lib/event-game-modes'
+import { 
+  PhysicsTarget, 
+  createPhysicsTarget, 
+  updatePhysicsTarget, 
+  OCEAN_PHYSICS_CONFIG, 
+  COSMIC_PHYSICS_CONFIG,
+  applyImpulse
+} from '@/lib/target-physics'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -59,6 +67,10 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     frozenTargets: new Set(),
     visibilityStates: new Map()
   })
+  
+  const isPhysicsMode = eventGameModeId === 'ocean-wave' || eventGameModeId === 'cosmic-gravity'
+  const [physicsTargets, setPhysicsTargets] = useState<PhysicsTarget[]>([])
+  const physicsAnimationRef = useRef<number | null>(null)
   
   useEffect(() => {
     if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
@@ -136,11 +148,25 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     
     const target = generateRandomTarget(rect.width, rect.height, duration, targetSize)
 
-    setGameState(prev => ({
-      ...prev,
-      currentTarget: target
-    }))
-  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, gameState.currentTarget])
+    if (isPhysicsMode && (eventGameModeId === 'ocean-wave' || eventGameModeId === 'cosmic-gravity')) {
+      const eventTarget: EventTarget = {
+        ...target,
+        type: 'normal',
+        velocity: { x: 0, y: 0 }
+      }
+      
+      const physicsType = eventGameModeId === 'ocean-wave' ? 'ocean' : 'cosmic'
+      const config = physicsType === 'ocean' ? OCEAN_PHYSICS_CONFIG : COSMIC_PHYSICS_CONFIG
+      const physicsTarget = createPhysicsTarget(eventTarget, config, physicsType)
+      
+      setPhysicsTargets([physicsTarget])
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        currentTarget: target
+      }))
+    }
+  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, gameState.currentTarget, isPhysicsMode, eventGameModeId])
 
   const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
@@ -256,6 +282,18 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
           y: target.y
         }
       ])
+      
+      if (isPhysicsMode && eventGameModeId === 'cosmic-gravity') {
+        setPhysicsTargets(targets => 
+          targets.map(t => 
+            applyImpulse(t, { x: 3, y: 3 }, { x: target.x, y: target.y })
+          )
+        )
+      }
+    }
+
+    if (isPhysicsMode) {
+      setPhysicsTargets([])
     }
 
     setGameState(prev => {
@@ -304,7 +342,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState, isPhysicsMode, eventGameModeId])
 
   const handleMiss = useCallback(async () => {
     if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
@@ -326,6 +364,10 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     }
     
     soundSystem.play('miss')
+    
+    if (isPhysicsMode) {
+      setPhysicsTargets([])
+    }
     
     setGameState(prev => {
       const newTargetsRemaining = prev.roundTargetsRemaining - 1
@@ -364,7 +406,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [onGameOver, difficultyConfig, useAdaptiveDifficulty])
+  }, [onGameOver, difficultyConfig, useAdaptiveDifficulty, isPhysicsMode])
 
   const handleStartRound = useCallback(() => {
     soundSystem.play('roundStart')
@@ -375,13 +417,55 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   }, [])
 
   useEffect(() => {
-    if (gameState.phase === 'playing' && !gameState.currentTarget) {
+    if (gameState.phase === 'playing' && !gameState.currentTarget && physicsTargets.length === 0) {
       const timeout = setTimeout(() => {
         spawnTarget()
       }, 500)
       return () => clearTimeout(timeout)
     }
-  }, [gameState.phase, gameState.currentTarget, spawnTarget])
+  }, [gameState.phase, gameState.currentTarget, spawnTarget, physicsTargets.length])
+
+  useEffect(() => {
+    if (!isPhysicsMode || physicsTargets.length === 0 || gameState.phase !== 'playing') {
+      return
+    }
+
+    let lastTime = Date.now()
+    
+    const updatePhysics = () => {
+      const now = Date.now()
+      const deltaTime = now - lastTime
+      lastTime = now
+
+      if (!containerRef.current) return
+
+      const bounds = {
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight
+      }
+
+      setPhysicsTargets(targets => {
+        if (targets.length === 0) return targets
+
+        const physicsType = eventGameModeId === 'ocean-wave' ? 'ocean' : 'cosmic'
+        const config = physicsType === 'ocean' ? OCEAN_PHYSICS_CONFIG : COSMIC_PHYSICS_CONFIG
+
+        return targets.map(target => 
+          updatePhysicsTarget(target, config, bounds, deltaTime, physicsType)
+        )
+      })
+
+      physicsAnimationRef.current = requestAnimationFrame(updatePhysics)
+    }
+
+    physicsAnimationRef.current = requestAnimationFrame(updatePhysics)
+
+    return () => {
+      if (physicsAnimationRef.current) {
+        cancelAnimationFrame(physicsAnimationRef.current)
+      }
+    }
+  }, [isPhysicsMode, physicsTargets.length, gameState.phase, eventGameModeId])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -456,7 +540,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
           />
 
           <AnimatePresence>
-            {gameState.currentTarget && (
+            {gameState.currentTarget && !isPhysicsMode && (
               <Target
                 key={gameState.currentTarget.id}
                 target={gameState.currentTarget}
@@ -466,6 +550,16 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
                 skin={targetSkin || 'default'}
               />
             )}
+            {isPhysicsMode && physicsTargets.map(physicsTarget => (
+              <Target
+                key={physicsTarget.id}
+                target={physicsTarget}
+                onHit={handleHit}
+                onMiss={handleMiss}
+                size={config.targetSize}
+                skin={targetSkin || 'default'}
+              />
+            ))}
           </AnimatePresence>
 
           {effects.map(effect => (

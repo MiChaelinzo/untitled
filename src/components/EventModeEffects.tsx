@@ -293,10 +293,100 @@ export function EventModeEffects({ eventGameMode }: EventModeEffectsProps) {
     }
   }
 
+  const getBackgroundEffect = () => {
+    const bgEffect = eventGameMode.visualEffects.find(ve => ve.type === 'background')
+    if (!bgEffect) return null
+
+    switch (bgEffect.effect) {
+      case 'water-ripple':
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(ellipse at 30% 50%, ${bgEffect.color || 'oklch(0.75 0.18 180)'}${Math.round(bgEffect.intensity * 30)}%, transparent 50%), radial-gradient(ellipse at 70% 60%, ${bgEffect.color || 'oklch(0.75 0.18 180)'}${Math.round(bgEffect.intensity * 25)}%, transparent 50%)`,
+              }}
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+            {Array.from({ length: 8 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full border-2"
+                style={{
+                  left: `${20 + Math.random() * 60}%`,
+                  top: `${20 + Math.random() * 60}%`,
+                  width: 100,
+                  height: 100,
+                  borderColor: `${bgEffect.color || 'oklch(0.75 0.18 180)'}40`,
+                }}
+                animate={{
+                  scale: [0, 2.5],
+                  opacity: [0.6, 0],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 3,
+                  ease: 'easeOut',
+                }}
+              />
+            ))}
+          </div>
+        )
+
+      case 'nebula':
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(ellipse at 20% 30%, ${bgEffect.color || 'oklch(0.75 0.18 60)'}${Math.round(bgEffect.intensity * 25)}%, transparent 60%), radial-gradient(ellipse at 80% 70%, oklch(0.68 0.22 290)${Math.round(bgEffect.intensity * 20)}%, transparent 50%), radial-gradient(ellipse at 50% 50%, oklch(0.65 0.18 200)${Math.round(bgEffect.intensity * 15)}%, transparent 70%)`,
+                filter: 'blur(40px)',
+              }}
+              animate={{
+                opacity: [0.6, 0.9, 0.6],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+          </div>
+        )
+
+      case 'grid':
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `linear-gradient(${bgEffect.color || 'oklch(0.75 0.18 195)'}20 1px, transparent 1px), linear-gradient(90deg, ${bgEffect.color || 'oklch(0.75 0.18 195)'}20 1px, transparent 1px)`,
+                backgroundSize: '50px 50px',
+                opacity: bgEffect.intensity,
+              }}
+            />
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
   return (
     <>
       {getParticleEffect()}
       {getScreenEffect()}
+      {getBackgroundEffect()}
     </>
   )
 }

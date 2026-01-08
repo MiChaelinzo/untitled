@@ -212,13 +212,16 @@ export function Target({ target, onHit, onMiss, size = 80, skin = 'default' }: T
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ 
+        scale: 1, 
+        opacity: 1,
+        left: target.x - size / 2,
+        top: target.y - size / 2
+      }}
       exit={{ scale: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'backOut' }}
       className="absolute cursor-pointer z-0"
       style={{
-        left: target.x - size / 2,
-        top: target.y - size / 2,
         width: size,
         height: size
       }}
