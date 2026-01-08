@@ -8,6 +8,7 @@ import { GameOver } from '@/components/GameOver'
 import { AchievementToast } from '@/components/AchievementToast'
 import { UnlockNotification } from '@/components/UnlockNotification'
 import { EventNotificationBanner } from '@/components/EventNotificationBanner'
+import { DailyBonusNotification } from '@/components/DailyBonusNotification'
 import { Login } from '@/components/Login'
 import { DynamicBackground } from '@/components/DynamicBackground'
 import { MouseTrail } from '@/components/MouseTrail'
@@ -141,6 +142,8 @@ function App() {
   const [customDifficulties, setCustomDifficulties] = useKV<CustomDifficulty[]>('custom-difficulties', [])
   const [recentActions, setRecentActions] = useKV<string[]>('recent-actions', [])
   const [userCountryCode, setUserCountryCode] = useKV<string | null>('user-country-code', null)
+  const [showDailyBonus, setShowDailyBonus] = useState(false)
+  const [dailyBonusShown, setDailyBonusShown] = useKV<string>('daily-bonus-shown', '')
 
   useEffect(() => {
     if (soundTheme) soundSystem.setTheme(soundTheme)
@@ -165,7 +168,20 @@ function App() {
 
   useEffect(() => {
     if (phase === 'menu') {
-      setDailyStreak(current => updateStreak(current || DEFAULT_STREAK))
+      const previousStreak = dailyStreak?.currentStreak || 0
+      setDailyStreak(current => {
+        const updated = updateStreak(current || DEFAULT_STREAK)
+        
+        const today = new Date().toDateString()
+        if (dailyBonusShown !== today && updated.currentStreak > 0) {
+          setTimeout(() => {
+            setShowDailyBonus(true)
+            setDailyBonusShown(today)
+          }, 1000)
+        }
+        
+        return updated
+      })
     }
   }, [phase, setDailyStreak])
 
@@ -673,6 +689,10 @@ function App() {
     setUnlockQueue(current => current.slice(1))
   }
 
+  const handleViewRewards = () => {
+    setShowDailyBonus(false)
+  }
+
   return (
     <>
       <DynamicBackground variant={backgroundVariant || 'particles'} />
@@ -683,6 +703,16 @@ function App() {
       />
       <Toaster theme="dark" position="top-center" />
       
+      <AnimatePresence>
+        {showDailyBonus && dailyStreak && phase === 'menu' && (
+          <DailyBonusNotification
+            streak={dailyStreak}
+            onDismiss={() => setShowDailyBonus(false)}
+            onViewRewards={handleViewRewards}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {achievementQueue.length > 0 && (
           <AchievementToast

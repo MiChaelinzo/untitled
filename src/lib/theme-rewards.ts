@@ -511,6 +511,81 @@ export const THEME_UNLOCKABLES: ThemeUnlockable[] = [
     rarity: 'epic',
     glowColor: 'oklch(0.75 0.18 195)',
     requirement: { type: 'perfect-rounds', target: 15 }
+  },
+  {
+    id: 'title-dedicated',
+    type: 'title',
+    name: 'Dedicated',
+    description: 'Earned from 5-day streak',
+    icon: '🔥',
+    rarity: 'rare',
+    glowColor: 'oklch(0.70 0.24 30)',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'badge-weekly-warrior',
+    type: 'profile-badge',
+    name: 'Weekly Warrior',
+    description: 'Maintained a 7-day streak',
+    icon: '👑',
+    rarity: 'epic',
+    glowColor: 'oklch(0.75 0.20 45)',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'skin-streak-champion',
+    type: 'target-skin',
+    name: 'Flame Champion',
+    description: 'Blazing target from 14-day streak',
+    icon: '🔥',
+    rarity: 'epic',
+    glowColor: 'oklch(0.70 0.25 30)',
+    value: 'streak-champion',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'trail-streak-flame',
+    type: 'mouse-trail',
+    name: 'Flame Trail',
+    description: 'Fiery trail from 21-day streak',
+    icon: '🔥',
+    rarity: 'legendary',
+    glowColor: 'oklch(0.70 0.25 30)',
+    value: 'streak-flame',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'visual-streak-master',
+    type: 'visual-theme',
+    name: 'Streak Master',
+    description: 'Legendary theme from 30-day streak',
+    icon: '🌟',
+    rarity: 'legendary',
+    glowColor: 'oklch(0.75 0.20 60)',
+    value: 'streak-master',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'bg-streak-unstoppable',
+    type: 'background',
+    name: 'Unstoppable Force',
+    description: 'Epic background from 50-day streak',
+    icon: '🔱',
+    rarity: 'legendary',
+    glowColor: 'oklch(0.68 0.22 270)',
+    value: 'streak-unstoppable',
+    requirement: { type: 'level', target: 1 }
+  },
+  {
+    id: 'bundle-century',
+    type: 'visual-theme',
+    name: 'Century Bundle',
+    description: 'Ultimate rewards from 100-day streak',
+    icon: '👑',
+    rarity: 'mythic',
+    glowColor: 'oklch(0.75 0.20 60)',
+    value: 'century',
+    requirement: { type: 'level', target: 1 }
   }
 ]
 
