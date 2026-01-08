@@ -8,6 +8,14 @@ export interface ShareContent {
 }
 
 export function generateBadgeShareText(badge: TimeLimitedBadge, playerName?: string): ShareContent {
+  if (!badge || !badge.name) {
+    return {
+      text: 'I earned a new badge in C9 Reflex Arena!',
+      hashtags: ['Cloud9', 'ReflexArena', 'Gaming'],
+      url: window.location.origin
+    }
+  }
+
   const rarityEmoji = {
     common: '🥉',
     rare: '🥈',
@@ -16,8 +24,11 @@ export function generateBadgeShareText(badge: TimeLimitedBadge, playerName?: str
   }
 
   const playerPrefix = playerName ? `${playerName} earned` : 'I earned'
+  const emoji = rarityEmoji[badge.rarity] || '🏆'
+  const icon = badge.icon || '🎯'
+  const description = badge.description || 'Special achievement unlocked'
   
-  const text = `${playerPrefix} the ${rarityEmoji[badge.rarity]} ${badge.name} badge in C9 Reflex Arena! ${badge.icon}\n\n${badge.description}\n\nThink you can beat this? Play now!`
+  const text = `${playerPrefix} the ${emoji} ${badge.name} badge in C9 Reflex Arena! ${icon}\n\n${description}\n\nThink you can beat this? Play now!`
   
   return {
     text,

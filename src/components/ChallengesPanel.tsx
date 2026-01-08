@@ -186,7 +186,7 @@ export function ChallengesPanel({ challengeData, onClaimReward }: ChallengesPane
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <AnimatePresence>
-                  {activeBadges.map(badge => (
+                  {activeBadges.filter(badge => badge && badge.id && badge.name).map(badge => (
                     <BadgeDisplay key={badge.id} badge={badge} />
                   ))}
                 </AnimatePresence>

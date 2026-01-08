@@ -192,7 +192,11 @@ const RARITY_STYLES = {
 }
 
 export function BadgeDisplay({ badge, isNew }: BadgeDisplayProps) {
-  const rarityStyle = RARITY_STYLES[badge.rarity]
+  if (!badge || !badge.name || !badge.rarity) {
+    return null
+  }
+
+  const rarityStyle = RARITY_STYLES[badge.rarity] || RARITY_STYLES.common
   const timeRemaining = badge.expiresAt - Date.now()
   const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24))
   const isExpiringSoon = daysRemaining < 3
@@ -211,9 +215,9 @@ export function BadgeDisplay({ badge, isNew }: BadgeDisplayProps) {
           boxShadow: `0 0 20px ${badge.glowColor || rarityStyle.glow}40`
         }}
       >
-        <div className="text-4xl mb-2">{badge.icon}</div>
+        <div className="text-4xl mb-2">{badge.icon || '🏆'}</div>
         <h4 className="font-bold text-sm mb-1">{badge.name}</h4>
-        <p className="text-xs text-muted-foreground mb-2">{badge.description}</p>
+        <p className="text-xs text-muted-foreground mb-2">{badge.description || 'Achievement badge'}</p>
         <Badge variant="outline" className={`text-xs ${rarityStyle.text} ${rarityStyle.border}`}>
           {badge.rarity.toUpperCase()}
         </Badge>

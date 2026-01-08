@@ -609,10 +609,10 @@ function App() {
       
       updated.level = calculateLevel(updated.currentXP)
       
-      if (challenge.reward.badge) {
+      if (challenge.reward.badge && challenge.reward.badge.name) {
         updated.earnedBadges = [...updated.earnedBadges, challenge.reward.badge]
         toast.success(`Badge Earned: ${challenge.reward.badge.name}!`, {
-          description: challenge.reward.badge.description
+          description: challenge.reward.badge.description || 'New badge unlocked'
         })
       }
       

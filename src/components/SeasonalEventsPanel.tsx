@@ -72,6 +72,11 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
   }
 
   const claimReward = (challenge: EventChallenge, eventId: string) => {
+    if (!challenge || !challenge.reward) {
+      toast.error('Invalid challenge or reward')
+      return
+    }
+
     const progress = getEventProgress(eventId)
     
     if (progress.completedChallenges.includes(challenge.id)) {
@@ -84,9 +89,9 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
           }
         }))
         
-        toast.success(`Reward Claimed: ${challenge.reward.name}!`, {
-          description: challenge.reward.description,
-          icon: challenge.reward.icon
+        toast.success(`Reward Claimed: ${challenge.reward.name || 'Reward'}!`, {
+          description: challenge.reward.description || 'New reward unlocked',
+          icon: challenge.reward.icon || '🎁'
         })
       } else {
         toast.info('Reward already claimed')
@@ -297,7 +302,7 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                       <TabsContent value="challenges" className="mt-6">
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="space-y-4">
-                            {selectedEvent.challenges.map(challenge => {
+                            {selectedEvent.challenges.filter(challenge => challenge && challenge.reward).map(challenge => {
                               const { isComplete, progress, target } = getChallengeProgress(
                                 challenge,
                                 selectedEvent.id
@@ -360,18 +365,20 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                         <div className="flex items-center gap-2">
                                           <Lightning className="w-4 h-4 text-cyan" />
                                           <span className="text-sm font-semibold">
-                                            {challenge.reward.name}
+                                            {challenge.reward?.name || 'Reward'}
                                           </span>
-                                          <Badge 
-                                            variant="outline"
-                                            className="text-xs"
-                                            style={{ 
-                                              borderColor: challenge.reward.glowColor,
-                                              color: challenge.reward.glowColor
-                                            }}
-                                          >
-                                            {challenge.reward.rarity}
-                                          </Badge>
+                                          {challenge.reward?.rarity && (
+                                            <Badge 
+                                              variant="outline"
+                                              className="text-xs"
+                                              style={{ 
+                                                borderColor: challenge.reward.glowColor,
+                                                color: challenge.reward.glowColor
+                                              }}
+                                            >
+                                              {challenge.reward.rarity}
+                                            </Badge>
+                                          )}
                                         </div>
                                         <Button
                                           size="sm"
@@ -393,7 +400,7 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                       <TabsContent value="rewards" className="mt-6">
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {selectedEvent.challenges.map(challenge => {
+                            {selectedEvent.challenges.filter(challenge => challenge && challenge.reward).map(challenge => {
                               const hasEarned = getEventProgress(selectedEvent.id)
                                 .earnedRewards.includes(challenge.reward.id)
                               
@@ -414,26 +421,30 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                       </Badge>
                                     </div>
                                   )}
-                                  <div className="text-4xl mb-3">{challenge.reward.icon}</div>
-                                  <h4 className="font-semibold mb-1">{challenge.reward.name}</h4>
+                                  <div className="text-4xl mb-3">{challenge.reward?.icon || '🎁'}</div>
+                                  <h4 className="font-semibold mb-1">{challenge.reward?.name || 'Reward'}</h4>
                                   <p className="text-xs text-muted-foreground mb-3">
-                                    {challenge.reward.description}
+                                    {challenge.reward?.description || 'Special reward'}
                                   </p>
                                   <div className="flex items-center gap-2">
-                                    <Badge 
-                                      variant="outline"
-                                      style={{ 
-                                        borderColor: challenge.reward.glowColor,
-                                        color: challenge.reward.glowColor
-                                      }}
-                                    >
-                                      {challenge.reward.rarity}
-                                    </Badge>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {challenge.reward.type}
-                                    </Badge>
+                                    {challenge.reward?.rarity && (
+                                      <Badge 
+                                        variant="outline"
+                                        style={{ 
+                                          borderColor: challenge.reward.glowColor,
+                                          color: challenge.reward.glowColor
+                                        }}
+                                      >
+                                        {challenge.reward.rarity}
+                                      </Badge>
+                                    )}
+                                    {challenge.reward?.type && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {challenge.reward.type}
+                                      </Badge>
+                                    )}
                                   </div>
-                                  {challenge.reward.isPermanent && (
+                                  {challenge.reward?.isPermanent && (
                                     <div className="mt-2">
                                       <Badge variant="outline" className="text-xs">
                                         <Star className="w-3 h-3 mr-1" />

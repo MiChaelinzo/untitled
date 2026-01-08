@@ -376,7 +376,8 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                     onSelectCountry={(countryCode) => {
                       setFilter({ ...filter, country: countryCode })
                       setActiveTab('global')
-                      toast.success(`Filtering by ${COUNTRIES.find(c => c.code === countryCode)?.name}`)
+                      const country = COUNTRIES.find(c => c.code === countryCode)
+                      toast.success(`Filtering by ${country?.name || 'selected country'}`)
                     }}
                   />
                 </TabsContent>
