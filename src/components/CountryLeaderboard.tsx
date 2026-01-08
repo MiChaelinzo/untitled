@@ -64,8 +64,12 @@ export function CountryLeaderboard({ leaderboard, onSelectCountry }: CountryLead
       const country = COUNTRIES.find(c => c.code === countryCode)
       if (!country) return
 
-      const averageScore = stats.scores.reduce((sum, s) => sum + s, 0) / stats.scores.length
-      const averageAccuracy = stats.accuracies.reduce((sum, a) => sum + a, 0) / stats.accuracies.length
+      const averageScore = stats.scores.length > 0 
+        ? stats.scores.reduce((sum, s) => sum + s, 0) / stats.scores.length 
+        : 0
+      const averageAccuracy = stats.accuracies.length > 0 
+        ? stats.accuracies.reduce((sum, a) => sum + a, 0) / stats.accuracies.length 
+        : 0
 
       countryStatsArray.push({
         countryCode,

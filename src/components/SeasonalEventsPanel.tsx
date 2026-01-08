@@ -308,8 +308,9 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                 selectedEvent.id
                               )
                               const progressPercent = (progress / target) * 100
-                              const hasClaimedReward = getEventProgress(selectedEvent.id)
-                                .earnedRewards.includes(challenge.reward.id)
+                              const hasClaimedReward = challenge.reward?.id 
+                                ? getEventProgress(selectedEvent.id).earnedRewards.includes(challenge.reward.id)
+                                : false
 
                               return (
                                 <Card 
@@ -367,7 +368,7 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                           <span className="text-sm font-semibold">
                                             {challenge.reward?.name || 'Reward'}
                                           </span>
-                                          {challenge.reward?.rarity && (
+                                          {challenge.reward?.rarity && challenge.reward?.glowColor && (
                                             <Badge 
                                               variant="outline"
                                               className="text-xs"
@@ -401,15 +402,16 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {selectedEvent.challenges.filter(challenge => challenge && challenge.reward).map(challenge => {
-                              const hasEarned = getEventProgress(selectedEvent.id)
-                                .earnedRewards.includes(challenge.reward.id)
+                              const hasEarned = challenge.reward?.id 
+                                ? getEventProgress(selectedEvent.id).earnedRewards.includes(challenge.reward.id)
+                                : false
                               
                               return (
                                 <Card 
-                                  key={challenge.reward.id}
+                                  key={challenge.reward?.id || challenge.id}
                                   className="p-4 relative overflow-hidden"
                                   style={{
-                                    boxShadow: hasEarned 
+                                    boxShadow: hasEarned && challenge.reward?.glowColor
                                       ? `0 0 20px color-mix(in oklch, ${challenge.reward.glowColor} 50%, transparent)`
                                       : 'none'
                                   }}
@@ -427,7 +429,7 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                     {challenge.reward?.description || 'Special reward'}
                                   </p>
                                   <div className="flex items-center gap-2">
-                                    {challenge.reward?.rarity && (
+                                    {challenge.reward?.rarity && challenge.reward?.glowColor && (
                                       <Badge 
                                         variant="outline"
                                         style={{ 
