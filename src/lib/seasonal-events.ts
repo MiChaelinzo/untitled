@@ -114,11 +114,140 @@ export interface PlayerEventProgress {
   completedChallenges: string[]
   earnedRewards: string[]
   eventScore: number
+  challengeProgress?: Record<string, number>
   leaderboardRank?: number
   lastUpdated: number
 }
 
 export const SEASONAL_EVENTS: SeasonalEvent[] = [
+  {
+    id: 'test-event-2025',
+    type: 'championship',
+    name: '🎮 Test Championship',
+    description: 'Test your skills and earn exclusive rewards!',
+    icon: '⚡',
+    theme: {
+      primaryColor: 'oklch(0.65 0.24 240)',
+      accentColor: 'oklch(0.75 0.18 195)',
+      backgroundColor: 'oklch(0.15 0.02 240)',
+      particleEffect: 'stars'
+    },
+    startDate: new Date('2025-01-01').getTime(),
+    endDate: new Date('2025-12-31').getTime(),
+    isActive: true,
+    challenges: [
+      {
+        id: 'test-score-100',
+        eventId: 'test-event-2025',
+        name: 'Quick Start',
+        description: 'Score 100 points in any game',
+        icon: '🎯',
+        tier: 'bronze',
+        requirement: { type: 'score', target: 100 },
+        reward: {
+          id: 'test-bronze-badge',
+          name: 'Quick Start Badge',
+          description: 'You started the journey!',
+          icon: '🥉',
+          type: 'badge',
+          rarity: 'limited',
+          glowColor: 'oklch(0.55 0.18 35)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'test-targets-50',
+        eventId: 'test-event-2025',
+        name: 'Target Practice',
+        description: 'Hit 50 targets across all games',
+        icon: '🎪',
+        tier: 'silver',
+        requirement: { type: 'targets', target: 50 },
+        reward: {
+          id: 'test-silver-badge',
+          name: 'Sharpshooter Badge',
+          description: 'Your aim is improving!',
+          icon: '🥈',
+          type: 'badge',
+          rarity: 'limited',
+          glowColor: 'oklch(0.70 0.08 240)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'test-combo-10',
+        eventId: 'test-event-2025',
+        name: 'Combo Master',
+        description: 'Achieve a 10x combo',
+        icon: '⚡',
+        tier: 'gold',
+        requirement: { type: 'combo', target: 10 },
+        reward: {
+          id: 'test-gold-badge',
+          name: 'Combo Master Badge',
+          description: 'You got the rhythm!',
+          icon: '🥇',
+          type: 'badge',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.75 0.22 60)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'test-games-3',
+        eventId: 'test-event-2025',
+        name: 'Persistent Player',
+        description: 'Complete 3 games during the event',
+        icon: '🎮',
+        tier: 'silver',
+        requirement: { type: 'games', target: 3 },
+        reward: {
+          id: 'test-persistence-badge',
+          name: 'Persistence Badge',
+          description: 'Keep going!',
+          icon: '💪',
+          type: 'badge',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.70 0.08 240)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'test-perfect-1',
+        eventId: 'test-event-2025',
+        name: 'Perfect Round',
+        description: 'Complete 1 perfect round',
+        icon: '✨',
+        tier: 'platinum',
+        requirement: { type: 'perfect', target: 1 },
+        reward: {
+          id: 'test-perfect-badge',
+          name: 'Perfectionist Badge',
+          description: 'Flawless execution!',
+          icon: '💎',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.78 0.15 220)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'test-modifier',
+      name: 'Championship Mode',
+      description: 'Bonus points and effects',
+      effects: {
+        scoreMultiplier: 1.2,
+        particleEffects: ['stars', 'sparkles']
+      }
+    }
+  },
   {
     id: 'winter-wonderland-2024',
     type: 'winter-holiday',
@@ -723,6 +852,7 @@ export function getEventProgress(
     completedChallenges: [],
     earnedRewards: [],
     eventScore: 0,
+    challengeProgress: {},
     lastUpdated: Date.now()
   }
 }

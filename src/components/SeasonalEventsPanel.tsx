@@ -57,6 +57,7 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
       completedChallenges: [],
       earnedRewards: [],
       eventScore: 0,
+      challengeProgress: {},
       lastUpdated: Date.now()
     }
   }
@@ -64,9 +65,10 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
   const getChallengeProgress = (challenge: EventChallenge, eventId: string) => {
     const progress = getEventProgress(eventId)
     const isComplete = progress.completedChallenges.includes(challenge.id)
+    const currentProgress = (progress.challengeProgress || {})[challenge.id] || 0
     return {
       isComplete,
-      progress: isComplete ? challenge.requirement.target : 0,
+      progress: isComplete ? challenge.requirement.target : currentProgress,
       target: challenge.requirement.target
     }
   }

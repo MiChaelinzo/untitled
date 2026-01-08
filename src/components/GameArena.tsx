@@ -5,6 +5,7 @@ import { GameHUD } from '@/components/GameHUD'
 import { RoundTransition } from '@/components/RoundTransition'
 import { HitFeedback } from '@/components/HitEffects'
 import { TargetParticles } from '@/components/TargetParticles'
+import { EventChallengeProgress } from '@/components/EventChallengeProgress'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -15,6 +16,7 @@ import { TargetSkin } from '@/lib/target-skins'
 import { useKV } from '@github/spark/hooks'
 import { AdaptiveDifficultySystem } from '@/lib/adaptive-difficulty'
 import { toast } from 'sonner'
+import { getActiveEvents, SEASONAL_EVENTS, PlayerEventProgress } from '@/lib/seasonal-events'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -40,6 +42,11 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const adaptiveSystemRef = useRef<AdaptiveDifficultySystem | null>(null)
   const [showAdaptiveIndicator, setShowAdaptiveIndicator] = useState(false)
   const [lastAdjustmentDirection, setLastAdjustmentDirection] = useState<'easier' | 'harder' | 'maintain'>('maintain')
+  const [eventProgress] = useKV<Record<string, PlayerEventProgress>>('event-progress', {})
+  
+  const activeEvents = getActiveEvents(SEASONAL_EVENTS)
+  const currentEvent = activeEvents.length > 0 ? activeEvents[0] : null
+  const currentEventProgress = currentEvent ? eventProgress?.[currentEvent.id] : undefined
   
   useEffect(() => {
     if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
@@ -361,6 +368,15 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
           round={gameState.round}
           roundName={config.name}
           onContinue={handleStartRound}
+        />
+      )}
+
+      {currentEvent && currentEventProgress && !isPractice && gameState.phase === 'playing' && (
+        <EventChallengeProgress
+          challenges={currentEvent.challenges}
+          progress={currentEventProgress.challengeProgress || {}}
+          completedChallenges={currentEventProgress.completedChallenges || []}
+          isVisible={true}
         />
       )}
 

@@ -134,7 +134,7 @@ function App() {
 
   const [eventProgress, setEventProgress] = useKV<Record<string, PlayerEventProgress>>('event-progress', {})
   const [showEventBanner, setShowEventBanner] = useState(false)
-  const [eventBannerDismissed, setEventBannerDismissed] = useKV<boolean>('event-banner-dismissed', false)
+  const [dismissedEventBanners, setDismissedEventBanners] = useKV<string[]>('dismissed-event-banners', [])
 
   const [globalStats, setGlobalStats] = useKV<GlobalStats>('global-stats', DEFAULT_GLOBAL_STATS)
   const [gameSessions, setGameSessions] = useKV<GameSession[]>('game-sessions', [])
@@ -161,10 +161,14 @@ function App() {
 
   useEffect(() => {
     const activeEvents = getActiveEvents(SEASONAL_EVENTS)
-    if (activeEvents.length > 0 && !eventBannerDismissed && phase === 'menu') {
-      setShowEventBanner(true)
+    if (activeEvents.length > 0 && phase === 'menu') {
+      const firstActiveEvent = activeEvents[0]
+      const isDismissed = (dismissedEventBanners || []).includes(firstActiveEvent.id)
+      if (!isDismissed) {
+        setShowEventBanner(true)
+      }
     }
-  }, [phase, eventBannerDismissed])
+  }, [phase, dismissedEventBanners])
 
   useEffect(() => {
     if (phase === 'menu') {
@@ -535,10 +539,15 @@ function App() {
             completedChallenges: [],
             earnedRewards: [],
             eventScore: 0,
+            challengeProgress: {},
             lastUpdated: Date.now()
           }
           
           eventData.eventScore += score
+          
+          if (!eventData.challengeProgress) {
+            eventData.challengeProgress = {}
+          }
           
           event.challenges.forEach(challenge => {
             if (!eventData.completedChallenges.includes(challenge.id)) {
@@ -550,14 +559,18 @@ function App() {
                 perfectRounds: isPerfectRound ? 1 : 0
               }
               
-              const challengeKey = `${event.id}-${challenge.id}`
-              const currentProgress = (current || {})[event.id]?.eventScore || 0
+              const currentProgress = (eventData.challengeProgress || {})[challenge.id] || 0
               
               const { progress, isComplete } = checkEventChallengeProgress(
                 challenge,
                 gameData,
                 currentProgress
               )
+              
+              if (!eventData.challengeProgress) {
+                eventData.challengeProgress = {}
+              }
+              eventData.challengeProgress[challenge.id] = progress
               
               if (isComplete && !eventData.completedChallenges.includes(challenge.id)) {
                 eventData.completedChallenges.push(challenge.id)
@@ -736,8 +749,11 @@ function App() {
           <EventNotificationBanner
             event={getActiveEvents(SEASONAL_EVENTS)[0]}
             onViewEvent={() => {
+              const eventId = getActiveEvents(SEASONAL_EVENTS)[0]?.id
+              if (eventId) {
+                setDismissedEventBanners(current => [...(current || []), eventId])
+              }
               setShowEventBanner(false)
-              setEventBannerDismissed(true)
             }}
           />
         )}
