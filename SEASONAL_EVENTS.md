@@ -41,8 +41,15 @@ Added a comprehensive seasonal and event-exclusive limited-time rewards system t
 Each event has a unique visual identity:
 - **Winter Wonderland**: Icy blue colors, snowflake particles, frost effects
 - **Lunar New Year**: Golden reds, firework particles, prosperity theme
+- **Valentines Heartbreaker**: Pink and red, heart particles, romantic theme
+- **Spring Bloom Festival**: Green and pink, leaf particles, nature theme
+- **Cosmic Voyage**: Purple and gold, star particles, space exploration theme
+- **Neon Nights**: Magenta and cyan, sparkle particles, cyberpunk theme
+- **Ocean Odyssey**: Blue and teal, sparkle particles, underwater theme
 - **Summer Championship**: Golden yellows, star particles, competitive theme
+- **Arcade Legends**: Purple and yellow, sparkle particles, retro gaming theme
 - **Halloween Spooktacular**: Orange and purple, flame particles, spooky theme
+- **Cyber Week Blitz**: Red and purple, sparkle particles, high-speed theme
 - **Cloud9 Anniversary**: C9 blue and cyan, confetti, celebration theme
 - **Esports Worlds**: Championship gold and purple, star particles, elite theme
 
@@ -131,29 +138,61 @@ interface EventReward {
 
 ## Current Event Calendar (2024-2025)
 
-1. **Winter Wonderland** (Dec 15, 2024 - Jan 7, 2025)
+1. **Test Championship** (Jan 1 - Dec 31, 2025)
+   - 5 challenges: Quick Start, Target Practice, Combo Master, Persistent Player, Perfect Round
+   - Rewards: Multiple badges for testing and progression
+
+2. **Winter Wonderland** (Dec 15, 2024 - Jan 7, 2025)
    - 3 challenges: Frost Master, Snowflake Collector, Blizzard Combo
    - Rewards: Frost Trail, Snowman Badge, Blizzard King title
 
-2. **Lunar New Year** (Jan 29 - Feb 12, 2025)
+3. **Lunar New Year** (Jan 29 - Feb 12, 2025)
    - 2 challenges: Golden Dragon, Prosperity Bringer
    - Rewards: Dragon Target Skin, Fortune Badge
 
-3. **Summer Championship** (Jul 1 - Aug 31, 2024)
+4. **Valentines Heartbreaker** (Feb 8-16, 2025)
+   - 3 challenges: Cupid Master, Lovebirds, Heartbreaker
+   - Rewards: Cupid's Bow Trail, Lovebird Badge, Heartbreaker title
+
+5. **Spring Bloom Festival** (Mar 20 - Apr 5, 2025)
+   - 3 challenges: Garden Master, Butterfly Chaser, Spring Renewal
+   - Rewards: Blooming Garden Skin, Butterfly Badge, Nature's Champion title
+
+6. **Cosmic Voyage** (Apr 12-26, 2025)
+   - 3 challenges: Elite Astronaut, Cosmic Explorer, Supernova
+   - Rewards: Galactic Target Skin, Starfarer Badge, Cosmic Entity title
+
+7. **Neon Nights** (Jun 1-15, 2025)
+   - 3 challenges: Cyberpunk Legend, Street Runner, Elite Hacker
+   - Rewards: Neon Cyberpunk Skin, Street Runner Badge, Elite Hacker title
+
+8. **Summer Championship** (Jul 1 - Aug 31, 2024)
    - 1 challenge: Gold Medal
    - Rewards: Champion Trophy, Championship titles
 
-4. **Halloween Spooktacular** (Oct 15 - Nov 1, 2024)
-   - 3 challenges: Ghost Hunter, Pumpkin Smasher, Nightmare Mode
-   - Rewards: Ghostly Skin, Pumpkin King title, Reaper Badge
+9. **Ocean Odyssey** (Jul 15 - Aug 15, 2025)
+   - 3 challenges: Deep Sea Diver, Treasure Hunter, Leviathan Slayer
+   - Rewards: Aquatic Target Skin, Treasure Hunter Badge, Ocean Conqueror title
 
-5. **Cloud9 Anniversary** (Sep 1-30, 2024)
-   - 2 challenges: Cloud9 Legend, Dedicated Fan
-   - Rewards: C9 Founder Badge, Super Fan title
+10. **Arcade Legends** (Aug 1-31, 2025)
+    - 3 challenges: High Score Hero, Arcade Marathon, Combo King
+    - Rewards: Retro Pixel Skin, Arcade Legend Badge, Arcade King title
 
-6. **Esports Worlds** (Nov 1-30, 2024)
-   - 2 challenges + Leaderboard rewards
-   - Rewards: World Champion Trophy, Pro Player title, Elite Frame
+11. **Cloud9 Anniversary** (Sep 1-30, 2024)
+    - 2 challenges: Cloud9 Legend, Dedicated Fan
+    - Rewards: C9 Founder Badge, Super Fan title
+
+12. **Halloween Spooktacular** (Oct 15 - Nov 1, 2024)
+    - 3 challenges: Ghost Hunter, Pumpkin Smasher, Nightmare Mode
+    - Rewards: Ghostly Skin, Pumpkin King title, Reaper Badge
+
+13. **Esports Worlds** (Nov 1-30, 2024)
+    - 2 challenges + Leaderboard rewards
+    - Rewards: World Champion Trophy, Pro Player title, Elite Frame
+
+14. **Cyber Week Blitz** (Nov 24 - Dec 1, 2025)
+    - 3 challenges: Speed Demon, Mega Deal Hunter, Flash Sale Master
+    - Rewards: Lightning Trail, Golden Shopper Badge, Flash Master title
 
 ## User Experience Flow
 
@@ -192,16 +231,16 @@ interface EventReward {
 6. **Event Missions**: Daily event-specific objectives
 7. **Community Goals**: Server-wide objectives that unlock rewards for everyone
 
-### Seasonal Rotation Ideas
-- Spring Festival (Cherry Blossoms)
-- Summer Beach Bash
-- Autumn Harvest
-- New Year's Eve Countdown
-- Valentine's Day Love Shot
-- St. Patrick's Day
-- Independence Day (July 4th)
-- Thanksgiving Tournament
-- Winter Solstice
+### Seasonal Rotation Ideas (Future Events)
+- St. Patrick's Day (Luck of the Irish)
+- Earth Day (Environmental Theme)
+- Independence Day (July 4th Fireworks)
+- Thanksgiving Tournament (Harvest Theme)
+- Winter Solstice (Longest Night)
+- Mardi Gras (Carnival Celebration)
+- Sports Championship Tie-ins (Super Bowl, World Cup, etc.)
+- Music Festival Season
+- Back to School Challenge
 
 ## Design Decisions
 

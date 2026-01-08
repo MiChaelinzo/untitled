@@ -742,6 +742,637 @@ export const SEASONAL_EVENTS: SeasonalEvent[] = [
         }
       ]
     }
+  },
+  {
+    id: 'valentines-heartbreaker-2025',
+    type: 'valentines',
+    name: '💖 Valentines Heartbreaker',
+    description: 'Spread the love with heart-pounding challenges!',
+    icon: '💝',
+    theme: {
+      primaryColor: 'oklch(0.70 0.28 15)',
+      accentColor: 'oklch(0.75 0.25 350)',
+      backgroundColor: 'oklch(0.20 0.06 350)',
+      particleEffect: 'hearts'
+    },
+    startDate: new Date('2025-02-08').getTime(),
+    endDate: new Date('2025-02-16').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'valentines-cupid-master',
+        eventId: 'valentines-heartbreaker-2025',
+        name: 'Cupid Master',
+        description: 'Score 77,777 points with heart targets',
+        icon: '💘',
+        tier: 'gold',
+        requirement: { type: 'score', target: 77777 },
+        reward: {
+          id: 'valentines-cupid-bow',
+          name: 'Cupid\'s Bow Trail',
+          description: 'Romantic arrow trail effect',
+          icon: '🏹',
+          type: 'theme',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.75 0.25 350)',
+          isPermanent: true,
+          isRecurring: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'valentines-lovebirds',
+        eventId: 'valentines-heartbreaker-2025',
+        name: 'Lovebirds',
+        description: 'Hit 2 targets simultaneously 14 times',
+        icon: '💑',
+        tier: 'platinum',
+        requirement: { type: 'targets', target: 14 },
+        reward: {
+          id: 'valentines-lovebird-badge',
+          name: 'Lovebird Badge',
+          description: 'Perfect harmony achieved',
+          icon: '🕊️',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.70 0.28 15)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'valentines-heartbreaker',
+        eventId: 'valentines-heartbreaker-2025',
+        name: 'Heartbreaker',
+        description: 'Achieve a 50x combo without missing',
+        icon: '💔',
+        tier: 'diamond',
+        requirement: { type: 'combo', target: 50 },
+        reward: {
+          id: 'valentines-heartbreaker-title',
+          name: 'Heartbreaker',
+          description: 'Unstoppable romantic warrior',
+          icon: '👑',
+          type: 'title',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.75 0.25 350)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'valentines-modifier',
+      name: 'Love is in the Air',
+      description: 'Heart-shaped targets and romantic effects',
+      effects: {
+        scoreMultiplier: 1.4,
+        particleEffects: ['hearts', 'sparkles'],
+        specialTargets: ['heart', 'rose', 'chocolate']
+      }
+    }
+  },
+  {
+    id: 'spring-bloom-2025',
+    type: 'spring-festival',
+    name: '🌸 Spring Bloom Festival',
+    description: 'Welcome spring with blooming challenges!',
+    icon: '🌺',
+    theme: {
+      primaryColor: 'oklch(0.78 0.18 140)',
+      accentColor: 'oklch(0.75 0.22 330)',
+      backgroundColor: 'oklch(0.22 0.04 140)',
+      particleEffect: 'leaves'
+    },
+    startDate: new Date('2025-03-20').getTime(),
+    endDate: new Date('2025-04-05').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'spring-garden-master',
+        eventId: 'spring-bloom-2025',
+        name: 'Garden Master',
+        description: 'Hit 1,000 flower targets',
+        icon: '🌷',
+        tier: 'silver',
+        requirement: { type: 'targets', target: 1000 },
+        reward: {
+          id: 'spring-garden-skin',
+          name: 'Blooming Garden Skin',
+          description: 'Targets blossom with flowers',
+          icon: '🌻',
+          type: 'skin',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.78 0.18 140)',
+          value: 'flower',
+          isPermanent: true,
+          isRecurring: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'spring-butterfly',
+        eventId: 'spring-bloom-2025',
+        name: 'Butterfly Chaser',
+        description: 'Complete 15 perfect rounds during spring',
+        icon: '🦋',
+        tier: 'gold',
+        requirement: { type: 'perfect', target: 15 },
+        reward: {
+          id: 'spring-butterfly-badge',
+          name: 'Butterfly Badge',
+          description: 'Graceful and precise',
+          icon: '🦋',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.75 0.22 330)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'spring-renewal',
+        eventId: 'spring-bloom-2025',
+        name: 'Spring Renewal',
+        description: 'Play 30 games during the festival',
+        icon: '🌱',
+        tier: 'bronze',
+        requirement: { type: 'games', target: 30 },
+        reward: {
+          id: 'spring-renewal-title',
+          name: 'Nature\'s Champion',
+          description: 'Guardian of spring',
+          icon: '🌿',
+          type: 'title',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.78 0.18 140)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'spring-modifier',
+      name: 'Blossoming Beauty',
+      description: 'Petals fall and targets bloom',
+      effects: {
+        scoreMultiplier: 1.3,
+        particleEffects: ['leaves', 'sparkles'],
+        specialTargets: ['flower', 'butterfly', 'bee']
+      }
+    }
+  },
+  {
+    id: 'cyber-week-2025',
+    type: 'black-friday',
+    name: '🔥 Cyber Week Blitz',
+    description: 'Lightning-fast deals and electrifying challenges!',
+    icon: '⚡',
+    theme: {
+      primaryColor: 'oklch(0.65 0.25 15)',
+      accentColor: 'oklch(0.70 0.28 280)',
+      backgroundColor: 'oklch(0.12 0.02 280)',
+      particleEffect: 'sparkles'
+    },
+    startDate: new Date('2025-11-24').getTime(),
+    endDate: new Date('2025-12-01').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'cyber-speed-demon',
+        eventId: 'cyber-week-2025',
+        name: 'Speed Demon',
+        description: 'Complete 100 games in under 3 days',
+        icon: '⚡',
+        tier: 'diamond',
+        requirement: { type: 'games', target: 100 },
+        reward: {
+          id: 'cyber-lightning-trail',
+          name: 'Lightning Trail',
+          description: 'Electric cursor trail effect',
+          icon: '⚡',
+          type: 'theme',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.70 0.28 280)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'cyber-mega-deal',
+        eventId: 'cyber-week-2025',
+        name: 'Mega Deal Hunter',
+        description: 'Score 250,000 points during event',
+        icon: '💰',
+        tier: 'platinum',
+        requirement: { type: 'score', target: 250000 },
+        reward: {
+          id: 'cyber-golden-badge',
+          name: 'Golden Shopper Badge',
+          description: 'Master of the deals',
+          icon: '🏆',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.65 0.25 15)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'cyber-flash-sale',
+        eventId: 'cyber-week-2025',
+        name: 'Flash Sale Master',
+        description: 'Achieve 75x combo during event',
+        icon: '🔥',
+        tier: 'diamond',
+        requirement: { type: 'combo', target: 75 },
+        reward: {
+          id: 'cyber-flash-title',
+          name: 'Flash Master',
+          description: 'Fastest fingers in the game',
+          icon: '💨',
+          type: 'title',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.70 0.28 280)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'cyber-modifier',
+      name: 'Cyber Boost',
+      description: 'Enhanced speed and score multipliers',
+      effects: {
+        scoreMultiplier: 2.0,
+        speedMultiplier: 1.2,
+        particleEffects: ['sparkles', 'stars']
+      }
+    }
+  },
+  {
+    id: 'neon-nights-2025',
+    type: 'championship',
+    name: '🌃 Neon Nights',
+    description: 'Dive into the electric cyberpunk challenge!',
+    icon: '🎆',
+    theme: {
+      primaryColor: 'oklch(0.70 0.25 330)',
+      accentColor: 'oklch(0.75 0.18 195)',
+      backgroundColor: 'oklch(0.10 0.03 280)',
+      particleEffect: 'sparkles'
+    },
+    startDate: new Date('2025-06-01').getTime(),
+    endDate: new Date('2025-06-15').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'neon-cyberpunk-legend',
+        eventId: 'neon-nights-2025',
+        name: 'Cyberpunk Legend',
+        description: 'Score 100,000 with neon effects active',
+        icon: '🎆',
+        tier: 'diamond',
+        requirement: { type: 'score', target: 100000 },
+        reward: {
+          id: 'neon-cyberpunk-skin',
+          name: 'Neon Cyberpunk Skin',
+          description: 'Glowing neon target effects',
+          icon: '🌟',
+          type: 'skin',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.70 0.25 330)',
+          value: 'neon',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'neon-streetrunner',
+        eventId: 'neon-nights-2025',
+        name: 'Street Runner',
+        description: 'Hit 2,000 targets in neon mode',
+        icon: '🏃',
+        tier: 'gold',
+        requirement: { type: 'targets', target: 2000 },
+        reward: {
+          id: 'neon-runner-badge',
+          name: 'Street Runner Badge',
+          description: 'Urban warrior of the night',
+          icon: '🌆',
+          type: 'badge',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.75 0.18 195)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'neon-hacker',
+        eventId: 'neon-nights-2025',
+        name: 'Elite Hacker',
+        description: 'Achieve 100x combo in the neon realm',
+        icon: '💻',
+        tier: 'platinum',
+        requirement: { type: 'combo', target: 100 },
+        reward: {
+          id: 'neon-hacker-title',
+          name: 'Elite Hacker',
+          description: 'Master of the digital realm',
+          icon: '🔓',
+          type: 'title',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.70 0.25 330)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'neon-modifier',
+      name: 'Neon Overdrive',
+      description: 'Cyberpunk aesthetics with enhanced visuals',
+      effects: {
+        scoreMultiplier: 1.75,
+        particleEffects: ['sparkles', 'stars'],
+        specialTargets: ['neon', 'hologram', 'circuit']
+      }
+    }
+  },
+  {
+    id: 'ocean-odyssey-2025',
+    type: 'summer-games',
+    name: '🌊 Ocean Odyssey',
+    description: 'Dive deep into aquatic adventures!',
+    icon: '🐠',
+    theme: {
+      primaryColor: 'oklch(0.68 0.20 220)',
+      accentColor: 'oklch(0.75 0.18 180)',
+      backgroundColor: 'oklch(0.16 0.04 220)',
+      particleEffect: 'sparkles'
+    },
+    startDate: new Date('2025-07-15').getTime(),
+    endDate: new Date('2025-08-15').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'ocean-deep-diver',
+        eventId: 'ocean-odyssey-2025',
+        name: 'Deep Sea Diver',
+        description: 'Play 50 games in ocean mode',
+        icon: '🤿',
+        tier: 'silver',
+        requirement: { type: 'games', target: 50 },
+        reward: {
+          id: 'ocean-diver-skin',
+          name: 'Aquatic Target Skin',
+          description: 'Underwater bubble effects',
+          icon: '🫧',
+          type: 'skin',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.68 0.20 220)',
+          value: 'bubble',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'ocean-treasure-hunter',
+        eventId: 'ocean-odyssey-2025',
+        name: 'Treasure Hunter',
+        description: 'Score 150,000 points underwater',
+        icon: '💎',
+        tier: 'platinum',
+        requirement: { type: 'score', target: 150000 },
+        reward: {
+          id: 'ocean-treasure-badge',
+          name: 'Treasure Hunter Badge',
+          description: 'Found the hidden treasure',
+          icon: '🏴‍☠️',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.75 0.18 180)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'ocean-leviathan',
+        eventId: 'ocean-odyssey-2025',
+        name: 'Leviathan Slayer',
+        description: 'Achieve 60x combo in ocean mode',
+        icon: '🐋',
+        tier: 'gold',
+        requirement: { type: 'combo', target: 60 },
+        reward: {
+          id: 'ocean-leviathan-title',
+          name: 'Ocean Conqueror',
+          description: 'Ruler of the seven seas',
+          icon: '🔱',
+          type: 'title',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.68 0.20 220)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'ocean-modifier',
+      name: 'Underwater Expedition',
+      description: 'Aquatic effects and marine life',
+      effects: {
+        scoreMultiplier: 1.5,
+        particleEffects: ['sparkles'],
+        specialTargets: ['fish', 'treasure', 'coral']
+      }
+    }
+  },
+  {
+    id: 'cosmic-voyage-2025',
+    type: 'championship',
+    name: '🚀 Cosmic Voyage',
+    description: 'Journey through the stars for cosmic rewards!',
+    icon: '🌌',
+    theme: {
+      primaryColor: 'oklch(0.68 0.22 290)',
+      accentColor: 'oklch(0.75 0.18 60)',
+      backgroundColor: 'oklch(0.08 0.02 290)',
+      particleEffect: 'stars'
+    },
+    startDate: new Date('2025-04-12').getTime(),
+    endDate: new Date('2025-04-26').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'cosmic-astronaut',
+        eventId: 'cosmic-voyage-2025',
+        name: 'Elite Astronaut',
+        description: 'Complete 25 perfect rounds in space',
+        icon: '👨‍🚀',
+        tier: 'platinum',
+        requirement: { type: 'perfect', target: 25 },
+        reward: {
+          id: 'cosmic-astronaut-skin',
+          name: 'Galactic Target Skin',
+          description: 'Targets from distant galaxies',
+          icon: '🌠',
+          type: 'skin',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.68 0.22 290)',
+          value: 'galaxy',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'cosmic-explorer',
+        eventId: 'cosmic-voyage-2025',
+        name: 'Cosmic Explorer',
+        description: 'Hit 3,000 stellar targets',
+        icon: '🛸',
+        tier: 'gold',
+        requirement: { type: 'targets', target: 3000 },
+        reward: {
+          id: 'cosmic-explorer-badge',
+          name: 'Starfarer Badge',
+          description: 'Voyager of the cosmos',
+          icon: '✨',
+          type: 'badge',
+          rarity: 'exclusive',
+          glowColor: 'oklch(0.75 0.18 60)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'cosmic-supernova',
+        eventId: 'cosmic-voyage-2025',
+        name: 'Supernova',
+        description: 'Achieve a 125x combo among the stars',
+        icon: '💫',
+        tier: 'diamond',
+        requirement: { type: 'combo', target: 125 },
+        reward: {
+          id: 'cosmic-supernova-title',
+          name: 'Cosmic Entity',
+          description: 'Ascended beyond mortal limits',
+          icon: '🌟',
+          type: 'title',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.68 0.22 290)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'cosmic-modifier',
+      name: 'Zero Gravity',
+      description: 'Floating targets and stellar effects',
+      effects: {
+        scoreMultiplier: 1.9,
+        speedMultiplier: 0.8,
+        particleEffects: ['stars', 'sparkles'],
+        specialTargets: ['planet', 'meteor', 'comet']
+      }
+    }
+  },
+  {
+    id: 'arcade-legends-2025',
+    type: 'anniversary',
+    name: '🕹️ Arcade Legends',
+    description: 'Celebrate classic gaming with retro challenges!',
+    icon: '👾',
+    theme: {
+      primaryColor: 'oklch(0.75 0.25 280)',
+      accentColor: 'oklch(0.70 0.28 60)',
+      backgroundColor: 'oklch(0.12 0.03 280)',
+      particleEffect: 'sparkles'
+    },
+    startDate: new Date('2025-08-01').getTime(),
+    endDate: new Date('2025-08-31').getTime(),
+    isActive: false,
+    challenges: [
+      {
+        id: 'arcade-high-score',
+        eventId: 'arcade-legends-2025',
+        name: 'High Score Hero',
+        description: 'Score 200,000 points in retro mode',
+        icon: '🏆',
+        tier: 'diamond',
+        requirement: { type: 'score', target: 200000 },
+        reward: {
+          id: 'arcade-retro-skin',
+          name: 'Retro Pixel Skin',
+          description: '8-bit styled targets',
+          icon: '👾',
+          type: 'skin',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.75 0.25 280)',
+          value: 'pixel',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'arcade-marathon',
+        eventId: 'arcade-legends-2025',
+        name: 'Arcade Marathon',
+        description: 'Play 100 games in arcade mode',
+        icon: '🎮',
+        tier: 'platinum',
+        requirement: { type: 'games', target: 100 },
+        reward: {
+          id: 'arcade-legend-badge',
+          name: 'Arcade Legend Badge',
+          description: 'Master of classic gaming',
+          icon: '🕹️',
+          type: 'badge',
+          rarity: 'legendary',
+          glowColor: 'oklch(0.70 0.28 60)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      },
+      {
+        id: 'arcade-combo-king',
+        eventId: 'arcade-legends-2025',
+        name: 'Combo King',
+        description: 'Achieve 150x combo with retro effects',
+        icon: '⚡',
+        tier: 'diamond',
+        requirement: { type: 'combo', target: 150 },
+        reward: {
+          id: 'arcade-king-title',
+          name: 'Arcade King',
+          description: 'Retro gaming royalty',
+          icon: '👑',
+          type: 'title',
+          rarity: 'mythic',
+          glowColor: 'oklch(0.75 0.25 280)',
+          isPermanent: true,
+          seasonYear: 2025
+        }
+      }
+    ],
+    rewards: [],
+    specialModifier: {
+      id: 'arcade-modifier',
+      name: 'Retro Boost',
+      description: '8-bit visuals and classic arcade sounds',
+      effects: {
+        scoreMultiplier: 2.5,
+        particleEffects: ['sparkles'],
+        specialTargets: ['pacman', 'invader', 'tetris']
+      }
+    }
   }
 ]
 
