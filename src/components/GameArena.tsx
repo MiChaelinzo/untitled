@@ -6,6 +6,7 @@ import { RoundTransition } from '@/components/RoundTransition'
 import { HitFeedback } from '@/components/HitEffects'
 import { TargetParticles } from '@/components/TargetParticles'
 import { EventChallengeProgress } from '@/components/EventChallengeProgress'
+import { EventModeEffects } from '@/components/EventModeEffects'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -17,6 +18,7 @@ import { useKV } from '@github/spark/hooks'
 import { AdaptiveDifficultySystem } from '@/lib/adaptive-difficulty'
 import { toast } from 'sonner'
 import { getActiveEvents, SEASONAL_EVENTS, PlayerEventProgress } from '@/lib/seasonal-events'
+import { EventGameMode, getGameModeById, EventGameModeId } from '@/lib/event-game-modes'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -24,6 +26,7 @@ interface GameArenaProps {
   onComboUpdate?: (combo: number) => void
   isPractice?: boolean
   useAdaptiveDifficulty?: boolean
+  eventGameModeId?: EventGameModeId
 }
 
 interface Effect {
@@ -34,7 +37,7 @@ interface Effect {
   score?: number
 }
 
-export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = false, useAdaptiveDifficulty = false }: GameArenaProps) {
+export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = false, useAdaptiveDifficulty = false, eventGameModeId }: GameArenaProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
@@ -47,6 +50,15 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const activeEvents = getActiveEvents(SEASONAL_EVENTS)
   const currentEvent = activeEvents.length > 0 ? activeEvents[0] : null
   const currentEventProgress = currentEvent ? eventProgress?.[currentEvent.id] : undefined
+  
+  const eventGameMode = eventGameModeId ? getGameModeById(eventGameModeId) : null
+  const [eventModeState, setEventModeState] = useState<any>({
+    speedStreak: 0,
+    lastHitTime: 0,
+    pairTargets: new Map(),
+    frozenTargets: new Set(),
+    visibilityStates: new Map()
+  })
   
   useEffect(() => {
     if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
@@ -86,6 +98,41 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       setCurrentTargetDuration(duration)
       setCurrentTargetSize(targetSize)
     }
+
+    if (eventGameMode) {
+      eventGameMode.mechanics.forEach(mechanic => {
+        if (mechanic.type === 'time-manipulation' && mechanic.config.speedMultiplier) {
+          duration = duration / mechanic.config.speedMultiplier
+        }
+        
+        if (mechanic.type === 'target-behavior') {
+          if (mechanic.name === 'Freeze & Shatter') {
+            setTimeout(() => {
+              setEventModeState((prev: any) => {
+                const frozen = new Set(prev.frozenTargets || [])
+                frozen.add(gameState.currentTarget?.id)
+                return { ...prev, frozenTargets: frozen }
+              })
+            }, mechanic.config.freezeTime)
+          }
+          
+          if (mechanic.name === 'Phase Shift') {
+            const { phaseInterval, visibleDuration } = mechanic.config
+            let isVisible = true
+            const intervalId = setInterval(() => {
+              isVisible = !isVisible
+              setEventModeState((prev: any) => {
+                const states = new Map(prev.visibilityStates || new Map())
+                states.set(gameState.currentTarget?.id, isVisible)
+                return { ...prev, visibilityStates: states }
+              })
+            }, isVisible ? visibleDuration : phaseInterval - visibleDuration)
+            
+            setTimeout(() => clearInterval(intervalId), duration)
+          }
+        }
+      })
+    }
     
     const target = generateRandomTarget(rect.width, rect.height, duration, targetSize)
 
@@ -93,11 +140,77 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       ...prev,
       currentTarget: target
     }))
-  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty])
+  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, gameState.currentTarget])
 
   const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
-    const points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
+    let points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
+
+    if (eventGameMode) {
+      let eventMultiplier = eventGameMode.scoreModifier
+
+      eventGameMode.mechanics.forEach(mechanic => {
+        if (mechanic.type === 'time-manipulation' && mechanic.name === 'Speed Bonus') {
+          const { baseTimeWindow, bonusPerMs, maxBonus } = mechanic.config
+          if (reactionTime < baseTimeWindow) {
+            const bonus = Math.min((baseTimeWindow - reactionTime) / 100 * bonusPerMs, maxBonus)
+            eventMultiplier *= (1 + bonus)
+            toast.success(`⚡ Speed Bonus! ${bonus.toFixed(1)}x`, { duration: 1000 })
+          }
+        }
+
+        if (mechanic.type === 'scoring' && mechanic.name === 'Velocity Streak') {
+          const { fastThreshold, streakBonus, maxStreak } = mechanic.config
+          const now = Date.now()
+          if (reactionTime < fastThreshold && now - eventModeState.lastHitTime < 1000) {
+            const newStreak = Math.min((eventModeState.speedStreak || 0) + 1, maxStreak)
+            setEventModeState((prev: any) => ({ ...prev, speedStreak: newStreak, lastHitTime: now }))
+            eventMultiplier *= (1 + newStreak * streakBonus)
+            if (newStreak > 2) {
+              toast.success(`🔥 Velocity Streak ${newStreak}x!`, { duration: 1500 })
+            }
+          } else {
+            setEventModeState((prev: any) => ({ ...prev, speedStreak: 0, lastHitTime: now }))
+          }
+        }
+
+        if (mechanic.type === 'scoring' && mechanic.name === 'Lucky Numbers') {
+          const { luckyEnding, bonusMultiplier } = mechanic.config
+          const scoreEnding = points % 1000
+          if (luckyEnding.some((num: number) => scoreEnding === num || scoreEnding % 10 === num % 10)) {
+            eventMultiplier *= bonusMultiplier
+            toast.success(`🎆 Lucky Number! ${bonusMultiplier}x`, { duration: 2000 })
+          }
+        }
+
+        if (mechanic.type === 'target-behavior' && mechanic.name === 'Freeze & Shatter') {
+          const { freezeBonus } = mechanic.config
+          if (eventModeState.frozenTargets?.has(gameState.currentTarget?.id)) {
+            eventMultiplier *= freezeBonus
+            toast.success(`❄️ Frozen Shatter! ${freezeBonus}x`, { duration: 1500 })
+          }
+        }
+
+        if (mechanic.type === 'target-behavior' && mechanic.name === 'Pulse Beat') {
+          const { beatBonus } = mechanic.config
+          const targetAge = Date.now() - (gameState.currentTarget?.spawnTime || 0)
+          const pulsePhase = targetAge % mechanic.config.pulseInterval
+          if (pulsePhase < mechanic.config.beatWindow || pulsePhase > mechanic.config.pulseInterval - mechanic.config.beatWindow) {
+            eventMultiplier *= beatBonus
+            toast.success(`🎵 Perfect Beat! ${beatBonus}x`, { duration: 1500 })
+          }
+        }
+
+        if (mechanic.type === 'scoring' && mechanic.name === 'Gentle Touch') {
+          const { gentleBonus } = mechanic.config
+          if (reactionTime < 500) {
+            eventMultiplier *= gentleBonus
+          }
+        }
+      })
+
+      points = Math.round(points * eventMultiplier)
+    }
 
     if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
       adaptiveSystemRef.current.recordHit(reactionTime)
@@ -191,7 +304,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty])
+  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState])
 
   const handleMiss = useCallback(async () => {
     if (useAdaptiveDifficulty && adaptiveSystemRef.current) {
@@ -293,9 +406,23 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
+      {eventGameMode && <EventModeEffects eventGameMode={eventGameMode} />}
+      
       {isPractice && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-accent/20 border border-accent rounded-lg px-4 py-2">
           <span className="text-accent font-bold uppercase tracking-wider text-sm">Practice Mode</span>
+        </div>
+      )}
+      
+      {eventGameMode && (
+        <div className="absolute top-4 right-4 z-20 bg-gradient-to-r from-accent/30 to-primary/30 border border-accent rounded-lg px-4 py-2 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">{eventGameMode.icon}</span>
+            <div className="flex flex-col">
+              <span className="text-accent font-bold uppercase tracking-wider text-xs">{eventGameMode.name}</span>
+              <span className="text-primary text-xs">+{Math.round((eventGameMode.scoreModifier - 1) * 100)}% Bonus</span>
+            </div>
+          </div>
         </div>
       )}
       

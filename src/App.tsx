@@ -81,6 +81,7 @@ function App() {
   const [gameStartTime, setGameStartTime] = useState(0)
   const [currentCombo, setCurrentCombo] = useState(0)
   const [activeChallengeId, setActiveChallengeId] = useState<string | undefined>()
+  const [activeGameModeId, setActiveGameModeId] = useState<string | undefined>()
   const [challenges, setChallenges] = useKV<ChallengeType[]>('challenges', [])
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; avatarUrl?: string }>({
     id: `user_${Date.now()}`,
@@ -278,6 +279,7 @@ function App() {
     setGameStartTime(Date.now())
     setCurrentCombo(0)
     setUseAdaptiveDifficulty(useAdaptiveDifficulty || false)
+    setActiveGameModeId(gameModeId)
     setPhase('playing')
   }
 
@@ -812,6 +814,7 @@ function App() {
           onComboUpdate={setCurrentCombo}
           isPractice={isPracticeMode}
           useAdaptiveDifficulty={useAdaptiveDifficulty}
+          eventGameModeId={activeGameModeId as any}
         />
       )}
       
