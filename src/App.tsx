@@ -51,12 +51,18 @@ import {
   DEFAULT_STREAK
 } from '@/lib/streak-system'
 import { CustomDifficulty } from '@/lib/custom-difficulty'
+import {
+  GlobalLeaderboardEntry,
+  addGlobalLeaderboardEntry,
+  calculateAccuracy
+} from '@/lib/global-leaderboard'
 
 type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
 function App() {
   const [phase, setPhase] = useState<AppPhase>('login')
   const [leaderboard, setLeaderboard] = useKV<LeaderboardEntry[]>('leaderboard', [])
+  const [globalLeaderboard, setGlobalLeaderboard] = useKV<GlobalLeaderboardEntry[]>('global-leaderboard', [])
   const [soundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [soundEnabled] = useKV<boolean>('sound-enabled', true)
   const [backgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon' | 'spirals' | 'binary-rain' | 'geometric'>('background-variant', 'particles')
@@ -268,6 +274,24 @@ function App() {
     if (!isPracticeMode) {
       setGameSessions(current => [...(current || []), gameSession])
       setGlobalStats(current => updateGlobalStats(current || DEFAULT_GLOBAL_STATS, gameSession))
+      
+      setGlobalLeaderboard(current => {
+        const newEntry = addGlobalLeaderboardEntry(current || [], {
+          userId: currentUser.id,
+          username: currentUser.username,
+          avatarUrl: currentUser.avatarUrl,
+          score,
+          difficulty: currentDifficulty,
+          targetsHit,
+          targetsMissed,
+          highestCombo: currentCombo,
+          timestamp: Date.now(),
+          region: 'North America',
+          badges: playerUnlocks?.unlockedProfileBadges || [],
+          title: challengeData?.activeTitle || playerUnlocks?.equippedTitle
+        })
+        return newEntry
+      })
     }
     
     if (activeChallengeId) {
@@ -683,6 +707,7 @@ function App() {
         <Menu
           onStartGame={handleStartGame}
           leaderboard={leaderboard || []}
+          globalLeaderboard={globalLeaderboard || []}
           stats={stats || {
             totalGamesPlayed: 0,
             totalTargetsHit: 0,

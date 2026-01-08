@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle, Globe } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -27,7 +27,10 @@ import { StreakTracker } from '@/components/StreakTracker'
 import { PerformanceAnalytics } from '@/components/PerformanceAnalytics'
 import { QuickActionsMenu } from '@/components/QuickActionsMenu'
 import { CustomDifficultyBuilder } from '@/components/CustomDifficultyBuilder'
+import { GlobalLeaderboard } from '@/components/GlobalLeaderboard'
+import { CommunityStatsWidget } from '@/components/CommunityStatsWidget'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
+import { GlobalLeaderboardEntry } from '@/lib/global-leaderboard'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
@@ -53,6 +56,7 @@ import { PlayerChallengeData } from '@/lib/challenges'
 interface MenuProps {
   onStartGame: (difficulty: Difficulty, isPractice?: boolean, challengeId?: string, useAdaptiveDifficulty?: boolean, gameModeId?: string) => void
   leaderboard: LeaderboardEntry[]
+  globalLeaderboard?: GlobalLeaderboardEntry[]
   stats: PlayerStats
   unlockedAchievements: string[]
   challengeData: PlayerChallengeData
@@ -71,7 +75,8 @@ interface MenuProps {
 
 export function Menu({ 
   onStartGame, 
-  leaderboard, 
+  leaderboard,
+  globalLeaderboard,
   stats, 
   unlockedAchievements, 
   challengeData, 
@@ -98,6 +103,7 @@ export function Menu({
   const [mouseTrailVariant, setMouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
   const [activeTab, setActiveTab] = useState('play')
   const [showSpecialModeBanner, setShowSpecialModeBanner] = useState(true)
+  const [showGlobalLeaderboard, setShowGlobalLeaderboard] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useKV<boolean>('special-mode-banner-dismissed', false)
   
   const activeGameModes = getActiveGameModes(SPECIAL_GAME_MODES)
@@ -406,7 +412,36 @@ export function Menu({
           </TabsContent>
 
           <TabsContent value="leaderboard" className="space-y-4 mt-6">
-            <FilteredLeaderboard leaderboard={leaderboard} onExport={handleExport} />
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <Medal weight="fill" size={24} className="text-primary" />
+              <h3 className="text-2xl font-bold text-foreground">Leaderboards</h3>
+            </div>
+            
+            <div className="max-w-4xl mx-auto space-y-4">
+              <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground mb-2">🌍 Global Leaderboard</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Compete with players worldwide. View rankings, regional stats, and trending players.
+                    </p>
+                  </div>
+                  <Button
+                    size="lg"
+                    onClick={() => setShowGlobalLeaderboard(true)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    View Global
+                  </Button>
+                </div>
+              </Card>
+
+              <div className="text-center text-sm text-muted-foreground mb-2">
+                <p>Local Leaderboard</p>
+              </div>
+              
+              <FilteredLeaderboard leaderboard={leaderboard} onExport={handleExport} />
+            </div>
           </TabsContent>
 
           <TabsContent value="tournament" className="space-y-4 mt-6">
@@ -508,6 +543,9 @@ export function Menu({
               <ChartBar weight="fill" size={24} className="text-primary" />
               <h3 className="text-2xl font-bold text-foreground">Your Statistics</h3>
             </div>
+            {globalLeaderboard && globalLeaderboard.length > 0 && (
+              <CommunityStatsWidget globalLeaderboard={globalLeaderboard} />
+            )}
             <StatsPanel stats={stats} />
           </TabsContent>
 
@@ -621,6 +659,14 @@ export function Menu({
           <p>Powered by Cloud9 × JetBrains</p>
         </motion.div>
       </motion.div>
+
+      {showGlobalLeaderboard && (
+        <GlobalLeaderboard
+          leaderboard={globalLeaderboard || []}
+          currentUserId={currentUserId}
+          onClose={() => setShowGlobalLeaderboard(false)}
+        />
+      )}
     </div>
   )
 }
