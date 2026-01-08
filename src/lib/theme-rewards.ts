@@ -588,6 +588,7 @@ export function getNewlyUnlocked(
   ]
 
   return unlockables.filter(unlockable => {
+    if (!unlockable || !unlockable.id || !unlockable.requirement) return false
     if (allUnlocked.includes(unlockable.id)) return false
     return checkUnlockRequirement(
       unlockable.requirement,
@@ -610,7 +611,9 @@ export function groupUnlockablesByRarity(unlockables: ThemeUnlockable[]): Record
   }
 
   unlockables.forEach(unlockable => {
-    grouped[unlockable.rarity].push(unlockable)
+    if (unlockable && unlockable.rarity && grouped[unlockable.rarity]) {
+      grouped[unlockable.rarity].push(unlockable)
+    }
   })
 
   return grouped
@@ -628,7 +631,9 @@ export function groupUnlockablesByType(unlockables: ThemeUnlockable[]): Record<s
   }
 
   unlockables.forEach(unlockable => {
-    grouped[unlockable.type].push(unlockable)
+    if (unlockable && unlockable.type && grouped[unlockable.type]) {
+      grouped[unlockable.type].push(unlockable)
+    }
   })
 
   return grouped
@@ -657,6 +662,15 @@ export function getProgressToUnlock(
   playerLevel: number,
   totalXP: number
 ): { current: number; target: number; percentage: number; label: string } {
+  if (!unlockable || !unlockable.requirement) {
+    return {
+      current: 0,
+      target: 1,
+      percentage: 0,
+      label: 'Unknown'
+    }
+  }
+  
   const req = unlockable.requirement
 
   switch (req.type) {

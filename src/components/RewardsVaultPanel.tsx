@@ -128,6 +128,11 @@ export function RewardsVaultPanel({
   }
 
   const equipUnlockable = (unlockable: ThemeUnlockable) => {
+    if (!unlockable || !unlockable.name) {
+      toast.error('Invalid unlockable item')
+      return
+    }
+    
     if (!isUnlocked(unlockable.id)) {
       toast.error('Item not unlocked yet')
       return
@@ -179,6 +184,10 @@ export function RewardsVaultPanel({
   }
 
   const renderUnlockable = (unlockable: ThemeUnlockable) => {
+    if (!unlockable || !unlockable.name) {
+      return null
+    }
+    
     const unlocked = isUnlocked(unlockable.id)
     const equipped = isEquipped(unlockable.id)
     const progress = unlocked ? null : getProgressToUnlock(unlockable, stats, playerLevel, totalXP)

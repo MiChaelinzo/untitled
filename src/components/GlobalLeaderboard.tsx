@@ -312,7 +312,7 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                                       {entry.username}
                                     </p>
                                     {entry.countryCode && (
-                                      <span className="text-lg" title={entry.country}>
+                                      <span className="text-lg" title={entry.country || entry.countryCode}>
                                         {getCountryFlag(entry.countryCode)}
                                       </span>
                                     )}

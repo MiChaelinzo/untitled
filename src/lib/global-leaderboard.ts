@@ -280,31 +280,39 @@ export function getRegionalStats(
     regionMap.get(region)!.push(entry)
   })
 
-  return Array.from(regionMap.entries()).map(([region, entries]) => {
-    const uniquePlayers = new Map<string, GlobalLeaderboardEntry>()
-    entries.forEach(entry => {
-      const existing = uniquePlayers.get(entry.userId)
-      if (!existing || entry.score > existing.score) {
-        uniquePlayers.set(entry.userId, entry)
+  return Array.from(regionMap.entries())
+    .map(([region, entries]) => {
+      const uniquePlayers = new Map<string, GlobalLeaderboardEntry>()
+      entries.forEach(entry => {
+        const existing = uniquePlayers.get(entry.userId)
+        if (!existing || entry.score > existing.score) {
+          uniquePlayers.set(entry.userId, entry)
+        }
+      })
+
+      const bestScores = Array.from(uniquePlayers.values())
+      
+      if (bestScores.length === 0) {
+        return null
+      }
+      
+      const topEntry = bestScores.reduce((best, entry) => 
+        entry.score > best.score ? entry : best
+      , bestScores[0])
+
+      const avgScore = bestScores.reduce((sum, e) => sum + e.score, 0) / bestScores.length
+
+      return {
+        region,
+        playerCount: uniquePlayers.size,
+        averageScore: avgScore,
+        topScore: topEntry.score,
+        topPlayer: topEntry.username,
+        gamesPlayed: entries.length
       }
     })
-
-    const bestScores = Array.from(uniquePlayers.values())
-    const topEntry = bestScores.reduce((best, entry) => 
-      entry.score > best.score ? entry : best
-    , bestScores[0])
-
-    const avgScore = bestScores.reduce((sum, e) => sum + e.score, 0) / bestScores.length
-
-    return {
-      region,
-      playerCount: uniquePlayers.size,
-      averageScore: avgScore,
-      topScore: topEntry.score,
-      topPlayer: topEntry.username,
-      gamesPlayed: entries.length
-    }
-  }).sort((a, b) => b.topScore - a.topScore)
+    .filter((stats): stats is RegionalStats => stats !== null)
+    .sort((a, b) => b.topScore - a.topScore)
 }
 
 export function getTrendingPlayers(

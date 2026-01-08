@@ -546,7 +546,7 @@ function App() {
               if (isComplete && !eventData.completedChallenges.includes(challenge.id)) {
                 eventData.completedChallenges.push(challenge.id)
                 toast.success(`🎉 Event Challenge Complete: ${challenge.name}!`, {
-                  description: `Reward: ${challenge.reward.name}`,
+                  description: challenge.reward?.name ? `Reward: ${challenge.reward.name}` : 'Challenge completed!',
                   duration: 5000
                 })
               }
