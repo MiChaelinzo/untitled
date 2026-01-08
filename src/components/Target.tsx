@@ -215,7 +215,7 @@ export function Target({ target, onHit, onMiss, size = 80, skin = 'default' }: T
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'backOut' }}
-      className="absolute cursor-pointer"
+      className="absolute cursor-pointer z-0"
       style={{
         left: target.x - size / 2,
         top: target.y - size / 2,

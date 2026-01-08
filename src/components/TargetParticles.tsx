@@ -182,7 +182,7 @@ export function TargetParticles({ skin, x, y, onComplete }: TargetParticlesProps
 
   return (
     <div 
-      className="absolute pointer-events-none"
+      className="absolute pointer-events-none z-[5]"
       style={{ left: x, top: y }}
     >
       {particles.map((particle) => {

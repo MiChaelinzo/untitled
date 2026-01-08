@@ -15,7 +15,7 @@ export function HitFeedback({ score, x, y, onComplete }: HitFeedbackProps) {
       animate={{ scale: 1.5, opacity: 0, y: -50 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
       onAnimationComplete={onComplete}
-      className="absolute pointer-events-none font-bold text-2xl text-cyan glow-text"
+      className="absolute pointer-events-none font-bold text-2xl text-cyan glow-text z-[5]"
       style={{
         left: x,
         top: y,
@@ -58,7 +58,7 @@ export function HitParticles({ x, y, onComplete }: ParticleProps) {
           }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           onAnimationComplete={particle.id === 0 ? onComplete : undefined}
-          className="absolute w-2 h-2 rounded-full bg-primary"
+          className="absolute w-2 h-2 rounded-full bg-primary z-[5]"
           style={{
             left: x,
             top: y,
