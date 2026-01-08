@@ -583,7 +583,11 @@ export function Menu({
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4 mt-6">
-            <SeasonalEventsPanel />
+            <SeasonalEventsPanel 
+              onStartEventGameMode={(eventId, modeId) => {
+                onStartGame('medium', false, undefined, false, `event-${eventId}-${modeId}`)
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="special-modes" className="space-y-4 mt-6">

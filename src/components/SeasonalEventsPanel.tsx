@@ -17,7 +17,8 @@ import {
   Sparkle,
   Crown,
   Flame,
-  Lightning
+  Lightning,
+  GameController
 } from '@phosphor-icons/react'
 import {
   SeasonalEvent,
@@ -31,14 +32,18 @@ import {
   sortEventsByDate,
   SEASONAL_EVENTS
 } from '@/lib/seasonal-events'
+import { getEventGameMode } from '@/lib/event-game-modes'
+import { EventGameModeSelector } from '@/components/EventGameModeSelector'
 import { toast } from 'sonner'
 
 interface SeasonalEventsPanelProps {
   onClose?: () => void
+  onStartEventGameMode?: (eventId: string, modeId: string) => void
 }
 
-export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
+export function SeasonalEventsPanel({ onClose, onStartEventGameMode }: SeasonalEventsPanelProps) {
   const [selectedEvent, setSelectedEvent] = useState<SeasonalEvent | null>(null)
+  const [showGameModeSelector, setShowGameModeSelector] = useState(false)
   const [eventProgress, setEventProgress] = useKV<Record<string, PlayerEventProgress>>('event-progress', {})
   
   const activeEvents = getActiveEvents(SEASONAL_EVENTS)
@@ -258,10 +263,10 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                         >
                           {selectedEvent.icon}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <h2 className="text-2xl font-bold mb-2">{selectedEvent.name}</h2>
                           <p className="text-muted-foreground mb-3">{selectedEvent.description}</p>
-                          <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-4 text-sm flex-wrap">
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               <span>{formatTimeRemaining(selectedEvent.endDate)}</span>
@@ -277,6 +282,17 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
                                 <Flame className="w-3 h-3 mr-1" />
                                 Active Now
                               </Badge>
+                            )}
+                            {isEventActive(selectedEvent) && getEventGameMode(selectedEvent.id).length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-2"
+                                onClick={() => setShowGameModeSelector(true)}
+                              >
+                                <GameController />
+                                Event Game Modes
+                              </Button>
                             )}
                           </div>
                         </div>
@@ -482,6 +498,25 @@ export function SeasonalEventsPanel({ onClose }: SeasonalEventsPanelProps) {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {showGameModeSelector && selectedEvent && (
+          <EventGameModeSelector
+            event={selectedEvent}
+            eventProgress={getEventProgress(selectedEvent.id)}
+            onSelectMode={(modeId) => {
+              setShowGameModeSelector(false)
+              if (onStartEventGameMode) {
+                onStartEventGameMode(selectedEvent.id, modeId)
+              }
+              if (onClose) {
+                onClose()
+              }
+            }}
+            onClose={() => setShowGameModeSelector(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
