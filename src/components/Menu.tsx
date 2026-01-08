@@ -22,10 +22,17 @@ import { RewardsVaultPanel } from '@/components/RewardsVaultPanel'
 import { SeasonalEventsPanel } from '@/components/SeasonalEventsPanel'
 import { SpecialGameModePanel } from '@/components/SpecialGameModePanel'
 import { SpecialGameModeBanner } from '@/components/SpecialGameModeBanner'
+import { GlobalStatsCard } from '@/components/GlobalStatsCard'
+import { StreakTracker } from '@/components/StreakTracker'
+import { PerformanceAnalytics } from '@/components/PerformanceAnalytics'
+import { QuickActionsMenu } from '@/components/QuickActionsMenu'
+import { CustomDifficultyBuilder } from '@/components/CustomDifficultyBuilder'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
+import { DEFAULT_GLOBAL_STATS } from '@/lib/global-stats'
+import { DEFAULT_STREAK } from '@/lib/streak-system'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -53,9 +60,33 @@ interface MenuProps {
   currentUserId: string
   currentUsername: string
   currentAvatarUrl?: string
+  globalStats?: any
+  gameSessions?: any[]
+  dailyStreak?: any
+  customDifficulties?: any[]
+  recentActions?: string[]
+  onClaimStreakReward?: (rewardId: string) => void
+  onAddRecentAction?: (actionId: string) => void
 }
 
-export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, challengeData, onClaimChallengeReward, currentUserId, currentUsername, currentAvatarUrl }: MenuProps) {
+export function Menu({ 
+  onStartGame, 
+  leaderboard, 
+  stats, 
+  unlockedAchievements, 
+  challengeData, 
+  onClaimChallengeReward, 
+  currentUserId, 
+  currentUsername, 
+  currentAvatarUrl,
+  globalStats,
+  gameSessions,
+  dailyStreak,
+  customDifficulties,
+  recentActions,
+  onClaimStreakReward,
+  onAddRecentAction
+}: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
   const [selectedDifficulty, setSelectedDifficulty] = useKV<Difficulty>('selected-difficulty', 'medium')
@@ -191,7 +222,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-11 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-12 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
@@ -225,6 +256,10 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
             <TabsTrigger value="stats" className="flex items-center gap-2">
               <ChartBar size={16} weight="fill" />
               <span className="hidden sm:inline">Stats</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <Lightning size={16} weight="fill" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="achievements" className="flex items-center gap-2">
               <Medal size={16} weight="fill" />
@@ -518,6 +553,62 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
             <SpecialGameModePanel 
               onStartGameMode={(modeId, difficulty) => onStartGame(difficulty, false, undefined, false, modeId)} 
             />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6 mt-6">
+            {onAddRecentAction && recentActions && (
+              <QuickActionsMenu
+                onQuickPlay={() => {
+                  onAddRecentAction('quick-play')
+                  onStartGame('medium', false)
+                }}
+                onPractice={() => {
+                  onAddRecentAction('practice')
+                  onStartGame(selectedDifficulty || 'medium', true)
+                }}
+                onLastDifficulty={() => {
+                  onAddRecentAction('last-difficulty')
+                  onStartGame(selectedDifficulty || 'medium', false)
+                }}
+                onChallenge={() => {
+                  onAddRecentAction('challenge')
+                  setActiveTab('challenges')
+                }}
+                onTournament={() => {
+                  onAddRecentAction('tournament')
+                  setActiveTab('tournament')
+                }}
+                recentActions={recentActions}
+              />
+            )}
+
+            {globalStats && <GlobalStatsCard stats={globalStats} />}
+
+            {dailyStreak && onClaimStreakReward && (
+              <StreakTracker 
+                streak={dailyStreak} 
+                onClaimReward={onClaimStreakReward} 
+              />
+            )}
+
+            {gameSessions && gameSessions.length > 0 && (
+              <PerformanceAnalytics sessions={gameSessions} />
+            )}
+
+            {customDifficulties !== undefined && (
+              <CustomDifficultyBuilder
+                customDifficulties={customDifficulties}
+                onCreateDifficulty={(difficulty) => {
+                  toast.success(`Custom difficulty created: ${difficulty.name}`)
+                }}
+                onDeleteDifficulty={(id) => {
+                  toast.success('Custom difficulty deleted')
+                }}
+                onPlayDifficulty={(difficulty) => {
+                  toast.info(`Playing ${difficulty.name} - Coming soon!`)
+                }}
+              />
+            )}
           </TabsContent>
         </Tabs>
 

@@ -222,6 +222,52 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 - **Match Preview**: Click team matchups to see detailed predictions, key factors, and AI analysis before matches start
 - **Flexible Tournament Size**: Support for 2-8 teams in single-elimination brackets, scales from quick 2-team finals to full 8-team tournaments
 
+**Performance Analytics & Advanced Features** (NEW):
+- Functionality: Comprehensive analytics dashboard combining global statistics, daily streak system, performance tracking, quick actions menu, and custom difficulty builder. Features include community-wide statistics tracking, streak rewards system with time-limited bonuses, detailed performance trends analysis, one-click access to frequent actions, and complete custom difficulty creation with visual builder interface.
+- Purpose: Provides deep insights into player performance over time, encourages daily engagement through streak rewards, reduces friction with quick action shortcuts, enables personalized challenge creation for varied gameplay experiences, and displays community-wide achievements to drive competition and engagement
+- Trigger: New "Analytics" tab in main menu, accessible alongside existing tabs
+- Progression: Select Analytics tab → View global community stats with 8 key metrics → Check daily streak status and available rewards → Review recent game performance with trend analysis → Access quick actions for instant gameplay → Create custom difficulties with preset templates or full customization
+- Success criteria: All components load instantly, global stats accurately aggregate across all players, streak tracking persists daily and awards unlock reliably, performance trends show meaningful data with >10 game history, quick actions reduce clicks to play by 50%, custom difficulties support full parameter control and validate correctly
+
+**Global Statistics Dashboard**:
+- **Community Metrics**: Total games played, targets hit, all-time high score, best combo, fastest reaction time, average accuracy, perfect rounds, most popular difficulty
+- **Real-time Updates**: Statistics update after every non-practice game completion
+- **Visual Presentation**: 8-card grid layout with color-coded icons and animated stat reveals
+- **Last Updated Timestamp**: Shows freshness of community data
+
+**Daily Streak System**:
+- **Streak Tracking**: Current streak, longest streak ever, total play days counted automatically
+- **5 Milestone Rewards**: Day 3 (500 XP), Day 5 (title), Day 7 (badge), Day 14 (skin), Day 30 (theme)
+- **Progress Visualization**: Next milestone progress bar with days remaining
+- **One-Click Reward Claiming**: Available rewards shown prominently with claim buttons
+- **Streak History**: Visual timeline showing all milestone checkpoints and completion status
+- **Auto-Detection**: System automatically updates streak on first play each day
+- **Grace Period**: Missing one day breaks streak but preserves longest streak record
+
+**Performance Analytics**:
+- **Trend Analysis**: Score, accuracy, and reaction time trends with % change indicators
+- **Recent Games Tab**: Last 10 games with detailed performance breakdown per session
+- **Best Performances Tab**: Top 10 high scores with medals for top 3 positions
+- **Comparative Metrics**: Shows improvement/decline trends over rolling windows
+- **Session Details**: Date, difficulty, score, accuracy, average reaction time, combo, practice mode indicator
+
+**Quick Actions Menu**:
+- **5 One-Click Actions**: Quick Play (medium), Practice Mode, Last Played difficulty, Daily Challenge, Tournament
+- **Smart Ordering**: Recently used actions appear first for faster access
+- **Visual Indicators**: Recent actions show pulse animation
+- **Action Tracking**: System remembers last 5 used actions
+- **Instant Navigation**: Buttons either start game immediately or navigate to relevant tab
+
+**Custom Difficulty Builder**:
+- **Full Parameter Control**: 3 rounds × (duration, size, target count) + score multiplier + spawn delay
+- **Interactive Sliders**: Real-time visual feedback on all adjustments with value display
+- **4 Preset Templates**: Sniper Mode (tiny/slow), Blitz (large/fast), Zen Mode (relaxed), Chaos (random)
+- **Validation System**: Real-time error checking prevents invalid configurations
+- **Custom Difficulty Cards**: Shows created difficulties with stats, high scores, play counts
+- **One-Click Play**: Launch custom difficulty directly from card
+- **Delete Management**: Remove unwanted custom difficulties with confirmation
+- **Persistent Storage**: All custom difficulties saved via KV and survive sessions
+
 ## Edge Case Handling
 
 - **Accidental taps**: Outside-target clicks don't penalize but don't grant points either, preventing frustration
@@ -294,6 +340,21 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 - **Collection statistics**: Accurate count of unlocked vs total items per category, updates in real-time
 - **Duplicate unlock prevention**: System checks existing unlocks before triggering notifications, prevents re-unlock bugs
 - **Equipped item indicators**: Currently active cosmetics clearly marked in vault and persist across game sessions
+- **Global stats race conditions**: Stats update atomically per game, preventing data loss from concurrent sessions
+- **Streak timezone handling**: Streak resets based on local midnight, consistent across time zones
+- **Streak reward double-claiming**: System checks claimed status before awarding, prevents duplicate rewards
+- **Performance analytics empty state**: Shows helpful message when <2 games played, prompts user to start playing
+- **Trend calculation minimum**: Requires 2+ games for trends, shows neutral state otherwise
+- **Quick actions without history**: All actions available even on first use, ordering defaults to logical priority
+- **Recent action tracking overflow**: List caps at 5 most recent, oldest automatically removed
+- **Custom difficulty validation**: Prevents save if any parameter out of bounds, shows specific error messages
+- **Custom difficulty name conflicts**: Allows duplicate names with unique IDs, sorted by creation time
+- **Custom difficulty limits**: No hard limit on created difficulties, performance tested up to 50+
+- **Slider interaction**: Real-time value updates, no lag or jump on rapid adjustments
+- **Preset loading**: Overwrites current form, warns if unsaved changes exist
+- **Analytics tab initial load**: Shows empty states gracefully, loads fastest available data first
+- **Session history storage**: Game sessions capped at 100 most recent to prevent storage bloat
+- **Global stats initialization**: Starts at zero for new installations, updates incrementally per game
 
 ## Design Direction
 

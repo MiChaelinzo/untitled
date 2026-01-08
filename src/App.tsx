@@ -38,6 +38,19 @@ import {
   checkEventChallengeProgress,
   SEASONAL_EVENTS
 } from '@/lib/seasonal-events'
+import {
+  GlobalStats,
+  GameSession,
+  updateGlobalStats,
+  DEFAULT_GLOBAL_STATS
+} from '@/lib/global-stats'
+import {
+  DailyStreak,
+  updateStreak,
+  claimStreakReward,
+  DEFAULT_STREAK
+} from '@/lib/streak-system'
+import { CustomDifficulty } from '@/lib/custom-difficulty'
 
 type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
@@ -115,6 +128,12 @@ function App() {
   const [showEventBanner, setShowEventBanner] = useState(false)
   const [eventBannerDismissed, setEventBannerDismissed] = useKV<boolean>('event-banner-dismissed', false)
 
+  const [globalStats, setGlobalStats] = useKV<GlobalStats>('global-stats', DEFAULT_GLOBAL_STATS)
+  const [gameSessions, setGameSessions] = useKV<GameSession[]>('game-sessions', [])
+  const [dailyStreak, setDailyStreak] = useKV<DailyStreak>('daily-streak', DEFAULT_STREAK)
+  const [customDifficulties, setCustomDifficulties] = useKV<CustomDifficulty[]>('custom-difficulties', [])
+  const [recentActions, setRecentActions] = useKV<string[]>('recent-actions', [])
+
   useEffect(() => {
     if (soundTheme) soundSystem.setTheme(soundTheme)
     if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
@@ -126,6 +145,12 @@ function App() {
       setShowEventBanner(true)
     }
   }, [phase, eventBannerDismissed])
+
+  useEffect(() => {
+    if (phase === 'menu') {
+      setDailyStreak(current => updateStreak(current || DEFAULT_STREAK))
+    }
+  }, [phase, setDailyStreak])
 
   useEffect(() => {
     async function loadUser() {
@@ -227,6 +252,23 @@ function App() {
     
     const gameTime = Date.now() - gameStartTime
     const isPerfectRound = targetsMissed === 0 && targetsHit > 0
+    
+    const gameSession: GameSession = {
+      id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      score,
+      difficulty: currentDifficulty,
+      targetsHit,
+      targetsMissed,
+      highestCombo: currentCombo,
+      reactionTimes: [],
+      isPractice: isPracticeMode
+    }
+
+    if (!isPracticeMode) {
+      setGameSessions(current => [...(current || []), gameSession])
+      setGlobalStats(current => updateGlobalStats(current || DEFAULT_GLOBAL_STATS, gameSession))
+    }
     
     if (activeChallengeId) {
       setChallenges(current => {
@@ -484,6 +526,17 @@ function App() {
     setPhase('gameOver')
   }
 
+  const handleClaimStreakReward = (rewardId: string) => {
+    setDailyStreak(current => claimStreakReward(current || DEFAULT_STREAK, rewardId))
+  }
+
+  const handleAddRecentAction = (actionId: string) => {
+    setRecentActions(current => {
+      const updated = [actionId, ...(current || []).filter(id => id !== actionId)]
+      return updated.slice(0, 5)
+    })
+  }
+
   const handleClaimChallengeReward = (challengeId: string) => {
     setChallengeData(current => {
       const defaultData: PlayerChallengeData = {
@@ -657,6 +710,13 @@ function App() {
           currentUserId={currentUser.id}
           currentUsername={currentUser.username}
           currentAvatarUrl={currentUser.avatarUrl}
+          globalStats={globalStats || DEFAULT_GLOBAL_STATS}
+          gameSessions={gameSessions || []}
+          dailyStreak={dailyStreak || DEFAULT_STREAK}
+          customDifficulties={customDifficulties || []}
+          recentActions={recentActions || []}
+          onClaimStreakReward={handleClaimStreakReward}
+          onAddRecentAction={handleAddRecentAction}
         />
       )}
       
