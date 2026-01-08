@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -19,6 +19,7 @@ import { ThemedBackgroundSelector } from '@/components/ThemedBackgroundSelector'
 import { TournamentPanel } from '@/components/TournamentPanel'
 import { TeamTournamentPanel } from '@/components/TeamTournamentPanel'
 import { RewardsVaultPanel } from '@/components/RewardsVaultPanel'
+import { SeasonalEventsPanel } from '@/components/SeasonalEventsPanel'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
 import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
@@ -169,7 +170,7 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-9 bg-card/50 backdrop-blur">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-10 bg-card/50 backdrop-blur">
             <TabsTrigger value="play" className="flex items-center gap-2">
               <Play size={16} weight="fill" />
               <span className="hidden sm:inline">Play</span>
@@ -185,6 +186,11 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
             <TabsTrigger value="teams" className="flex items-center gap-2">
               <UsersThree size={16} weight="fill" />
               <span className="hidden sm:inline">Teams</span>
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center gap-2 relative">
+              <Calendar size={16} weight="fill" />
+              <span className="hidden sm:inline">Events</span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="flex items-center gap-2">
               <Medal size={16} weight="fill" />
@@ -472,6 +478,10 @@ export function Menu({ onStartGame, leaderboard, stats, unlockedAchievements, ch
               currentAvatarUrl={currentAvatarUrl}
               onStartChallenge={(challengeId, difficulty) => onStartGame(difficulty, false, challengeId)}
             />
+          </TabsContent>
+
+          <TabsContent value="events" className="space-y-4 mt-6">
+            <SeasonalEventsPanel />
           </TabsContent>
         </Tabs>
 

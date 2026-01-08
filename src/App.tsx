@@ -7,6 +7,7 @@ import { GameArena } from '@/components/GameArena'
 import { GameOver } from '@/components/GameOver'
 import { AchievementToast } from '@/components/AchievementToast'
 import { UnlockNotification } from '@/components/UnlockNotification'
+import { EventNotificationBanner } from '@/components/EventNotificationBanner'
 import { Login } from '@/components/Login'
 import { DynamicBackground } from '@/components/DynamicBackground'
 import { MouseTrail } from '@/components/MouseTrail'
@@ -30,6 +31,13 @@ import {
   getNewlyUnlocked,
   THEME_UNLOCKABLES
 } from '@/lib/theme-rewards'
+import {
+  SeasonalEvent,
+  PlayerEventProgress,
+  getActiveEvents,
+  checkEventChallengeProgress,
+  SEASONAL_EVENTS
+} from '@/lib/seasonal-events'
 
 type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
@@ -103,10 +111,21 @@ function App() {
     activeTitle: undefined
   })
 
+  const [eventProgress, setEventProgress] = useKV<Record<string, PlayerEventProgress>>('event-progress', {})
+  const [showEventBanner, setShowEventBanner] = useState(false)
+  const [eventBannerDismissed, setEventBannerDismissed] = useKV<boolean>('event-banner-dismissed', false)
+
   useEffect(() => {
     if (soundTheme) soundSystem.setTheme(soundTheme)
     if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
   }, [soundTheme, soundEnabled])
+
+  useEffect(() => {
+    const activeEvents = getActiveEvents(SEASONAL_EVENTS)
+    if (activeEvents.length > 0 && !eventBannerDismissed && phase === 'menu') {
+      setShowEventBanner(true)
+    }
+  }, [phase, eventBannerDismissed])
 
   useEffect(() => {
     async function loadUser() {
@@ -409,6 +428,59 @@ function App() {
       })
     }
     
+    const activeEvents = getActiveEvents(SEASONAL_EVENTS)
+    if (activeEvents.length > 0 && !isPracticeMode) {
+      setEventProgress(current => {
+        const updated = { ...(current || {}) }
+        
+        activeEvents.forEach(event => {
+          const eventData = updated[event.id] || {
+            eventId: event.id,
+            completedChallenges: [],
+            earnedRewards: [],
+            eventScore: 0,
+            lastUpdated: Date.now()
+          }
+          
+          eventData.eventScore += score
+          
+          event.challenges.forEach(challenge => {
+            if (!eventData.completedChallenges.includes(challenge.id)) {
+              const gameData = {
+                score,
+                targetsHit,
+                combo: currentCombo,
+                difficulty: currentDifficulty,
+                perfectRounds: isPerfectRound ? 1 : 0
+              }
+              
+              const challengeKey = `${event.id}-${challenge.id}`
+              const currentProgress = (current || {})[event.id]?.eventScore || 0
+              
+              const { progress, isComplete } = checkEventChallengeProgress(
+                challenge,
+                gameData,
+                currentProgress
+              )
+              
+              if (isComplete && !eventData.completedChallenges.includes(challenge.id)) {
+                eventData.completedChallenges.push(challenge.id)
+                toast.success(`🎉 Event Challenge Complete: ${challenge.name}!`, {
+                  description: `Reward: ${challenge.reward.name}`,
+                  duration: 5000
+                })
+              }
+            }
+          })
+          
+          eventData.lastUpdated = Date.now()
+          updated[event.id] = eventData
+        })
+        
+        return updated
+      })
+    }
+    
     setPhase('gameOver')
   }
 
@@ -534,6 +606,18 @@ function App() {
           <UnlockNotification
             unlockable={unlockQueue[0]}
             onComplete={removeUnlock}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showEventBanner && phase === 'menu' && getActiveEvents(SEASONAL_EVENTS).length > 0 && (
+          <EventNotificationBanner
+            event={getActiveEvents(SEASONAL_EVENTS)[0]}
+            onViewEvent={() => {
+              setShowEventBanner(false)
+              setEventBannerDismissed(true)
+            }}
           />
         )}
       </AnimatePresence>
