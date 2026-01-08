@@ -22,7 +22,8 @@ import {
   Funnel,
   MapPin,
   Calendar,
-  Gauge
+  Gauge,
+  Flag
 } from '@phosphor-icons/react'
 import {
   GlobalLeaderboardEntry,
@@ -41,6 +42,13 @@ import {
 } from '@/lib/global-leaderboard'
 import { Difficulty } from '@/lib/game-types'
 import { toast } from 'sonner'
+import { 
+  COUNTRIES, 
+  getCountryFlag, 
+  getCountriesByRegion,
+  getAllRegions 
+} from '@/lib/country-flags'
+import { CountryLeaderboard } from './CountryLeaderboard'
 
 interface GlobalLeaderboardProps {
   leaderboard: GlobalLeaderboardEntry[]
@@ -49,10 +57,15 @@ interface GlobalLeaderboardProps {
 }
 
 export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: GlobalLeaderboardProps) {
-  const [activeTab, setActiveTab] = useState<'global' | 'regional' | 'trending' | 'stats'>('global')
+  const [activeTab, setActiveTab] = useState<'global' | 'countries' | 'regional' | 'trending' | 'stats'>('global')
   const [filter, setFilter] = useState<LeaderboardFilter>({
     timeRange: 'all-time'
   })
+
+  const availableCountries = useMemo(() => {
+    const codes = new Set(leaderboard.map(e => e.countryCode).filter(Boolean))
+    return COUNTRIES.filter(c => codes.has(c.code)).sort((a, b) => a.name.localeCompare(b.name))
+  }, [leaderboard])
 
   const filteredLeaderboard = useMemo(() => 
     filterLeaderboard(leaderboard, filter),
@@ -189,7 +202,13 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
 
               <Select 
                 value={filter.region || 'all'} 
-                onValueChange={(value) => setFilter({ ...filter, region: value === 'all' ? undefined : value })}
+                onValueChange={(value) => {
+                  setFilter({ 
+                    ...filter, 
+                    region: value === 'all' ? undefined : value,
+                    country: undefined
+                  })
+                }}
               >
                 <SelectTrigger className="w-[160px]">
                   <MapPin className="w-4 h-4 mr-2" />
@@ -199,6 +218,27 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                   <SelectItem value="all">All Regions</SelectItem>
                   {REGIONS.map(region => (
                     <SelectItem key={region} value={region}>{region}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select 
+                value={filter.country || 'all'} 
+                onValueChange={(value) => setFilter({ ...filter, country: value === 'all' ? undefined : value })}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <Flag className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="All Countries" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Countries</SelectItem>
+                  {availableCountries.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">{country.flag}</span>
+                        {country.name}
+                      </span>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -213,10 +253,14 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1">
             <div className="px-6 pt-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="global">
                   <Trophy className="w-4 h-4 mr-2" />
                   Global
+                </TabsTrigger>
+                <TabsTrigger value="countries">
+                  <Flag className="w-4 h-4 mr-2" />
+                  Countries
                 </TabsTrigger>
                 <TabsTrigger value="regional">
                   <MapPin className="w-4 h-4 mr-2" />
@@ -267,6 +311,11 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                                     <p className="font-semibold text-foreground truncate">
                                       {entry.username}
                                     </p>
+                                    {entry.countryCode && (
+                                      <span className="text-lg" title={entry.country}>
+                                        {getCountryFlag(entry.countryCode)}
+                                      </span>
+                                    )}
                                     {entry.title && (
                                       <Badge variant="secondary" className="text-xs">
                                         {entry.title}
@@ -319,6 +368,17 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                       ))}
                     </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="countries" className="mt-0">
+                  <CountryLeaderboard 
+                    leaderboard={leaderboard}
+                    onSelectCountry={(countryCode) => {
+                      setFilter({ ...filter, country: countryCode })
+                      setActiveTab('global')
+                      toast.success(`Filtering by ${COUNTRIES.find(c => c.code === countryCode)?.name}`)
+                    }}
+                  />
                 </TabsContent>
 
                 <TabsContent value="regional" className="mt-0">

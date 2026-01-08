@@ -56,6 +56,7 @@ import {
   addGlobalLeaderboardEntry,
   calculateAccuracy
 } from '@/lib/global-leaderboard'
+import { detectUserCountry, getRegionForCountry, getCountryByCode } from '@/lib/country-flags'
 
 type AppPhase = 'login' | 'menu' | 'playing' | 'gameOver'
 
@@ -139,11 +140,21 @@ function App() {
   const [dailyStreak, setDailyStreak] = useKV<DailyStreak>('daily-streak', DEFAULT_STREAK)
   const [customDifficulties, setCustomDifficulties] = useKV<CustomDifficulty[]>('custom-difficulties', [])
   const [recentActions, setRecentActions] = useKV<string[]>('recent-actions', [])
+  const [userCountryCode, setUserCountryCode] = useKV<string | null>('user-country-code', null)
 
   useEffect(() => {
     if (soundTheme) soundSystem.setTheme(soundTheme)
     if (soundEnabled !== undefined) soundSystem.setEnabled(soundEnabled)
   }, [soundTheme, soundEnabled])
+
+  useEffect(() => {
+    if (userCountryCode === null) {
+      const detected = detectUserCountry()
+      if (detected) {
+        setUserCountryCode(detected)
+      }
+    }
+  }, [userCountryCode, setUserCountryCode])
 
   useEffect(() => {
     const activeEvents = getActiveEvents(SEASONAL_EVENTS)
@@ -276,6 +287,7 @@ function App() {
       setGlobalStats(current => updateGlobalStats(current || DEFAULT_GLOBAL_STATS, gameSession))
       
       setGlobalLeaderboard(current => {
+        const country = userCountryCode ? getCountryByCode(userCountryCode) : undefined
         const newEntry = addGlobalLeaderboardEntry(current || [], {
           userId: currentUser.id,
           username: currentUser.username,
@@ -286,7 +298,9 @@ function App() {
           targetsMissed,
           highestCombo: currentCombo,
           timestamp: Date.now(),
-          region: 'North America',
+          countryCode: userCountryCode || undefined,
+          country: country?.name,
+          region: country?.region || 'Unknown',
           badges: playerUnlocks?.unlockedProfileBadges || [],
           title: challengeData?.activeTitle || playerUnlocks?.equippedTitle
         })

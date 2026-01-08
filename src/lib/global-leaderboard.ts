@@ -13,6 +13,7 @@ export interface GlobalLeaderboardEntry {
   highestCombo: number
   timestamp: number
   rank?: number
+  countryCode?: string
   country?: string
   region?: string
   badges?: string[]
@@ -63,6 +64,7 @@ export interface LeaderboardFilter {
   timeRange: 'today' | 'week' | 'month' | 'all-time'
   difficulty?: Difficulty
   region?: string
+  country?: string
   minGames?: number
 }
 
@@ -159,6 +161,7 @@ export function filterLeaderboard(
     
     if (filter.difficulty && entry.difficulty !== filter.difficulty) return false
     if (filter.region && entry.region !== filter.region) return false
+    if (filter.country && entry.countryCode !== filter.country) return false
     
     return true
   })

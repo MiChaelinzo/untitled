@@ -29,6 +29,7 @@ import { QuickActionsMenu } from '@/components/QuickActionsMenu'
 import { CustomDifficultyBuilder } from '@/components/CustomDifficultyBuilder'
 import { GlobalLeaderboard } from '@/components/GlobalLeaderboard'
 import { CommunityStatsWidget } from '@/components/CommunityStatsWidget'
+import { CountrySelector } from '@/components/CountrySelector'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { GlobalLeaderboardEntry } from '@/lib/global-leaderboard'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
@@ -466,6 +467,8 @@ export function Menu({
 
           <TabsContent value="customize" className="space-y-8 mt-6">
             <div className="max-w-4xl mx-auto space-y-8">
+              <CountrySelector />
+              
               <VisualThemeSelector
                 currentTheme={visualTheme || 'cyberpunk'}
                 onThemeChange={(theme) => {
