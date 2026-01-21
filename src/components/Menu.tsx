@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle, Globe } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle, Globe, Eye, Broadcast } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -31,6 +31,10 @@ import { GlobalLeaderboard } from '@/components/GlobalLeaderboard'
 import { CommunityStatsWidget } from '@/components/CommunityStatsWidget'
 import { CountrySelector } from '@/components/CountrySelector'
 import { ComboBackgroundShowcase } from '@/components/ComboBackgroundShowcase'
+import { ProChallengePanel } from '@/components/ProChallengePanel'
+import { LiveEventLeaderboard, addLiveEventEntry, LiveEventConfig } from '@/components/LiveEventLeaderboard'
+import { AccessibilitySettings } from '@/components/AccessibilitySettings'
+import { AdvancedAnalytics } from '@/components/AdvancedAnalytics'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { GlobalLeaderboardEntry } from '@/lib/global-leaderboard'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
@@ -231,64 +235,79 @@ export function Menu({
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-12 bg-card/50 backdrop-blur">
-            <TabsTrigger value="play" className="flex items-center gap-2">
-              <Play size={16} weight="fill" />
-              <span className="hidden sm:inline">Play</span>
-            </TabsTrigger>
-            <TabsTrigger value="special-modes" className="flex items-center gap-2 relative">
-              <Sparkle size={16} weight="fill" />
-              <span className="hidden sm:inline">Special</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
-            </TabsTrigger>
-            <TabsTrigger value="friends" className="flex items-center gap-2">
-              <Users size={16} weight="fill" />
-              <span className="hidden sm:inline">Friends</span>
-            </TabsTrigger>
-            <TabsTrigger value="tournament" className="flex items-center gap-2">
-              <Trophy size={16} weight="fill" />
-              <span className="hidden sm:inline">1v1</span>
-            </TabsTrigger>
-            <TabsTrigger value="teams" className="flex items-center gap-2">
-              <UsersThree size={16} weight="fill" />
-              <span className="hidden sm:inline">Teams</span>
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2 relative">
-              <Calendar size={16} weight="fill" />
-              <span className="hidden sm:inline">Events</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
-            </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
-              <Medal size={16} weight="fill" />
-              <span className="hidden sm:inline">Leaders</span>
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="flex items-center gap-2">
-              <ChartBar size={16} weight="fill" />
-              <span className="hidden sm:inline">Stats</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <Lightning size={16} weight="fill" />
-              <span className="hidden sm:inline">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="flex items-center gap-2">
-              <Medal size={16} weight="fill" />
-              <span className="hidden sm:inline">Rewards</span>
-            </TabsTrigger>
-            <TabsTrigger value="challenges" className="flex items-center gap-2 relative">
-              <Target size={16} weight="fill" />
-              <span className="hidden sm:inline">Challenges</span>
-              {challengeData.activeChallenges.some(c => {
-                const progress = challengeData.progress[c.id]
-                return progress?.completed && !progress?.claimedReward
-              }) && (
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex min-w-full w-max bg-card/50 backdrop-blur">
+              <TabsTrigger value="play" className="flex items-center gap-2">
+                <Play size={16} weight="fill" />
+                <span className="hidden sm:inline">Play</span>
+              </TabsTrigger>
+              <TabsTrigger value="pro-challenge" className="flex items-center gap-2 relative">
+                <Trophy size={16} weight="fill" />
+                <span className="hidden sm:inline">Pro Challenge</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan rounded-full animate-pulse" />
+              </TabsTrigger>
+              <TabsTrigger value="live-event" className="flex items-center gap-2">
+                <Broadcast size={16} weight="fill" />
+                <span className="hidden sm:inline">Live Event</span>
+              </TabsTrigger>
+              <TabsTrigger value="special-modes" className="flex items-center gap-2 relative">
+                <Sparkle size={16} weight="fill" />
+                <span className="hidden sm:inline">Special</span>
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="customize" className="flex items-center gap-2">
-              <Palette size={16} weight="fill" />
-              <span className="hidden sm:inline">Customize</span>
-            </TabsTrigger>
-          </TabsList>
+              </TabsTrigger>
+              <TabsTrigger value="friends" className="flex items-center gap-2">
+                <Users size={16} weight="fill" />
+                <span className="hidden sm:inline">Friends</span>
+              </TabsTrigger>
+              <TabsTrigger value="tournament" className="flex items-center gap-2">
+                <Trophy size={16} weight="fill" />
+                <span className="hidden sm:inline">1v1</span>
+              </TabsTrigger>
+              <TabsTrigger value="teams" className="flex items-center gap-2">
+                <UsersThree size={16} weight="fill" />
+                <span className="hidden sm:inline">Teams</span>
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex items-center gap-2 relative">
+                <Calendar size={16} weight="fill" />
+                <span className="hidden sm:inline">Events</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
+              </TabsTrigger>
+              <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+                <Medal size={16} weight="fill" />
+                <span className="hidden sm:inline">Leaders</span>
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="flex items-center gap-2">
+                <ChartBar size={16} weight="fill" />
+                <span className="hidden sm:inline">Stats</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <Lightning size={16} weight="fill" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="flex items-center gap-2">
+                <Medal size={16} weight="fill" />
+                <span className="hidden sm:inline">Rewards</span>
+              </TabsTrigger>
+              <TabsTrigger value="challenges" className="flex items-center gap-2 relative">
+                <Target size={16} weight="fill" />
+                <span className="hidden sm:inline">Challenges</span>
+                {challengeData.activeChallenges.some(c => {
+                  const progress = challengeData.progress[c.id]
+                  return progress?.completed && !progress?.claimedReward
+                }) && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="customize" className="flex items-center gap-2">
+                <Palette size={16} weight="fill" />
+                <span className="hidden sm:inline">Customize</span>
+              </TabsTrigger>
+              <TabsTrigger value="accessibility" className="flex items-center gap-2">
+                <Eye size={16} weight="fill" />
+                <span className="hidden sm:inline">Accessibility</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="play" className="space-y-6 mt-6">
             <motion.div
@@ -630,7 +649,44 @@ export function Menu({
             />
           </TabsContent>
 
+          <TabsContent value="pro-challenge" className="space-y-6 mt-6">
+            <ProChallengePanel
+              onStartProChallenge={(proPlayerId, difficulty) => {
+                onStartGame(difficulty, false, undefined, false, `pro-${proPlayerId}`)
+              }}
+              playerBestScores={{}}
+            />
+          </TabsContent>
+
+          <TabsContent value="live-event" className="space-y-6 mt-6">
+            <LiveEventLeaderboard
+              onStartEvent={(eventId) => {
+                toast.success('Live event started! Start playing to appear on the leaderboard.')
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="accessibility" className="space-y-6 mt-6">
+            <AccessibilitySettings 
+              onSettingsChange={() => {
+                toast.success('Accessibility settings updated')
+              }}
+            />
+          </TabsContent>
+
+
           <TabsContent value="analytics" className="space-y-6 mt-6">
+            {gameSessions && gameSessions.length > 0 && (
+              <AdvancedAnalytics
+                gameSessions={gameSessions}
+                totalGamesPlayed={stats.totalGamesPlayed}
+                totalTargetsHit={stats.totalTargetsHit}
+                totalTargetsMissed={stats.totalTargetsMissed}
+                highestScore={stats.highestScore}
+                highestCombo={stats.highestCombo}
+              />
+            )}
+
             {onAddRecentAction && recentActions && (
               <QuickActionsMenu
                 onQuickPlay={() => {
