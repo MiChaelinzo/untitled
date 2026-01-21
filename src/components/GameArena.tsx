@@ -13,6 +13,7 @@ import { PowerUpCollectionEffect } from '@/components/PowerUpCollectionEffect'
 import { PowerUpScreenEffects } from '@/components/PowerUpScreenEffects'
 import { InGameBackground } from '@/components/InGameBackground'
 import { ComboBackgroundUnlockNotification } from '@/components/ComboBackgroundUnlockNotification'
+import { GameplayMouseTrail } from '@/components/GameplayMouseTrail'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -67,6 +68,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const difficultyConfig = DIFFICULTY_CONFIG[difficulty]
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [targetSkin] = useKV<TargetSkin>('target-skin', 'default')
+  const [gameplayParticleIntensity] = useKV<'low' | 'medium' | 'high'>('gameplay-particle-intensity', 'medium')
   const adaptiveSystemRef = useRef<AdaptiveDifficultySystem | null>(null)
   const [showAdaptiveIndicator, setShowAdaptiveIndicator] = useState(false)
   const [lastAdjustmentDirection, setLastAdjustmentDirection] = useState<'easier' | 'harder' | 'maintain'>('maintain')
@@ -662,6 +664,14 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         round={gameState.round}
         eventGameModeId={eventGameModeId}
         onBackgroundUnlock={handleBackgroundUnlock}
+      />
+      
+      <GameplayMouseTrail
+        enabled={true}
+        combo={gameState.combo}
+        isPaused={gameState.phase !== 'playing'}
+        color="primary"
+        intensity={gameplayParticleIntensity || 'medium'}
       />
       
       <AnimatePresence>

@@ -103,6 +103,7 @@ export function Menu({
   const [backgroundVariant, setBackgroundVariant] = useKV<'particles' | 'waves' | 'grid' | 'nebula' | 'matrix' | 'aurora' | 'constellation' | 'hexagon' | 'spirals' | 'binary-rain' | 'geometric'>('background-variant', 'particles')
   const [mouseTrailEnabled, setMouseTrailEnabled] = useKV<boolean>('mouse-trail-enabled', true)
   const [mouseTrailVariant, setMouseTrailVariant] = useKV<'dots' | 'glow' | 'sparkle' | 'line'>('mouse-trail-variant', 'glow')
+  const [gameplayParticleIntensity, setGameplayParticleIntensity] = useKV<'low' | 'medium' | 'high'>('gameplay-particle-intensity', 'medium')
   const [activeTab, setActiveTab] = useState('play')
   const [showSpecialModeBanner, setShowSpecialModeBanner] = useState(true)
   const [showGlobalLeaderboard, setShowGlobalLeaderboard] = useState(false)
@@ -536,6 +537,33 @@ export function Menu({
                         </SelectContent>
                       </Select>
                     )}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Gameplay Particle Trail
+                      </label>
+                    </div>
+                    <Select 
+                      value={gameplayParticleIntensity || 'medium'} 
+                      onValueChange={(value: any) => {
+                        setGameplayParticleIntensity(value)
+                        toast.success(`Gameplay particle intensity: ${value}`)
+                      }}
+                    >
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low - Minimal particles</SelectItem>
+                        <SelectItem value="medium">Medium - Balanced effects</SelectItem>
+                        <SelectItem value="high">High - Maximum particles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Dynamic particle trails during gameplay that respond to cursor speed and combos
+                    </p>
                   </div>
                 </div>
               </Card>
