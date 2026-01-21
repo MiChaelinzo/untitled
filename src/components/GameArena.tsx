@@ -11,6 +11,7 @@ import { PowerUp } from '@/components/PowerUp'
 import { ActivePowerUpsDisplay } from '@/components/ActivePowerUpsDisplay'
 import { PowerUpCollectionEffect } from '@/components/PowerUpCollectionEffect'
 import { PowerUpScreenEffects } from '@/components/PowerUpScreenEffects'
+import { InGameBackground } from '@/components/InGameBackground'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -645,6 +646,14 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
+      <InGameBackground
+        difficulty={gameState.difficulty}
+        score={gameState.score}
+        combo={gameState.combo}
+        round={gameState.round}
+        eventGameModeId={eventGameModeId}
+      />
+      
       {eventGameMode && <EventModeEffects eventGameMode={eventGameMode} />}
       
       <AnimatePresence>
