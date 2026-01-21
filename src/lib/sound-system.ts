@@ -1,4 +1,4 @@
-type SoundType = 'hit' | 'miss' | 'combo' | 'roundStart' | 'gameOver'
+type SoundType = 'hit' | 'miss' | 'combo' | 'roundStart' | 'gameOver' | 'powerup'
 export type SoundTheme = 'sci-fi' | 'retro' | 'minimal'
 
 class SoundSystem {
@@ -71,6 +71,9 @@ class SoundSystem {
       case 'gameOver':
         this.playSciFiGameOver()
         break
+      case 'powerup':
+        this.playSciFiPowerUp()
+        break
     }
   }
 
@@ -91,6 +94,9 @@ class SoundSystem {
       case 'gameOver':
         this.playRetroGameOver()
         break
+      case 'powerup':
+        this.playRetroPowerUp()
+        break
     }
   }
 
@@ -110,6 +116,9 @@ class SoundSystem {
         break
       case 'gameOver':
         this.playMinimalGameOver()
+        break
+      case 'powerup':
+        this.playMinimalPowerUp()
         break
     }
   }
@@ -493,6 +502,91 @@ class SoundSystem {
 
     oscillator.start(now)
     oscillator.stop(now + 0.3)
+  }
+
+  private playSciFiPowerUp() {
+    if (!this.audioContext || !this.masterGain) return
+
+    const now = this.audioContext.currentTime
+    const frequencies = [440, 554, 659, 880, 1109]
+
+    frequencies.forEach((freq, index) => {
+      const oscillator = this.audioContext!.createOscillator()
+      const gainNode = this.audioContext!.createGain()
+      const filter = this.audioContext!.createBiquadFilter()
+      const startTime = now + (index * 0.08)
+
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(freq, startTime)
+      oscillator.frequency.exponentialRampToValueAtTime(freq * 1.3, startTime + 0.15)
+      
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(3000, startTime)
+      filter.frequency.exponentialRampToValueAtTime(5000, startTime + 0.15)
+      filter.Q.setValueAtTime(8, startTime)
+
+      gainNode.gain.setValueAtTime(0, startTime)
+      gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.02)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15)
+
+      oscillator.connect(filter)
+      filter.connect(gainNode)
+      gainNode.connect(this.masterGain!)
+
+      oscillator.start(startTime)
+      oscillator.stop(startTime + 0.15)
+    })
+  }
+
+  private playRetroPowerUp() {
+    if (!this.audioContext || !this.masterGain) return
+
+    const now = this.audioContext.currentTime
+    const arpeggio = [523, 659, 784, 1047, 1319]
+
+    arpeggio.forEach((freq, index) => {
+      const oscillator = this.audioContext!.createOscillator()
+      const gainNode = this.audioContext!.createGain()
+      const startTime = now + (index * 0.06)
+
+      oscillator.type = 'square'
+      oscillator.frequency.setValueAtTime(freq, startTime)
+
+      gainNode.gain.setValueAtTime(0.3, startTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.12)
+
+      oscillator.connect(gainNode)
+      gainNode.connect(this.masterGain!)
+
+      oscillator.start(startTime)
+      oscillator.stop(startTime + 0.12)
+    })
+  }
+
+  private playMinimalPowerUp() {
+    if (!this.audioContext || !this.masterGain) return
+
+    const now = this.audioContext.currentTime
+    
+    for (let i = 0; i < 3; i++) {
+      const oscillator = this.audioContext.createOscillator()
+      const gainNode = this.audioContext.createGain()
+      const startTime = now + (i * 0.1)
+      const freq = 1000 + (i * 300)
+
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(freq, startTime)
+
+      gainNode.gain.setValueAtTime(0, startTime)
+      gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.02)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2)
+
+      oscillator.connect(gainNode)
+      gainNode.connect(this.masterGain)
+
+      oscillator.start(startTime)
+      oscillator.stop(startTime + 0.2)
+    }
   }
 
   private createNoiseBuffer(duration: number): AudioBuffer {

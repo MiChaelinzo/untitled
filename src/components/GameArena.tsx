@@ -9,6 +9,8 @@ import { EventChallengeProgress } from '@/components/EventChallengeProgress'
 import { EventModeEffects } from '@/components/EventModeEffects'
 import { PowerUp } from '@/components/PowerUp'
 import { ActivePowerUpsDisplay } from '@/components/ActivePowerUpsDisplay'
+import { PowerUpCollectionEffect } from '@/components/PowerUpCollectionEffect'
+import { PowerUpScreenEffects } from '@/components/PowerUpScreenEffects'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
 import { soundSystem } from '@/lib/sound-system'
@@ -88,6 +90,8 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const [activePowerUps, setActivePowerUps] = useState<ActivePowerUp[]>([])
   const [lastPowerUpSpawn, setLastPowerUpSpawn] = useState(0)
   const [multiShotCounter, setMultiShotCounter] = useState(0)
+  const [collectionEffects, setCollectionEffects] = useState<Array<{ id: string; x: number; y: number; color: string; icon: string }>>([])
+
   
   useEffect(() => {
     if (useAdaptiveDifficulty && !adaptiveSystemRef.current) {
@@ -471,6 +475,17 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     const powerUp = powerUps.find(p => p.id === powerUpId)
     if (!powerUp) return
 
+    setCollectionEffects(prev => [
+      ...prev,
+      {
+        id: `collection-${Date.now()}-${Math.random()}`,
+        x: powerUp.x,
+        y: powerUp.y,
+        color: powerUp.color,
+        icon: powerUp.icon
+      }
+    ])
+
     setPowerUps(prev => prev.filter(p => p.id !== powerUpId))
     
     const newActivePowerUp: ActivePowerUp = {
@@ -485,7 +500,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       setMultiShotCounter(5)
     }
     
-    soundSystem.play('combo', 5)
+    soundSystem.play('powerup')
     toast.success(`${powerUp.icon} ${powerUp.name}!`, {
       description: powerUp.description,
       duration: 2000
@@ -632,6 +647,12 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
       {eventGameMode && <EventModeEffects eventGameMode={eventGameMode} />}
       
+      <AnimatePresence>
+        {activePowerUps.length > 0 && (
+          <PowerUpScreenEffects activePowerUps={activePowerUps} />
+        )}
+      </AnimatePresence>
+      
       {isPractice && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-accent/20 border border-accent rounded-lg px-4 py-2">
           <span className="text-accent font-bold uppercase tracking-wider text-sm">Practice Mode</span>
@@ -689,6 +710,21 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
                 key={powerUp.id}
                 powerUp={powerUp}
                 onClick={() => handlePowerUpCollect(powerUp.id)}
+              />
+            ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {collectionEffects.map(effect => (
+              <PowerUpCollectionEffect
+                key={effect.id}
+                x={effect.x}
+                y={effect.y}
+                color={effect.color}
+                icon={effect.icon}
+                onComplete={() => {
+                  setCollectionEffects(prev => prev.filter(e => e.id !== effect.id))
+                }}
               />
             ))}
           </AnimatePresence>
