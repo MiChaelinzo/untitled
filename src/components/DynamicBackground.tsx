@@ -50,10 +50,10 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         }
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
-        this.size = Math.random() * 2 + 0.5
-        this.speedX = (Math.random() - 0.5) * 0.5
-        this.speedY = (Math.random() - 0.5) * 0.5
-        this.opacity = Math.random() * 0.5 + 0.2
+        this.size = Math.random() * 1.5 + 0.5
+        this.speedX = (Math.random() - 0.5) * 0.15
+        this.speedY = (Math.random() - 0.5) * 0.15
+        this.opacity = Math.random() * 0.3 + 0.1
       }
 
       update() {
@@ -71,6 +71,11 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
+        
+        ctx.shadowBlur = 8
+        ctx.shadowColor = `rgba(100, 150, 255, ${this.opacity * 0.5})`
+        ctx.fill()
+        ctx.shadowBlur = 0
       }
     }
 
@@ -264,15 +269,15 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         if (!canvas) return
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
-        this.size = Math.random() * 2 + 0.5
-        this.opacity = Math.random() * 0.8 + 0.2
-        this.twinkleSpeed = 0.02 + Math.random() * 0.03
+        this.size = Math.random() * 1.5 + 0.5
+        this.opacity = Math.random() * 0.6 + 0.3
+        this.twinkleSpeed = 0.008 + Math.random() * 0.012
         this.twinklePhase = Math.random() * Math.PI * 2
       }
 
       update() {
         this.twinklePhase += this.twinkleSpeed
-        this.opacity = 0.3 + Math.sin(this.twinklePhase) * 0.5
+        this.opacity = 0.3 + Math.sin(this.twinklePhase) * 0.3
       }
 
       draw() {
@@ -281,6 +286,11 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
+        
+        ctx.shadowBlur = 6
+        ctx.shadowColor = `rgba(220, 230, 255, ${this.opacity * 0.8})`
+        ctx.fill()
+        ctx.shadowBlur = 0
       }
     }
 
@@ -544,28 +554,28 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
     }
 
     if (variant === 'particles') {
-      particles = Array.from({ length: 100 }, () => new Particle())
+      particles = Array.from({ length: 50 }, () => new Particle())
     } else if (variant === 'waves') {
-      waves = Array.from({ length: 5 }, (_, i) => new Wave(i))
+      waves = Array.from({ length: 3 }, (_, i) => new Wave(i))
     } else if (variant === 'grid') {
-      for (let i = 0; i <= 20; i++) {
+      for (let i = 0; i <= 15; i++) {
         gridLines.push(new GridLine(true, i))
         gridLines.push(new GridLine(false, i))
       }
     } else if (variant === 'matrix') {
-      matrixColumns = Array.from({ length: 50 }, () => new MatrixColumn())
+      matrixColumns = Array.from({ length: 25 }, () => new MatrixColumn())
     } else if (variant === 'aurora') {
-      auroraLayers = Array.from({ length: 4 }, (_, i) => new AuroraLayer(i))
+      auroraLayers = Array.from({ length: 3 }, (_, i) => new AuroraLayer(i))
     } else if (variant === 'constellation') {
-      stars = Array.from({ length: 200 }, () => new Star())
+      stars = Array.from({ length: 150 }, () => new Star())
     } else if (variant === 'hexagon') {
-      hexagons = Array.from({ length: 30 }, () => new Hexagon())
+      hexagons = Array.from({ length: 15 }, () => new Hexagon())
     } else if (variant === 'spirals') {
-      spirals = Array.from({ length: 8 }, () => new Spiral())
+      spirals = Array.from({ length: 4 }, () => new Spiral())
     } else if (variant === 'binary-rain') {
-      binaryDrops = Array.from({ length: 60 }, () => new BinaryDrop())
+      binaryDrops = Array.from({ length: 30 }, () => new BinaryDrop())
     } else if (variant === 'geometric') {
-      geometricShapes = Array.from({ length: 40 }, () => new GeometricShape())
+      geometricShapes = Array.from({ length: 20 }, () => new GeometricShape())
     }
 
     const animate = () => {
@@ -584,7 +594,7 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
             const distance = Math.sqrt(dx * dx + dy * dy)
 
             if (distance < 100) {
-              ctx.strokeStyle = `rgba(100, 150, 255, ${0.15 * (1 - distance / 100)})`
+              ctx.strokeStyle = `rgba(100, 150, 255, ${0.08 * (1 - distance / 100)})`
               ctx.lineWidth = 0.5
               ctx.beginPath()
               ctx.moveTo(particles[i].x, particles[i].y)
@@ -604,19 +614,36 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
           line.draw()
         })
       } else if (variant === 'nebula') {
+        const time = Date.now() * 0.0001
         const gradient = ctx.createRadialGradient(
-          canvas.width / 2,
-          canvas.height / 2,
+          canvas.width / 2 + Math.sin(time) * 100,
+          canvas.height / 2 + Math.cos(time) * 100,
           0,
           canvas.width / 2,
           canvas.height / 2,
-          canvas.width / 2
+          Math.max(canvas.width, canvas.height) * 0.6
         )
-        gradient.addColorStop(0, 'rgba(100, 50, 200, 0.1)')
-        gradient.addColorStop(0.5, 'rgba(50, 100, 255, 0.05)')
+        gradient.addColorStop(0, 'rgba(120, 80, 200, 0.08)')
+        gradient.addColorStop(0.3, 'rgba(80, 120, 255, 0.05)')
+        gradient.addColorStop(0.6, 'rgba(100, 100, 200, 0.03)')
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        for (let i = 0; i < 80; i++) {
+          const x = (Math.sin(time * 0.3 + i * 0.5) * canvas.width * 0.3) + canvas.width / 2
+          const y = (Math.cos(time * 0.2 + i * 0.3) * canvas.height * 0.3) + canvas.height / 2
+          const size = Math.random() * 1.5 + 0.5
+          const opacity = (Math.sin(time * 2 + i) * 0.15) + 0.25
+          
+          ctx.fillStyle = `rgba(220, 230, 255, ${opacity})`
+          ctx.shadowBlur = 4
+          ctx.shadowColor = `rgba(220, 230, 255, ${opacity * 0.5})`
+          ctx.beginPath()
+          ctx.arc(x, y, size, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.shadowBlur = 0
+        }
       } else if (variant === 'matrix') {
         matrixColumns.forEach(col => {
           col.update()
@@ -640,7 +667,7 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
             const distance = Math.sqrt(dx * dx + dy * dy)
 
             if (distance < 150) {
-              ctx.strokeStyle = `rgba(220, 230, 255, ${0.1 * (1 - distance / 150)})`
+              ctx.strokeStyle = `rgba(220, 230, 255, ${0.05 * (1 - distance / 150)})`
               ctx.lineWidth = 0.5
               ctx.beginPath()
               ctx.moveTo(stars[i].x, stars[i].y)
@@ -735,14 +762,12 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${colors.color1} rounded-full blur-3xl animate-pulse`} />
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${colors.color1} rounded-full blur-3xl opacity-30`} />
         <div 
-          className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${colors.color2} rounded-full blur-3xl animate-pulse`}
-          style={{ animationDelay: '1s' }} 
+          className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${colors.color2} rounded-full blur-3xl opacity-25`}
         />
         <div 
-          className={`absolute top-1/2 right-1/3 w-80 h-80 ${colors.color3} rounded-full blur-3xl animate-pulse`}
-          style={{ animationDelay: '2s' }} 
+          className={`absolute top-1/2 right-1/3 w-80 h-80 ${colors.color3} rounded-full blur-3xl opacity-20`}
         />
       </motion.div>
     </>
