@@ -1,8 +1,30 @@
 {
-    "name": "spark-template",
+    "name": "c9-reflex-arena",
     "private": true,
-    "version": "0.0.0",
+    "version": "2.0.0",
     "type": "module",
+    "description": "An electrifying reaction-time challenge game for Cloud9 event booths - Built for Sky's the Limit Hackathon",
+    "keywords": [
+        "c9",
+        "cloud9",
+        "reflex",
+        "game",
+        "esports",
+        "jetbrains",
+        "hackathon",
+        "event-game",
+        "reaction-time"
+    ],
+    "author": "C9 Reflex Arena Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/your-username/c9-reflex-arena"
+    },
+    "bugs": {
+        "url": "https://github.com/your-username/c9-reflex-arena/issues"
+    },
+    "homepage": "https://github.com/your-username/c9-reflex-arena#readme",
     "scripts": {
         "dev": "vite",
         "kill": "fuser -k 5000/tcp",
