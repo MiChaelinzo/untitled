@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Difficulty } from '@/lib/game-types'
 import { useEffect, useState } from 'react'
 import { EventGameModeId } from '@/lib/event-game-modes'
+import { getComboBackgroundVariant, ComboBackgroundVariant } from '@/lib/combo-backgrounds'
 
 interface InGameBackgroundProps {
   difficulty: Difficulty
@@ -9,26 +10,40 @@ interface InGameBackgroundProps {
   combo: number
   round: number
   eventGameModeId?: EventGameModeId
+  onBackgroundUnlock?: (variant: ComboBackgroundVariant) => void
 }
 
-export function InGameBackground({ difficulty, score, combo, round, eventGameModeId }: InGameBackgroundProps) {
+export function InGameBackground({ difficulty, score, combo, round, eventGameModeId, onBackgroundUnlock }: InGameBackgroundProps) {
   const [particleCount, setParticleCount] = useState(50)
   const [intensity, setIntensity] = useState(1)
+  const [currentBackground, setCurrentBackground] = useState<ComboBackgroundVariant | null>(null)
 
   useEffect(() => {
-    const difficultyMultiplier = {
-      easy: 0.6,
-      medium: 1,
-      hard: 1.5,
-      insane: 2.5
-    }[difficulty]
+    if (!eventGameModeId) {
+      const newBackground = getComboBackgroundVariant(combo)
+      
+      if (currentBackground && newBackground.id !== currentBackground.id && onBackgroundUnlock) {
+        onBackgroundUnlock(newBackground)
+      }
+      
+      setCurrentBackground(newBackground)
+      setIntensity(newBackground.intensity)
+    } else {
+      const difficultyMultiplier = {
+        easy: 0.6,
+        medium: 1,
+        hard: 1.5,
+        insane: 2.5
+      }[difficulty]
 
-    const comboBoost = Math.min(combo / 10, 2)
-    const roundMultiplier = 1 + (round - 1) * 0.3
+      const comboBoost = Math.min(combo / 10, 2)
+      const roundMultiplier = 1 + (round - 1) * 0.3
 
-    setIntensity(difficultyMultiplier * (1 + comboBoost) * roundMultiplier)
+      setIntensity(difficultyMultiplier * (1 + comboBoost) * roundMultiplier)
+    }
+    
     setParticleCount(Math.floor(50 + (difficulty === 'insane' ? 100 : difficulty === 'hard' ? 50 : 0)))
-  }, [difficulty, combo, round])
+  }, [difficulty, combo, round, eventGameModeId, currentBackground, onBackgroundUnlock])
 
   const getColorScheme = () => {
     if (eventGameModeId === 'winter-frostbite') return { primary: 'rgba(147, 197, 253, 0.5)', secondary: 'rgba(191, 219, 254, 0.3)' }
@@ -41,6 +56,13 @@ export function InGameBackground({ difficulty, score, combo, round, eventGameMod
     if (eventGameModeId === 'neon-pulse') return { primary: 'rgba(236, 72, 153, 0.5)', secondary: 'rgba(59, 130, 246, 0.3)' }
     if (eventGameModeId === 'spring-butterfly') return { primary: 'rgba(74, 222, 128, 0.5)', secondary: 'rgba(251, 191, 36, 0.3)' }
     
+    if (currentBackground && !eventGameModeId) {
+      return { 
+        primary: currentBackground.colorPrimary, 
+        secondary: currentBackground.colorSecondary 
+      }
+    }
+    
     if (combo > 20) return { primary: 'rgba(236, 72, 153, 0.4)', secondary: 'rgba(124, 58, 237, 0.3)' }
     if (combo > 10) return { primary: 'rgba(59, 130, 246, 0.4)', secondary: 'rgba(16, 185, 129, 0.3)' }
     if (difficulty === 'insane') return { primary: 'rgba(239, 68, 68, 0.4)', secondary: 'rgba(245, 158, 11, 0.3)' }
@@ -50,6 +72,7 @@ export function InGameBackground({ difficulty, score, combo, round, eventGameMod
   }
 
   const colors = getColorScheme()
+  const activeVariant = currentBackground?.variant || 'particles'
 
   if (eventGameModeId === 'ocean-wave') {
     return <OceanWaveBackground colors={colors} intensity={intensity} />
@@ -67,6 +90,35 @@ export function InGameBackground({ difficulty, score, combo, round, eventGameMod
     return <CyberSpeedBackground colors={colors} intensity={intensity} />
   }
 
+  if (!eventGameModeId && currentBackground) {
+    switch (activeVariant) {
+      case 'particles':
+        return <EasyBackground colors={colors} intensity={intensity} />
+      case 'waves':
+        return <MediumBackground colors={colors} intensity={intensity} />
+      case 'aurora':
+        return <AuroraBackground colors={colors} intensity={intensity} />
+      case 'constellation':
+        return <ConstellationBackground colors={colors} intensity={intensity} />
+      case 'matrix':
+        return <MatrixBackground colors={colors} intensity={intensity} />
+      case 'nebula':
+        return <NebulaBackground colors={colors} intensity={intensity} combo={combo} />
+      case 'binary-rain':
+        return <BinaryRainBackground colors={colors} intensity={intensity} />
+      case 'spirals':
+        return <SpiralsBackground colors={colors} intensity={intensity} />
+      case 'geometric':
+        return <GeometricBackground colors={colors} intensity={intensity} />
+      case 'hexagon':
+        return <HexagonBackground colors={colors} intensity={intensity} />
+      case 'grid':
+        return <HardBackground colors={colors} intensity={intensity} particleCount={particleCount} />
+      default:
+        return <EasyBackground colors={colors} intensity={intensity} />
+    }
+  }
+
   if (difficulty === 'insane') {
     return <InsaneBackground colors={colors} intensity={intensity} combo={combo} />
   }
@@ -79,15 +131,15 @@ export function InGameBackground({ difficulty, score, combo, round, eventGameMod
     return <MediumBackground colors={colors} intensity={intensity} />
   }
 
-  return <EasyBackground colors={colors} />
+  return <EasyBackground colors={colors} intensity={intensity} />
 }
 
-function EasyBackground({ colors }: { colors: { primary: string; secondary: string } }) {
+function EasyBackground({ colors, intensity = 1 }: { colors: { primary: string; secondary: string }; intensity?: number }) {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-card" />
       
-      {Array.from({ length: 50 }).map((_, i) => (
+      {Array.from({ length: Math.floor(50 * intensity) }).map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
@@ -100,8 +152,8 @@ function EasyBackground({ colors }: { colors: { primary: string; secondary: stri
             boxShadow: `0 0 ${Math.random() * 8 + 4}px ${i % 2 === 0 ? colors.primary : colors.secondary}`,
           }}
           animate={{
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6 * intensity, 0.3],
+            scale: [1, 1.2 * intensity, 1],
           }}
           transition={{
             duration: Math.random() * 5 + 8,
@@ -118,8 +170,8 @@ function EasyBackground({ colors }: { colors: { primary: string; secondary: stri
           background: `radial-gradient(circle at 50% 50%, ${colors.primary}, transparent 60%)`,
         }}
         animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.08, 0.12, 0.08],
+          scale: [1, 1.1 * intensity, 1],
+          opacity: [0.08, 0.12 * intensity, 0.08],
         }}
         transition={{
           duration: 10,
@@ -821,6 +873,449 @@ function CyberSpeedBackground({ colors, intensity }: { colors: { primary: string
         }}
         transition={{
           duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+    </div>
+  )
+}
+
+function AuroraBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-950/20 via-cyan-950/15 to-purple-950/20" />
+      
+      {Array.from({ length: 5 }).map((_, i) => (
+        <motion.div
+          key={`aurora-${i}`}
+          className="absolute w-full blur-2xl"
+          style={{
+            height: '40%',
+            top: `${20 + i * 15}%`,
+            background: `linear-gradient(90deg, transparent, ${colors.primary}, ${colors.secondary}, transparent)`,
+            opacity: 0.15,
+          }}
+          animate={{
+            x: [-200, 200, -200],
+            opacity: [0.1, 0.2 * intensity, 0.1],
+          }}
+          transition={{
+            duration: 15 + i * 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 2,
+          }}
+        />
+      ))}
+
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 50% 30%, ${colors.primary}, transparent 70%)`,
+        }}
+        animate={{
+          scale: [1, 1.3 * intensity, 1],
+          opacity: [0.08, 0.15, 0.08],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+    </div>
+  )
+}
+
+function ConstellationBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-950/30 to-black" />
+      
+      {Array.from({ length: 100 }).map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute rounded-full"
+          style={{
+            width: Math.random() * 3 + 1,
+            height: Math.random() * 3 + 1,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            background: 'white',
+            boxShadow: `0 0 ${Math.random() * 10 + 5}px rgba(255, 255, 255, 0.8)`,
+          }}
+          animate={{
+            opacity: [0.3, 0.8 * intensity, 0.3],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: Math.random() * 3 + 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: Math.random() * 5,
+          }}
+        />
+      ))}
+
+      {Array.from({ length: 20 }).map((_, i) => (
+        <svg key={`line-${i}`} className="absolute inset-0 pointer-events-none" style={{ opacity: 0.15 }}>
+          <motion.line
+            x1={`${Math.random() * 100}%`}
+            y1={`${Math.random() * 100}%`}
+            x2={`${Math.random() * 100}%`}
+            y2={`${Math.random() * 100}%`}
+            stroke={colors.primary}
+            strokeWidth="1"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: [0, 1, 0] }}
+            transition={{
+              duration: 8 + Math.random() * 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: Math.random() * 5,
+            }}
+          />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+function MatrixBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-black" />
+      
+      {Array.from({ length: 20 }).map((_, i) => (
+        <motion.div
+          key={`matrix-${i}`}
+          className="absolute font-mono text-xs"
+          style={{
+            left: `${(i / 20) * 100}%`,
+            color: colors.primary,
+            textShadow: `0 0 8px ${colors.primary}`,
+            opacity: 0.6,
+          }}
+          animate={{
+            y: [-100, window.innerHeight + 100],
+          }}
+          transition={{
+            duration: (5 / intensity) + Math.random() * 3,
+            repeat: Infinity,
+            ease: "linear",
+            delay: Math.random() * 3,
+          }}
+        >
+          {Array.from({ length: 20 }).map((_, j) => (
+            <div key={j}>
+              {Math.random() > 0.5 ? '1' : '0'}
+            </div>
+          ))}
+        </motion.div>
+      ))}
+
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${colors.secondary}, transparent 60%)`,
+        }}
+        animate={{
+          scale: [1, 1.2 * intensity, 1],
+          opacity: [0.05, 0.12, 0.05],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+    </div>
+  )
+}
+
+function NebulaBackground({ colors, intensity, combo }: { colors: { primary: string; secondary: string }; intensity: number; combo: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 via-black to-pink-950/40" />
+      
+      {Array.from({ length: 6 }).map((_, i) => (
+        <motion.div
+          key={`nebula-${i}`}
+          className="absolute rounded-full blur-3xl"
+          style={{
+            width: 400 + Math.random() * 200,
+            height: 400 + Math.random() * 200,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            background: `radial-gradient(circle, ${i % 2 === 0 ? colors.primary : colors.secondary}, transparent)`,
+          }}
+          animate={{
+            x: [0, Math.random() * 200 - 100],
+            y: [0, Math.random() * 200 - 100],
+            scale: [1, 1.3 * intensity, 1],
+            opacity: [0.15, 0.3, 0.15],
+          }}
+          transition={{
+            duration: 20 + i * 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 2,
+          }}
+        />
+      ))}
+
+      {Array.from({ length: 80 }).map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute rounded-full"
+          style={{
+            width: Math.random() * 2 + 0.5,
+            height: Math.random() * 2 + 0.5,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            background: 'white',
+            boxShadow: `0 0 ${Math.random() * 6 + 3}px white`,
+          }}
+          animate={{
+            opacity: [0.3, 0.8, 0.3],
+          }}
+          transition={{
+            duration: Math.random() * 3 + 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: Math.random() * 2,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function BinaryRainBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-cyan-950/20 to-black" />
+      
+      {Array.from({ length: 30 }).map((_, i) => (
+        <motion.div
+          key={`binary-${i}`}
+          className="absolute font-mono text-sm"
+          style={{
+            left: `${(i / 30) * 100}%`,
+            color: colors.primary,
+            textShadow: `0 0 8px ${colors.primary}`,
+            opacity: 0.5,
+          }}
+          animate={{
+            y: [-100, window.innerHeight + 100],
+          }}
+          transition={{
+            duration: (4 / intensity) + Math.random() * 2,
+            repeat: Infinity,
+            ease: "linear",
+            delay: Math.random() * 2,
+          }}
+        >
+          {Array.from({ length: 15 }).map((_, j) => (
+            <div key={j}>
+              {Math.random() > 0.5 ? '1' : '0'}
+            </div>
+          ))}
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+function SpiralsBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-amber-950/20 to-background" />
+      
+      {Array.from({ length: 3 }).map((_, i) => (
+        <motion.div
+          key={`spiral-${i}`}
+          className="absolute inset-0"
+          style={{
+            background: `conic-gradient(from ${i * 120}deg, transparent, ${colors.primary}, ${colors.secondary}, transparent)`,
+            opacity: 0.12,
+          }}
+          animate={{
+            rotate: [i * 120, i * 120 + 360],
+          }}
+          transition={{
+            duration: 40 / intensity,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+      ))}
+
+      {Array.from({ length: 60 }).map((_, i) => {
+        const angle = (i / 60) * Math.PI * 2
+        const radius = 200 + (i % 5) * 80
+        
+        return (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute rounded-full"
+            style={{
+              width: Math.random() * 4 + 2,
+              height: Math.random() * 4 + 2,
+              background: i % 2 === 0 ? colors.primary : colors.secondary,
+              boxShadow: `0 0 15px currentColor`,
+            }}
+            animate={{
+              x: [
+                Math.cos(angle) * radius + window.innerWidth / 2,
+                Math.cos(angle + Math.PI * 2) * radius + window.innerWidth / 2,
+              ],
+              y: [
+                Math.sin(angle) * radius + window.innerHeight / 2,
+                Math.sin(angle + Math.PI * 2) * radius + window.innerHeight / 2,
+              ],
+              opacity: [0.3, 0.7 * intensity, 0.3],
+            }}
+            transition={{
+              duration: 15 / intensity,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+function GeometricBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-red-950/30 via-black to-pink-950/30" />
+      
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={`shape-${i}`}
+          className="absolute"
+          style={{
+            width: 150 + Math.random() * 100,
+            height: 150 + Math.random() * 100,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            border: `2px solid ${i % 2 === 0 ? colors.primary : colors.secondary}`,
+            boxShadow: `0 0 20px ${i % 2 === 0 ? colors.primary : colors.secondary}`,
+            transform: `rotate(${Math.random() * 360}deg)`,
+          }}
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.2 * intensity, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 20 + i * 3,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+      ))}
+
+      {Array.from({ length: 15 }).map((_, i) => (
+        <motion.div
+          key={`triangle-${i}`}
+          className="absolute"
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: '50px solid transparent',
+            borderRight: '50px solid transparent',
+            borderBottom: `100px solid ${colors.primary}`,
+            opacity: 0.15,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            rotate: [0, 360],
+            y: [0, -100, 0],
+          }}
+          transition={{
+            duration: 15 + Math.random() * 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: Math.random() * 5,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function HexagonBackground({ colors, intensity }: { colors: { primary: string; secondary: string }; intensity: number }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 via-black to-fuchsia-950/40" />
+      
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          background: `
+            repeating-conic-gradient(
+              from 0deg at 50% 50%,
+              transparent 0deg,
+              ${colors.primary} 60deg,
+              transparent 120deg
+            )
+          `,
+          opacity: 0.08,
+        }}
+        animate={{
+          rotate: [0, 360],
+        }}
+        transition={{
+          duration: 50 / intensity,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      {Array.from({ length: 20 }).map((_, i) => (
+        <motion.div
+          key={`hex-${i}`}
+          className="absolute"
+          style={{
+            width: 80 + Math.random() * 40,
+            height: 80 + Math.random() * 40,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+            background: i % 2 === 0 ? colors.primary : colors.secondary,
+            boxShadow: `0 0 30px ${i % 2 === 0 ? colors.primary : colors.secondary}`,
+          }}
+          animate={{
+            opacity: [0.1, 0.3 * intensity, 0.1],
+            scale: [1, 1.2, 1],
+            rotate: [0, 60, 0],
+          }}
+          transition={{
+            duration: 12 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 0.5,
+          }}
+        />
+      ))}
+
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${colors.secondary}, transparent 70%)`,
+        }}
+        animate={{
+          scale: [1, 1.5 * intensity, 1],
+          opacity: [0.1, 0.25, 0.1],
+        }}
+        transition={{
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut",
         }}

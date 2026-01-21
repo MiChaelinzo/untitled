@@ -30,6 +30,7 @@ import { CustomDifficultyBuilder } from '@/components/CustomDifficultyBuilder'
 import { GlobalLeaderboard } from '@/components/GlobalLeaderboard'
 import { CommunityStatsWidget } from '@/components/CommunityStatsWidget'
 import { CountrySelector } from '@/components/CountrySelector'
+import { ComboBackgroundShowcase } from '@/components/ComboBackgroundShowcase'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { GlobalLeaderboardEntry } from '@/lib/global-leaderboard'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
@@ -549,6 +550,7 @@ export function Menu({
             {globalLeaderboard && globalLeaderboard.length > 0 && (
               <CommunityStatsWidget globalLeaderboard={globalLeaderboard} />
             )}
+            <ComboBackgroundShowcase highestCombo={stats.highestCombo || 0} />
             <StatsPanel stats={stats} />
           </TabsContent>
 
