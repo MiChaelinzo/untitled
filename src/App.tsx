@@ -27,6 +27,12 @@ import {
   Challenge
 } from '@/lib/challenges'
 import {
+  Tournament,
+  updateMatchScore,
+  advanceTournament,
+  getTournamentWinner
+} from '@/lib/tournament-system'
+import {
   ThemeUnlockable,
   PlayerUnlocks,
   getNewlyUnlocked,
@@ -82,6 +88,8 @@ function App() {
   const [currentCombo, setCurrentCombo] = useState(0)
   const [activeChallengeId, setActiveChallengeId] = useState<string | undefined>()
   const [activeGameModeId, setActiveGameModeId] = useState<string | undefined>()
+  const [activeTournamentMatchId, setActiveTournamentMatchId] = useState<string | undefined>()
+  const [activeTournament, setActiveTournament] = useKV<Tournament | null>('active-tournament', null)
   const [challenges, setChallenges] = useKV<ChallengeType[]>('challenges', [])
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; avatarUrl?: string }>({
     id: `user_${Date.now()}`,
@@ -272,10 +280,18 @@ function App() {
     setPhase('menu')
   }
 
-  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeId?: string, useAdaptiveDifficulty?: boolean, gameModeId?: string) => {
+  const handleStartGame = (difficulty: Difficulty, isPractice: boolean = false, challengeOrMatchId?: string, useAdaptiveDifficulty?: boolean, gameModeId?: string) => {
     setCurrentDifficulty(difficulty)
     setIsPracticeMode(isPractice)
-    setActiveChallengeId(challengeId)
+    
+    if (challengeOrMatchId?.startsWith('match_')) {
+      setActiveTournamentMatchId(challengeOrMatchId)
+      setActiveChallengeId(undefined)
+    } else {
+      setActiveChallengeId(challengeOrMatchId)
+      setActiveTournamentMatchId(undefined)
+    }
+    
     setGameStartTime(Date.now())
     setCurrentCombo(0)
     setUseAdaptiveDifficulty(useAdaptiveDifficulty || false)
@@ -393,6 +409,37 @@ function App() {
         })
       })
       setActiveChallengeId(undefined)
+    }
+    
+    if (activeTournamentMatchId && activeTournament) {
+      setActiveTournament(current => {
+        if (!current) return null
+        
+        const updatedTournament = updateMatchScore(current, activeTournamentMatchId, currentUser.id, score)
+        
+        const match = updatedTournament.matches.find(m => m.id === activeTournamentMatchId)
+        if (match?.status === 'completed') {
+          if (match.winnerId === currentUser.id) {
+            toast.success('Match won! Advancing to next round.')
+          } else {
+            toast.info('Match complete.')
+          }
+          
+          const advanced = advanceTournament(updatedTournament)
+          
+          if (advanced.status === 'completed') {
+            const winner = getTournamentWinner(advanced)
+            if (winner?.id === currentUser.id) {
+              toast.success('🏆 Tournament Champion! Congratulations!')
+            }
+          }
+          
+          return advanced
+        }
+        
+        return updatedTournament
+      })
+      setActiveTournamentMatchId(undefined)
     }
     
     const previousStats = stats || {
@@ -804,6 +851,8 @@ function App() {
           recentActions={recentActions || []}
           onClaimStreakReward={handleClaimStreakReward}
           onAddRecentAction={handleAddRecentAction}
+          activeTournament={activeTournament}
+          onTournamentUpdate={setActiveTournament}
         />
       )}
       

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,10 +18,9 @@ import {
   Match,
   TournamentPlayer,
   createTournament,
-  advanceTournament,
-  updateMatchScore,
+  getPlayerNextMatch,
   getTournamentWinner,
-  getPlayerNextMatch
+  updateMatchScore
 } from '@/lib/tournament-system'
 import { Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
@@ -36,6 +35,8 @@ interface TournamentPanelProps {
   currentAvatarUrl?: string
   onStartMatch: (difficulty: Difficulty, matchId: string) => void
   playerStats?: PlayerStats
+  activeTournament?: Tournament | null
+  onTournamentUpdate?: (tournament: Tournament | null) => void
 }
 
 export function TournamentPanel({
@@ -43,14 +44,28 @@ export function TournamentPanel({
   currentUsername,
   currentAvatarUrl,
   onStartMatch,
-  playerStats
+  playerStats,
+  activeTournament: externalTournament,
+  onTournamentUpdate
 }: TournamentPanelProps) {
-  const [tournament, setTournament] = useState<Tournament | null>(null)
+  const [tournament, setTournament] = useState<Tournament | null>(externalTournament || null)
   const [tournamentName, setTournamentName] = useState('')
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('medium')
   const [playerCount, setPlayerCount] = useState<string>('4')
   const [isCreating, setIsCreating] = useState(false)
   const [showMatchmaking, setShowMatchmaking] = useState(false)
+
+  useEffect(() => {
+    if (externalTournament !== undefined) {
+      setTournament(externalTournament)
+    }
+  }, [externalTournament])
+
+  useEffect(() => {
+    if (onTournamentUpdate) {
+      onTournamentUpdate(tournament)
+    }
+  }, [tournament, onTournamentUpdate])
 
   const handleCreateTournament = () => {
     if (!tournamentName.trim()) {
@@ -85,32 +100,6 @@ export function TournamentPanel({
     setTournament(newTournament)
     setIsCreating(false)
     toast.success('Tournament created! Start playing matches.')
-  }
-
-  const handleMatchComplete = (matchId: string, score: number) => {
-    if (!tournament) return
-
-    const updatedTournament = updateMatchScore(tournament, matchId, currentUserId, score)
-    setTournament(updatedTournament)
-
-    const match = updatedTournament.matches.find(m => m.id === matchId)
-    if (match?.status === 'completed') {
-      if (match.winnerId === currentUserId) {
-        toast.success('Match won! Advancing to next round.')
-      } else {
-        toast.info('Match complete. Better luck next time!')
-      }
-
-      const advanced = advanceTournament(updatedTournament)
-      setTournament(advanced)
-
-      if (advanced.status === 'completed') {
-        const winner = getTournamentWinner(advanced)
-        if (winner?.id === currentUserId) {
-          toast.success('🏆 Tournament Champion! Congratulations!')
-        }
-      }
-    }
   }
 
   const simulateBotMatch = (match: Match) => {

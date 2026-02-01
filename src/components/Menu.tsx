@@ -45,6 +45,7 @@ import { VisualTheme, applyVisualTheme } from '@/lib/visual-themes'
 import { TargetSkin } from '@/lib/target-skins'
 import { DEFAULT_GLOBAL_STATS } from '@/lib/global-stats'
 import { DEFAULT_STREAK } from '@/lib/streak-system'
+import { Tournament } from '@/lib/tournament-system'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -80,6 +81,8 @@ interface MenuProps {
   recentActions?: string[]
   onClaimStreakReward?: (rewardId: string) => void
   onAddRecentAction?: (actionId: string) => void
+  activeTournament?: Tournament | null
+  onTournamentUpdate?: (tournament: Tournament | null) => void
 }
 
 export function Menu({ 
@@ -99,7 +102,9 @@ export function Menu({
   customDifficulties,
   recentActions,
   onClaimStreakReward,
-  onAddRecentAction
+  onAddRecentAction,
+  activeTournament,
+  onTournamentUpdate
 }: MenuProps) {
   const [soundEnabled, setSoundEnabled] = useKV<boolean>('sound-enabled', true)
   const [soundTheme, setSoundTheme] = useKV<SoundTheme>('sound-theme', 'sci-fi')
@@ -484,6 +489,8 @@ export function Menu({
               currentAvatarUrl={currentAvatarUrl}
               onStartMatch={(difficulty, matchId) => onStartGame(difficulty, false, matchId)}
               playerStats={stats}
+              activeTournament={activeTournament || null}
+              onTournamentUpdate={onTournamentUpdate}
             />
           </TabsContent>
 
