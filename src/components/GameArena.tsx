@@ -143,6 +143,8 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       setCurrentTargetDuration(duration)
       setCurrentTargetSize(targetSize)
     }
+    
+    const target = generateRandomTarget(rect.width, rect.height, duration, targetSize)
 
     if (eventGameMode) {
       eventGameMode.mechanics.forEach(mechanic => {
@@ -152,10 +154,11 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         
         if (mechanic.type === 'target-behavior') {
           if (mechanic.name === 'Freeze & Shatter') {
+            const targetId = target.id
             setTimeout(() => {
               setEventModeState((prev: any) => {
                 const frozen = new Set(prev.frozenTargets || [])
-                frozen.add(gameState.currentTarget?.id)
+                frozen.add(targetId)
                 return { ...prev, frozenTargets: frozen }
               })
             }, mechanic.config.freezeTime)
@@ -163,12 +166,13 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
           
           if (mechanic.name === 'Phase Shift') {
             const { phaseInterval, visibleDuration } = mechanic.config
+            const targetId = target.id
             let isVisible = true
             const intervalId = setInterval(() => {
               isVisible = !isVisible
               setEventModeState((prev: any) => {
                 const states = new Map(prev.visibilityStates || new Map())
-                states.set(gameState.currentTarget?.id, isVisible)
+                states.set(targetId, isVisible)
                 return { ...prev, visibilityStates: states }
               })
             }, isVisible ? visibleDuration : phaseInterval - visibleDuration)
@@ -178,8 +182,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         }
       })
     }
-    
-    const target = generateRandomTarget(rect.width, rect.height, duration, targetSize)
 
     if (isPhysicsMode && (eventGameModeId === 'ocean-wave' || eventGameModeId === 'cosmic-gravity')) {
       const eventTarget: EventTarget = {
@@ -199,7 +201,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         currentTarget: target
       }))
     }
-  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, gameState.currentTarget, isPhysicsMode, eventGameModeId])
+  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, isPhysicsMode, eventGameModeId])
 
   const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
