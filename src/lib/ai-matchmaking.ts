@@ -354,3 +354,165 @@ export async function recommendDifficulty(players: PlayerSkillProfile[]): Promis
   if (avgSkill > 1200) return 'medium'
   return 'easy'
 }
+
+export async function findMatchingOpponents(
+  playerProfile: PlayerSkillProfile,
+  availablePlayers: PlayerSkillProfile[],
+  maxMatches: number = 5
+): Promise<{
+  matches: Array<{
+    opponent: PlayerSkillProfile
+    matchScore: number
+    skillDifference: number
+    reasoning: string
+  }>
+  aiAnalysis: string
+}> {
+  const filtered = availablePlayers.filter(p => p.userId !== playerProfile.userId)
+  
+  if (filtered.length === 0) {
+    return {
+      matches: [],
+      aiAnalysis: 'No opponents currently available for matchmaking.'
+    }
+  }
+
+  const playerData = {
+    username: playerProfile.username,
+    skillRating: playerProfile.skillRating,
+    consistencyScore: playerProfile.consistencyScore,
+    playStyle: playerProfile.playStyle,
+    preferredDifficulty: playerProfile.preferredDifficulty,
+    recentPerformance: playerProfile.recentPerformance.slice(-5)
+  }
+
+  const opponentsData = filtered.map(p => ({
+    username: p.username,
+    skillRating: p.skillRating,
+    consistencyScore: p.consistencyScore,
+    playStyle: p.playStyle,
+    preferredDifficulty: p.preferredDifficulty
+  }))
+
+  const promptText = `You are an AI matchmaking system for a competitive reflex game. Find the ${maxMatches} best opponents for this player.
+
+Player Profile:
+${JSON.stringify(playerData, null, 2)}
+
+Available Opponents:
+${JSON.stringify(opponentsData, null, 2)}
+
+Analyze and return the best matches considering:
+- Skill rating similarity (within 300-500 points is ideal)
+- Play style compatibility for exciting matches
+- Consistency scores for fair competition
+- Recent performance trends
+
+Return JSON with this exact structure:
+{
+  "matches": [
+    {
+      "opponentUsername": "username",
+      "matchScore": 0.95,
+      "skillDifference": 150,
+      "reasoning": "why this is a good match"
+    }
+  ],
+  "overallAnalysis": "summary of matchmaking quality and recommendations"
+}`
+
+  try {
+    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const aiResult = JSON.parse(response)
+
+    const matches = aiResult.matches.slice(0, maxMatches).map((match: any) => {
+      const opponent = filtered.find(p => p.username === match.opponentUsername)
+      return opponent ? {
+        opponent,
+        matchScore: match.matchScore,
+        skillDifference: match.skillDifference,
+        reasoning: match.reasoning
+      } : null
+    }).filter(Boolean)
+
+    return {
+      matches,
+      aiAnalysis: aiResult.overallAnalysis
+    }
+  } catch (error) {
+    console.error('AI matchmaking failed, using fallback:', error)
+    return fallbackFindOpponents(playerProfile, filtered, maxMatches)
+  }
+}
+
+function fallbackFindOpponents(
+  playerProfile: PlayerSkillProfile,
+  availablePlayers: PlayerSkillProfile[],
+  maxMatches: number
+): {
+  matches: Array<{
+    opponent: PlayerSkillProfile
+    matchScore: number
+    skillDifference: number
+    reasoning: string
+  }>
+  aiAnalysis: string
+} {
+  const scored = availablePlayers.map(opponent => {
+    const skillDiff = Math.abs(playerProfile.skillRating - opponent.skillRating)
+    const consistencyDiff = Math.abs(playerProfile.consistencyScore - opponent.consistencyScore)
+    
+    const skillScore = Math.max(0, 1 - skillDiff / 1000)
+    const consistencyScore = 1 - consistencyDiff
+    const playStyleBonus = playerProfile.playStyle !== opponent.playStyle ? 0.1 : 0
+    
+    const matchScore = (skillScore * 0.7) + (consistencyScore * 0.2) + playStyleBonus
+
+    let reasoning = 'Similar skill level'
+    if (skillDiff < 200) reasoning = 'Perfectly matched skill level'
+    else if (skillDiff > 500) reasoning = 'Challenging opponent with different skill level'
+    
+    if (playerProfile.playStyle !== opponent.playStyle) {
+      reasoning += `, contrasting ${opponent.playStyle} play style`
+    }
+
+    return {
+      opponent,
+      matchScore,
+      skillDifference: skillDiff,
+      reasoning
+    }
+  })
+
+  scored.sort((a, b) => b.matchScore - a.matchScore)
+
+  return {
+    matches: scored.slice(0, maxMatches),
+    aiAnalysis: `Found ${Math.min(maxMatches, scored.length)} opponents using skill-based matching. The top matches have similar skill ratings for competitive games.`
+  }
+}
+
+export async function generateMatchPreview(
+  player1: PlayerSkillProfile,
+  player2: PlayerSkillProfile
+): Promise<string> {
+  const promptText = `Generate an exciting 2-sentence preview for this competitive matchup:
+
+${player1.username} (${player1.playStyle} player, ${player1.skillRating} rating, ${(player1.consistencyScore * 100).toFixed(0)}% consistency)
+vs
+${player2.username} (${player2.playStyle} player, ${player2.skillRating} rating, ${(player2.consistencyScore * 100).toFixed(0)}% consistency)
+
+Make it sound like an esports commentator hyping up an exciting match. Focus on what makes this matchup interesting.`
+
+  try {
+    const preview = await window.spark.llm(promptText, 'gpt-4o-mini', false)
+    return preview.trim()
+  } catch (error) {
+    const skillDiff = Math.abs(player1.skillRating - player2.skillRating)
+    if (skillDiff < 200) {
+      return `An evenly matched showdown between ${player1.username} and ${player2.username}! With nearly identical skill ratings, this battle could go either way.`
+    } else {
+      return `${player1.skillRating > player2.skillRating ? player1.username : player2.username} enters as the favorite, but ${player1.skillRating > player2.skillRating ? player2.username : player1.username}'s ${player1.skillRating > player2.skillRating ? player2.playStyle : player1.playStyle} style could turn the tables!`
+    }
+  }
+}

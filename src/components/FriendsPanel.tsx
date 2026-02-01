@@ -35,7 +35,8 @@ import {
   Target,
   Fire,
   Crown,
-  User
+  User,
+  Sparkle
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
@@ -53,25 +54,31 @@ import {
 } from '@/lib/friends-system'
 import { Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
+import { AIOpponentFinder } from '@/components/AIOpponentFinder'
+import { PlayerSkillProfile, createPlayerSkillProfile } from '@/lib/ai-matchmaking'
+import { PlayerStats } from '@/lib/achievements'
 
 interface FriendsPanelProps {
   currentUserId: string
   currentUsername: string
   currentAvatarUrl?: string
   onStartChallenge: (challengeId: string, difficulty: Difficulty) => void
+  playerStats?: PlayerStats
 }
 
 export function FriendsPanel({ 
   currentUserId, 
   currentUsername,
   currentAvatarUrl,
-  onStartChallenge 
+  onStartChallenge,
+  playerStats 
 }: FriendsPanelProps) {
   const [friends, setFriends] = useKV<Friend[]>('friends', [])
   const [friendRequests, setFriendRequests] = useKV<FriendRequest[]>('friend-requests', [])
   const [sentRequests, setSentRequests] = useKV<FriendRequest[]>('sent-requests', [])
   const [challenges, setChallenges] = useKV<ChallengeType[]>('challenges', [])
   const [notifications, setNotifications] = useKV<ChallengeNotification[]>('challenge-notifications', [])
+  const [gameSessions, setGameSessions] = useKV<any[]>('game-sessions', [])
   const [playerProfile, setPlayerProfile] = useKV<PlayerProfile>('player-profile', {
     userId: currentUserId,
     username: currentUsername,
@@ -93,6 +100,7 @@ export function FriendsPanel({
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<Difficulty>>(new Set(['medium']))
   const [quickChallengeDialogOpen, setQuickChallengeDialogOpen] = useState(false)
   const [selectedFriendsForBulk, setSelectedFriendsForBulk] = useState<Set<string>>(new Set())
+  const [showAIMatchmaking, setShowAIMatchmaking] = useState(false)
 
   useEffect(() => {
     setPlayerProfile(current => {
@@ -435,6 +443,70 @@ export function FriendsPanel({
     })
   }
 
+  const handleChallengeFromAI = (opponentId: string, difficulty: Difficulty) => {
+    const opponent = friends?.find(f => f.id === opponentId)
+    if (!opponent) {
+      toast.error('Opponent not found')
+      return
+    }
+
+    const newChallenge: ChallengeType = {
+      id: generateChallengeId(),
+      fromUserId: currentUserId,
+      fromUsername: currentUsername,
+      toUserId: opponent.id,
+      toUsername: opponent.username,
+      difficulty: difficulty,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+      status: 'pending'
+    }
+
+    setChallenges(current => [...(current || []), newChallenge])
+    setShowAIMatchmaking(false)
+  }
+
+  const getPlayerSkillProfiles = (): PlayerSkillProfile[] => {
+    if (!friends || friends.length === 0 || !playerStats) return []
+
+    const recentScores = (gameSessions || [])
+      .slice(-10)
+      .map(s => s.score)
+
+    return friends.map(friend => {
+      const mockStats: PlayerStats = {
+        totalGamesPlayed: Math.floor(Math.random() * 100) + 10,
+        totalTargetsHit: Math.floor(Math.random() * 5000) + 1000,
+        totalTargetsMissed: Math.floor(Math.random() * 500) + 50,
+        highestScore: Math.floor(Math.random() * 50000) + 10000,
+        highestCombo: Math.floor(Math.random() * 30) + 5,
+        perfectRounds: Math.floor(Math.random() * 10),
+        insaneModeCompleted: Math.floor(Math.random() * 5),
+        totalPlayTime: Math.floor(Math.random() * 100000) + 10000
+      }
+
+      const mockRecentScores = Array.from({ length: 10 }, () => 
+        Math.floor(Math.random() * 30000) + 10000
+      )
+
+      return createPlayerSkillProfile(
+        friend.id,
+        friend.username,
+        mockStats,
+        mockRecentScores,
+        friend.avatarUrl
+      )
+    })
+  }
+
+  const currentPlayerProfile = playerStats ? createPlayerSkillProfile(
+    currentUserId,
+    currentUsername,
+    playerStats,
+    (gameSessions || []).slice(-10).map(s => s.score),
+    currentAvatarUrl
+  ) : null
+
   const handleAcceptChallenge = (challengeId: string) => {
     const challenge = challenges?.find(c => c.id === challengeId)
     if (!challenge) return
@@ -469,6 +541,17 @@ export function FriendsPanel({
   ) || []
   const completedChallenges = challenges?.filter(c => c.status === 'completed') || []
   const unreadNotifications = notifications?.filter(n => !n.read).length || 0
+
+  if (showAIMatchmaking && currentPlayerProfile) {
+    return (
+      <AIOpponentFinder
+        playerProfile={currentPlayerProfile}
+        availablePlayers={getPlayerSkillProfiles()}
+        onChallengeOpponent={handleChallengeFromAI}
+        onClose={() => setShowAIMatchmaking(false)}
+      />
+    )
+  }
 
   return (
     <div className="w-full space-y-6">
@@ -511,6 +594,38 @@ export function FriendsPanel({
         </TabsList>
 
         <TabsContent value="friends" className="space-y-4 mt-6">
+          <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+                <Sparkle weight="fill" className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                  AI-Powered Matchmaking
+                  <Badge variant="outline" className="text-accent border-accent text-xs">
+                    NEW
+                  </Badge>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Let AI find perfectly matched opponents based on your skill level and play style
+                </p>
+                <Button 
+                  onClick={() => setShowAIMatchmaking(true)}
+                  className="gap-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                  disabled={!friends || friends.length === 0}
+                >
+                  <Sparkle weight="fill" className="w-4 h-4" />
+                  Find Opponents
+                </Button>
+                {(!friends || friends.length === 0) && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Add friends to enable AI matchmaking
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+
           <Card className="p-4 bg-card/50 backdrop-blur border-primary/30">
             <div className="flex gap-2">
               <div className="relative flex-1">

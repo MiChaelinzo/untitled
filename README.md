@@ -34,6 +34,7 @@ Fully customizable via the Customize tab.
 - **Challenge Friends** - Direct 1v1 score challenges
 - **Friend Profiles** - View stats, win rates, and activity
 - **Real-time Notifications** - Get notified of challenges and results
+- **🆕 AI-Powered Matchmaking** - Intelligent opponent matching based on skill level, play style, and performance history
 
 ## 🎯 Core Features
 
@@ -48,6 +49,8 @@ Fully customizable via the Customize tab.
 - **1v1 Tournaments** - AI-powered skill-based matchmaking
 - **Team Tournaments** - 2v2 and 3v3 bracket competitions
 - **Daily/Weekly Challenges** - Time-limited objectives with exclusive rewards
+- **🆕 AI Opponent Finder** - GPT-4o-powered matchmaking finds perfectly balanced opponents
+- **Match Predictions** - AI-generated previews and win probability analysis
 
 ### 🎨 Customization
 - **Visual Themes** - Cyberpunk, Neon Nights, Synthwave, Midnight, Arctic

@@ -651,6 +651,7 @@ export function Menu({
               currentUsername={currentUsername}
               currentAvatarUrl={currentAvatarUrl}
               onStartChallenge={(challengeId, difficulty) => onStartGame(difficulty, false, challengeId)}
+              playerStats={stats}
             />
           </TabsContent>
 
