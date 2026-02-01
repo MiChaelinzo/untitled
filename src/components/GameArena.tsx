@@ -183,6 +183,8 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       })
     }
 
+    if (isPhysicsMode) {
+      const eventTarget: EventTarget = {
         ...target,
         type: 'normal',
         velocity: { x: 0, y: 0 }
@@ -201,7 +203,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     }
   }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, isPhysicsMode, eventGameModeId])
 
-  }, [gameState.round, difficultyConfig, useAdaptiveDifficulty, eventGameMode, isPhysicsMode, eventGameModeId])
+  const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
     let points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
 
@@ -395,8 +397,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
     if (powerUpMods.hasShield) {
       setActivePowerUps(prev => prev.filter(p => p.type !== 'shield'))
       toast.success('🛡️ Shield Protected!', {
-        description: 'Miss absorbed by shield',
-      toast.success('🛡️ Shield Protected!', {
+        description: 'Miss absorbed by shield'
       })
       soundSystem.play('hit', 0)
       
