@@ -86,7 +86,6 @@ function App() {
   const [isPracticeMode, setIsPracticeMode] = useState(false)
   const [useAdaptiveDifficulty, setUseAdaptiveDifficulty] = useState(false)
   const [gameStartTime, setGameStartTime] = useState(0)
-  const [currentCombo, setCurrentCombo] = useState(0)
   const [activeChallengeId, setActiveChallengeId] = useState<string | undefined>()
   const [activeGameModeId, setActiveGameModeId] = useState<string | undefined>()
   const [activeTournamentMatchId, setActiveTournamentMatchId] = useState<string | undefined>()
@@ -294,7 +293,6 @@ function App() {
     }
     
     setGameStartTime(Date.now())
-    setCurrentCombo(0)
     setUseAdaptiveDifficulty(useAdaptiveDifficulty || false)
     setActiveGameModeId(gameModeId)
     setPhase('playing')
@@ -316,7 +314,7 @@ function App() {
       difficulty: currentDifficulty,
       targetsHit,
       targetsMissed,
-      highestCombo: currentCombo,
+      highestCombo: 0,
       reactionTimes: [],
       isPractice: isPracticeMode
     }
@@ -335,7 +333,7 @@ function App() {
           difficulty: currentDifficulty,
           targetsHit,
           targetsMissed,
-          highestCombo: currentCombo,
+          highestCombo: 0,
           timestamp: Date.now(),
           countryCode: userCountryCode || undefined,
           country: country?.name,
@@ -363,7 +361,7 @@ function App() {
                 score,
                 targetsHit,
                 targetsMissed,
-                highestCombo: currentCombo,
+                highestCombo: 0,
                 completedAt: Date.now()
               }
               
@@ -384,7 +382,7 @@ function App() {
                 score,
                 targetsHit,
                 targetsMissed,
-                highestCombo: currentCombo,
+                highestCombo: 0,
                 completedAt: Date.now()
               }
               
@@ -483,7 +481,7 @@ function App() {
       totalTargetsHit: previousStats.totalTargetsHit + targetsHit,
       totalTargetsMissed: previousStats.totalTargetsMissed + targetsMissed,
       highestScore: Math.max(previousStats.highestScore, score),
-      highestCombo: Math.max(previousStats.highestCombo, currentCombo),
+      highestCombo: Math.max(previousStats.highestCombo, 0),
       perfectRounds: previousStats.perfectRounds + (isPerfectRound ? 1 : 0),
       insaneModeCompleted: previousStats.insaneModeCompleted + (currentDifficulty === 'insane' && round === 3 ? 1 : 0),
       totalPlayTime: previousStats.totalPlayTime + gameTime
@@ -571,7 +569,7 @@ function App() {
           score,
           targetsHit,
           targetsMissed,
-          combo: currentCombo,
+          combo: 0,
           difficulty: currentDifficulty,
           perfectRounds: isPerfectRound ? 1 : 0
         }
@@ -628,7 +626,7 @@ function App() {
               const gameData = {
                 score,
                 targetsHit,
-                combo: currentCombo,
+                combo: 0,
                 difficulty: currentDifficulty,
                 perfectRounds: isPerfectRound ? 1 : 0
               }
@@ -885,7 +883,7 @@ function App() {
         <GameArena
           onGameOver={handleGameOver}
           difficulty={currentDifficulty}
-          onComboUpdate={setCurrentCombo}
+          onComboUpdate={() => {}}
           isPractice={isPracticeMode}
           useAdaptiveDifficulty={useAdaptiveDifficulty}
           eventGameModeId={activeGameModeId as any}

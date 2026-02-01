@@ -20,11 +20,10 @@ export function generateRandomTarget(
   }
 }
 
-export function calculateScore(reactionTime: number, duration: number, combo: number, difficultyMultiplier: number = 1): number {
+export function calculateScore(reactionTime: number, duration: number, difficultyMultiplier: number = 1): number {
   const ratio = reactionTime / duration
   const baseScore = Math.max(100, Math.floor(1000 * (1 - ratio)))
-  const comboMultiplier = 1 + (combo * 0.1)
-  return Math.floor(baseScore * comboMultiplier * difficultyMultiplier)
+  return Math.floor(baseScore * difficultyMultiplier)
 }
 
 export function formatTime(ms: number): string {

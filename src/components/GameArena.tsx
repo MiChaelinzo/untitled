@@ -12,7 +12,6 @@ import { ActivePowerUpsDisplay } from '@/components/ActivePowerUpsDisplay'
 import { PowerUpCollectionEffect } from '@/components/PowerUpCollectionEffect'
 import { PowerUpScreenEffects } from '@/components/PowerUpScreenEffects'
 import { InGameBackground } from '@/components/InGameBackground'
-import { ComboBackgroundUnlockNotification } from '@/components/ComboBackgroundUnlockNotification'
 import { GameplayMouseTrail } from '@/components/GameplayMouseTrail'
 import { GameState, DIFFICULTY_CONFIG, Target as TargetType, Difficulty } from '@/lib/game-types'
 import { generateRandomTarget, calculateScore } from '@/lib/game-utils'
@@ -44,7 +43,6 @@ import {
   getPowerUpModifiers,
   POWER_UP_CONFIG
 } from '@/lib/power-ups'
-import { ComboBackgroundVariant } from '@/lib/combo-backgrounds'
 
 interface GameArenaProps {
   onGameOver: (score: number, round: number, targetsHit: number, targetsMissed: number) => void
@@ -96,8 +94,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   const [lastPowerUpSpawn, setLastPowerUpSpawn] = useState(0)
   const [multiShotCounter, setMultiShotCounter] = useState(0)
   const [collectionEffects, setCollectionEffects] = useState<Array<{ id: string; x: number; y: number; color: string; icon: string }>>([])
-  const [comboBackgroundUnlockQueue, setComboBackgroundUnlockQueue] = useState<ComboBackgroundVariant[]>([])
-  const [highestComboReached] = useKV<number>('highest-combo-reached', 0)
 
   
   useEffect(() => {
@@ -105,11 +101,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       adaptiveSystemRef.current = new AdaptiveDifficultySystem(difficulty)
     }
   }, [useAdaptiveDifficulty, difficulty])
-  
-  const handleBackgroundUnlock = useCallback((variant: ComboBackgroundVariant) => {
-    setComboBackgroundUnlockQueue(prev => [...prev, variant])
-    soundSystem.play('combo', variant.comboThreshold)
-  }, [])
   
   const [gameState, setGameState] = useState<GameState>({
     phase: 'roundTransition',
@@ -205,7 +196,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
 
   const handleHit = useCallback(async (reactionTime: number) => {
     const config = difficultyConfig.rounds[gameState.round as keyof typeof difficultyConfig.rounds]
-    let points = calculateScore(reactionTime, config.duration, gameState.combo, difficultyConfig.scoreMultiplier)
+    let points = calculateScore(reactionTime, config.duration, difficultyConfig.scoreMultiplier)
 
     const powerUpMods = getPowerUpModifiers(activePowerUps)
     
@@ -303,11 +294,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       }
     }
 
-    soundSystem.play('hit', gameState.combo)
-    
-    if (gameState.combo > 0 && gameState.combo % 3 === 0) {
-      soundSystem.play('combo', gameState.combo)
-    }
+    soundSystem.play('hit', 0)
 
     if (gameState.currentTarget && containerRef.current) {
       const target = gameState.currentTarget
@@ -345,12 +332,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
 
     setGameState(prev => {
       const newTargetsRemaining = prev.roundTargetsRemaining - 1
-      const newCombo = prev.combo + 1
       const newScore = prev.score + points
-
-      if (onComboUpdate) {
-        onComboUpdate(newCombo)
-      }
 
       if (newTargetsRemaining === 0) {
         if (prev.round === 3) {
@@ -361,7 +343,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
             ...prev,
             phase: 'gameOver',
             score: newScore,
-            combo: newCombo,
             targetsHit: prev.targetsHit + 1,
             currentTarget: null,
             roundTargetsRemaining: 0
@@ -372,7 +353,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
             phase: 'roundTransition',
             round: prev.round + 1,
             score: newScore,
-            combo: newCombo,
             targetsHit: prev.targetsHit + 1,
             currentTarget: null,
             roundTargetsRemaining: difficultyConfig.rounds[(prev.round + 1) as keyof typeof difficultyConfig.rounds].targets
@@ -383,13 +363,12 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       return {
         ...prev,
         score: newScore,
-        combo: newCombo,
         targetsHit: prev.targetsHit + 1,
         currentTarget: null,
         roundTargetsRemaining: newTargetsRemaining
       }
     })
-  }, [gameState.currentTarget, gameState.combo, gameState.round, onGameOver, difficultyConfig, onComboUpdate, useAdaptiveDifficulty, eventGameMode, eventModeState, isPhysicsMode, eventGameModeId, activePowerUps, multiShotCounter])
+  }, [gameState.currentTarget, gameState.round, onGameOver, difficultyConfig, eventGameMode, eventModeState, isPhysicsMode, eventGameModeId, activePowerUps, multiShotCounter])
 
   const handleMiss = useCallback(async () => {
     const powerUpMods = getPowerUpModifiers(activePowerUps)
@@ -448,7 +427,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
           return {
             ...prev,
             phase: 'gameOver',
-            combo: 0,
             targetsMissed: prev.targetsMissed + 1,
             currentTarget: null,
             roundTargetsRemaining: 0
@@ -458,7 +436,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
             ...prev,
             phase: 'roundTransition',
             round: prev.round + 1,
-            combo: 0,
             targetsMissed: prev.targetsMissed + 1,
             currentTarget: null,
             roundTargetsRemaining: difficultyConfig.rounds[(prev.round + 1) as keyof typeof difficultyConfig.rounds].targets
@@ -468,7 +445,6 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
 
       return {
         ...prev,
-        combo: 0,
         targetsMissed: prev.targetsMissed + 1,
         currentTarget: null,
         roundTargetsRemaining: newTargetsRemaining
@@ -664,30 +640,19 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
       <InGameBackground
         difficulty={gameState.difficulty}
         score={gameState.score}
-        combo={gameState.combo}
+        combo={0}
         round={gameState.round}
         eventGameModeId={eventGameModeId}
-        onBackgroundUnlock={handleBackgroundUnlock}
+        onBackgroundUnlock={() => {}}
       />
       
       <GameplayMouseTrail
         enabled={true}
-        combo={gameState.combo}
+        combo={0}
         isPaused={gameState.phase !== 'playing'}
         color="primary"
         intensity={gameplayParticleIntensity || 'medium'}
       />
-      
-      <AnimatePresence>
-        {comboBackgroundUnlockQueue.length > 0 && (
-          <ComboBackgroundUnlockNotification
-            variant={comboBackgroundUnlockQueue[0]}
-            onComplete={() => {
-              setComboBackgroundUnlockQueue(prev => prev.slice(1))
-            }}
-          />
-        )}
-      </AnimatePresence>
       
       {eventGameMode && <EventModeEffects eventGameMode={eventGameMode} />}
       
@@ -739,7 +704,7 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
         <>
           <GameHUD
             score={gameState.score}
-            combo={gameState.combo}
+            combo={0}
             round={gameState.round}
             targetsRemaining={gameState.roundTargetsRemaining}
           />
