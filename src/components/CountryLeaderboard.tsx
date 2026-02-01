@@ -54,7 +54,7 @@ export function CountryLeaderboard({ leaderboard, onSelectCountry }: CountryLead
 
       if (entry.score > stats.topScore) {
         stats.topScore = entry.score
-        stats.topPlayer = entry.username
+        stats.topPlayer = entry.username || 'Unknown'
       }
     })
 
@@ -62,7 +62,7 @@ export function CountryLeaderboard({ leaderboard, onSelectCountry }: CountryLead
 
     statsMap.forEach((stats, countryCode) => {
       const country = COUNTRIES.find(c => c.code === countryCode)
-      if (!country) return
+      if (!country || !country.name || !country.flag) return
 
       const averageScore = stats.scores.length > 0 
         ? stats.scores.reduce((sum, s) => sum + s, 0) / stats.scores.length 
@@ -141,7 +141,7 @@ export function CountryLeaderboard({ leaderboard, onSelectCountry }: CountryLead
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Top Player</span>
                   <span className="font-semibold text-foreground truncate max-w-[120px]">
-                    {country.topPlayer}
+                    {country.topPlayer || 'Unknown'}
                   </span>
                 </div>
 

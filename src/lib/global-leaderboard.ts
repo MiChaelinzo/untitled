@@ -307,7 +307,7 @@ export function getRegionalStats(
         playerCount: uniquePlayers.size,
         averageScore: avgScore,
         topScore: topEntry.score,
-        topPlayer: topEntry.username,
+        topPlayer: topEntry.username || 'Unknown',
         gamesPlayed: entries.length
       }
     })

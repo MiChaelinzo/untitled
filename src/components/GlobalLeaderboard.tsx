@@ -64,7 +64,7 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
 
   const availableCountries = useMemo(() => {
     const codes = new Set(leaderboard.map(e => e.countryCode).filter(Boolean))
-    return COUNTRIES.filter(c => codes.has(c.code)).sort((a, b) => a.name.localeCompare(b.name))
+    return COUNTRIES.filter(c => codes.has(c.code) && c.name && c.flag).sort((a, b) => a.name.localeCompare(b.name))
   }, [leaderboard])
 
   const filteredLeaderboard = useMemo(() => 
@@ -411,7 +411,7 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-muted-foreground">Top Player</span>
-                              <span className="font-semibold text-foreground">{stats.topPlayer}</span>
+                              <span className="font-semibold text-foreground">{stats.topPlayer || 'Unknown'}</span>
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-muted-foreground">Top Score</span>
