@@ -90,6 +90,9 @@ export function FriendsPanel({
   const [challengeDialogOpen, setChallengeDialogOpen] = useState(false)
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null)
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('medium')
+  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<Difficulty>>(new Set(['medium']))
+  const [quickChallengeDialogOpen, setQuickChallengeDialogOpen] = useState(false)
+  const [selectedFriendsForBulk, setSelectedFriendsForBulk] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     setPlayerProfile(current => {
@@ -118,8 +121,56 @@ export function FriendsPanel({
   }, [currentUserId, currentUsername, currentAvatarUrl, setPlayerProfile])
 
   useEffect(() => {
+    if (friends && friends.length === 0) {
+      const initialFriends: Friend[] = [
+        {
+          id: 'user_cloud9_fan',
+          username: 'Cloud9Fan123',
+          addedAt: Date.now() - 7 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_reflex_master',
+          username: 'ReflexMaster',
+          addedAt: Date.now() - 14 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_target_hunter',
+          username: 'TargetHunter',
+          addedAt: Date.now() - 3 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_aim_legend',
+          username: 'AimLegend',
+          addedAt: Date.now() - 30 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_quick_shot',
+          username: 'QuickShot_Pro',
+          addedAt: Date.now() - 5 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_cyber_sniper',
+          username: 'CyberSniper',
+          addedAt: Date.now() - 21 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_pixel_warrior',
+          username: 'PixelWarrior',
+          addedAt: Date.now() - 10 * 24 * 60 * 60 * 1000
+        },
+        {
+          id: 'user_blaze_king',
+          username: 'BlazeKing_99',
+          addedAt: Date.now() - 2 * 24 * 60 * 60 * 1000
+        }
+      ]
+      setFriends(initialFriends)
+    }
+  }, [friends, setFriends])
+
+  useEffect(() => {
     if (searchQuery.length >= 2) {
-      const mockProfiles: PlayerProfile[] = [
+      const allMockProfiles: PlayerProfile[] = [
         {
           userId: 'user_cloud9_fan',
           username: 'Cloud9Fan123',
@@ -152,6 +203,83 @@ export function FriendsPanel({
           bestScore: 98500,
           isOnline: true,
           lastSeen: Date.now()
+        },
+        {
+          userId: 'user_aim_legend',
+          username: 'AimLegend',
+          level: 35,
+          totalWins: 234,
+          totalLosses: 89,
+          winStreak: 8,
+          bestScore: 178000,
+          isOnline: true,
+          lastSeen: Date.now()
+        },
+        {
+          userId: 'user_quick_shot',
+          username: 'QuickShot_Pro',
+          level: 19,
+          totalWins: 78,
+          totalLosses: 45,
+          winStreak: 2,
+          bestScore: 112000,
+          isOnline: true,
+          lastSeen: Date.now()
+        },
+        {
+          userId: 'user_cyber_sniper',
+          username: 'CyberSniper',
+          level: 31,
+          totalWins: 189,
+          totalLosses: 76,
+          winStreak: 15,
+          bestScore: 165000,
+          isOnline: false,
+          lastSeen: Date.now() - 7200000
+        },
+        {
+          userId: 'user_pixel_warrior',
+          username: 'PixelWarrior',
+          level: 24,
+          totalWins: 102,
+          totalLosses: 88,
+          winStreak: 0,
+          bestScore: 123000,
+          isOnline: true,
+          lastSeen: Date.now()
+        },
+        {
+          userId: 'user_blaze_king',
+          username: 'BlazeKing_99',
+          level: 42,
+          totalWins: 312,
+          totalLosses: 98,
+          winStreak: 22,
+          bestScore: 203000,
+          isOnline: true,
+          lastSeen: Date.now()
+        },
+        {
+          userId: 'user_neon_striker',
+          username: 'NeonStriker',
+          level: 17,
+          totalWins: 56,
+          totalLosses: 34,
+          winStreak: 4,
+          bestScore: 94000,
+          isOnline: false,
+          lastSeen: Date.now() - 10800000
+        },
+        {
+          userId: 'user_shadow_ace',
+          username: 'ShadowAce',
+          level: 38,
+          totalWins: 267,
+          totalLosses: 112,
+          winStreak: 11,
+          bestScore: 189000,
+          isOnline: true,
+          lastSeen: Date.now()
         }
       ].filter(p => 
         p.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -159,7 +287,7 @@ export function FriendsPanel({
         p.userId !== currentUserId
       )
       
-      setMockSearchResults(mockProfiles)
+      setMockSearchResults(allMockProfiles)
     } else {
       setMockSearchResults([])
     }
@@ -216,22 +344,95 @@ export function FriendsPanel({
   const handleSendChallenge = () => {
     if (!selectedFriend) return
 
-    const challenge: ChallengeType = {
+    const newChallenges: ChallengeType[] = Array.from(selectedDifficulties).map(difficulty => ({
       id: generateChallengeId(),
       fromUserId: currentUserId,
       fromUsername: currentUsername,
       toUserId: selectedFriend.id,
       toUsername: selectedFriend.username,
-      difficulty: selectedDifficulty,
+      difficulty: difficulty,
       createdAt: Date.now(),
       expiresAt: Date.now() + (24 * 60 * 60 * 1000),
       status: 'pending'
-    }
+    }))
 
-    setChallenges(current => [...(current || []), challenge])
+    setChallenges(current => [...(current || []), ...newChallenges])
     setChallengeDialogOpen(false)
     setSelectedFriend(null)
-    toast.success(`Challenge sent to ${selectedFriend.username}!`)
+    setSelectedDifficulties(new Set(['medium']))
+    
+    if (newChallenges.length === 1) {
+      toast.success(`Challenge sent to ${selectedFriend.username}!`, {
+        description: `${DIFFICULTY_CONFIG[newChallenges[0].difficulty].name} difficulty`
+      })
+    } else {
+      toast.success(`${newChallenges.length} challenges sent to ${selectedFriend.username}!`, {
+        description: `Multiple difficulties selected`
+      })
+    }
+  }
+
+  const toggleDifficulty = (difficulty: Difficulty) => {
+    setSelectedDifficulties(current => {
+      const newSet = new Set(current)
+      if (newSet.has(difficulty)) {
+        if (newSet.size > 1) {
+          newSet.delete(difficulty)
+        }
+      } else {
+        newSet.add(difficulty)
+      }
+      return newSet
+    })
+  }
+
+  const handleQuickChallengeAll = () => {
+    if (selectedFriendsForBulk.size === 0) {
+      toast.error('Please select at least one friend')
+      return
+    }
+
+    const newChallenges: ChallengeType[] = []
+    
+    selectedFriendsForBulk.forEach(friendId => {
+      const friend = friends?.find(f => f.id === friendId)
+      if (!friend) return
+      
+      selectedDifficulties.forEach(difficulty => {
+        newChallenges.push({
+          id: generateChallengeId(),
+          fromUserId: currentUserId,
+          fromUsername: currentUsername,
+          toUserId: friend.id,
+          toUsername: friend.username,
+          difficulty: difficulty,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+          status: 'pending'
+        })
+      })
+    })
+
+    setChallenges(current => [...(current || []), ...newChallenges])
+    setQuickChallengeDialogOpen(false)
+    setSelectedFriendsForBulk(new Set())
+    setSelectedDifficulties(new Set(['medium']))
+    
+    toast.success(`${newChallenges.length} challenges sent!`, {
+      description: `To ${selectedFriendsForBulk.size} friend${selectedFriendsForBulk.size > 1 ? 's' : ''}`
+    })
+  }
+
+  const toggleFriendForBulk = (friendId: string) => {
+    setSelectedFriendsForBulk(current => {
+      const newSet = new Set(current)
+      if (newSet.has(friendId)) {
+        newSet.delete(friendId)
+      } else {
+        newSet.add(friendId)
+      }
+      return newSet
+    })
   }
 
   const handleAcceptChallenge = (challengeId: string) => {
@@ -324,6 +525,119 @@ export function FriendsPanel({
                   className="pl-10 bg-background/50 border-primary/30"
                 />
               </div>
+              {friends && friends.length > 0 && (
+                <Dialog open={quickChallengeDialogOpen} onOpenChange={setQuickChallengeDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-accent/50 hover:bg-accent/10 text-accent whitespace-nowrap"
+                    >
+                      <Lightning size={16} className="mr-2" weight="fill" />
+                      Quick Challenge
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-card/95 backdrop-blur border-primary/30 max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-primary">
+                        Quick Challenge Multiple Friends
+                      </DialogTitle>
+                      <DialogDescription>
+                        Select friends and difficulties to send bulk challenges
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                      <div>
+                        <label className="text-sm font-semibold mb-3 block">Select Friends</label>
+                        <div className="grid gap-2">
+                          {friends?.map(friend => {
+                            const isSelected = selectedFriendsForBulk.has(friend.id)
+                            return (
+                              <button
+                                key={friend.id}
+                                type="button"
+                                onClick={() => toggleFriendForBulk(friend.id)}
+                                className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
+                                  isSelected
+                                    ? 'border-primary bg-primary/20'
+                                    : 'border-primary/30 bg-background/50 hover:border-primary/50'
+                                }`}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                  <User size={20} className="text-primary" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-semibold">{friend.username}</div>
+                                </div>
+                                {isSelected && (
+                                  <Check size={20} className="text-primary flex-shrink-0" weight="bold" />
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div>
+                        <label className="text-sm font-semibold mb-3 block">Select Difficulties</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {(['easy', 'medium', 'hard', 'insane'] as Difficulty[]).map((diff) => {
+                            const isSelected = selectedDifficulties.has(diff)
+                            const config = DIFFICULTY_CONFIG[diff]
+                            return (
+                              <button
+                                key={diff}
+                                type="button"
+                                onClick={() => toggleDifficulty(diff)}
+                                className={`p-3 rounded-lg border-2 transition-all text-left ${
+                                  isSelected
+                                    ? 'border-accent bg-accent/20'
+                                    : 'border-accent/30 bg-background/50 hover:border-accent/50'
+                                }`}
+                              >
+                                <div className="font-bold text-sm">{config.name}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {config.scoreMultiplier}x multiplier
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
+                        <p className="text-sm font-semibold text-accent mb-1">
+                          Total: {selectedFriendsForBulk.size * selectedDifficulties.size} challenges
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedFriendsForBulk.size} friend{selectedFriendsForBulk.size !== 1 ? 's' : ''} × {selectedDifficulties.size} difficult{selectedDifficulties.size !== 1 ? 'ies' : 'y'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setQuickChallengeDialogOpen(false)
+                          setSelectedFriendsForBulk(new Set())
+                          setSelectedDifficulties(new Set(['medium']))
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleQuickChallengeAll}
+                        className="bg-accent hover:bg-accent/90"
+                        disabled={selectedFriendsForBulk.size === 0}
+                      >
+                        <Lightning size={16} className="mr-2" weight="fill" />
+                        Send Challenges
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
 
             {mockSearchResults.length > 0 && (
@@ -459,28 +773,48 @@ export function FriendsPanel({
                                 Challenge {friend.username}
                               </DialogTitle>
                               <DialogDescription>
-                                Select difficulty and send your challenge
+                                Select one or multiple difficulties to send challenges
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
                               <div>
-                                <label className="text-sm font-semibold mb-2 block">Difficulty</label>
-                                <Select value={selectedDifficulty} onValueChange={(v) => setSelectedDifficulty(v as Difficulty)}>
-                                  <SelectTrigger className="bg-background/50 border-primary/30">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="easy">Easy (1x)</SelectItem>
-                                    <SelectItem value="medium">Medium (1.5x)</SelectItem>
-                                    <SelectItem value="hard">Hard (2x)</SelectItem>
-                                    <SelectItem value="insane">Insane (3x)</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                <label className="text-sm font-semibold mb-3 block">Select Difficulties</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                  {(['easy', 'medium', 'hard', 'insane'] as Difficulty[]).map((diff) => {
+                                    const isSelected = selectedDifficulties.has(diff)
+                                    const config = DIFFICULTY_CONFIG[diff]
+                                    return (
+                                      <button
+                                        key={diff}
+                                        type="button"
+                                        onClick={() => toggleDifficulty(diff)}
+                                        className={`p-3 rounded-lg border-2 transition-all text-left ${
+                                          isSelected
+                                            ? 'border-primary bg-primary/20 scale-105'
+                                            : 'border-primary/30 bg-background/50 hover:border-primary/50'
+                                        }`}
+                                      >
+                                        <div className="font-bold text-sm">{config.name}</div>
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          {diff === 'easy' && 'Larger targets, slower pace'}
+                                          {diff === 'medium' && 'Balanced challenge'}
+                                          {diff === 'hard' && 'Fast reflexes needed'}
+                                          {diff === 'insane' && 'Ultimate test'}
+                                        </div>
+                                        <div className="text-xs text-accent font-semibold mt-1">
+                                          {config.scoreMultiplier}x multiplier
+                                        </div>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
                               </div>
                               <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
                                 <p className="text-sm text-muted-foreground">
-                                  Your friend will have 24 hours to accept and complete the challenge.
-                                  Highest score wins!
+                                  {selectedDifficulties.size === 1 
+                                    ? 'Sending 1 challenge. Your friend will have 24 hours to accept and complete it.' 
+                                    : `Sending ${selectedDifficulties.size} challenges at different difficulties. Highest score wins for each!`
+                                  }
                                 </p>
                               </div>
                             </div>
@@ -490,6 +824,7 @@ export function FriendsPanel({
                                 onClick={() => {
                                   setChallengeDialogOpen(false)
                                   setSelectedFriend(null)
+                                  setSelectedDifficulties(new Set(['medium']))
                                 }}
                               >
                                 Cancel
@@ -499,7 +834,7 @@ export function FriendsPanel({
                                 className="bg-accent hover:bg-accent/90"
                               >
                                 <Sword size={16} className="mr-2" />
-                                Send Challenge
+                                Send {selectedDifficulties.size > 1 ? `${selectedDifficulties.size} ` : ''}Challenge{selectedDifficulties.size > 1 ? 's' : ''}
                               </Button>
                             </div>
                           </DialogContent>
