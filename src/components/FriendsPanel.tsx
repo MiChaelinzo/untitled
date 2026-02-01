@@ -443,9 +443,9 @@ export function FriendsPanel({
     })
   }
 
-  const handleChallengeFromAI = (opponentId: string, difficulty: Difficulty) => {
-    const opponent = friends?.find(f => f.id === opponentId)
-    if (!opponent) {
+  const handleChallengeFromAI = (opponent: PlayerSkillProfile, difficulty: Difficulty) => {
+    const friend = friends?.find(f => f.id === opponent.userId)
+    if (!friend) {
       toast.error('Opponent not found')
       return
     }
@@ -454,7 +454,7 @@ export function FriendsPanel({
       id: generateChallengeId(),
       fromUserId: currentUserId,
       fromUsername: currentUsername,
-      toUserId: opponent.id,
+      toUserId: opponent.userId,
       toUsername: opponent.username,
       difficulty: difficulty,
       createdAt: Date.now(),
@@ -464,6 +464,10 @@ export function FriendsPanel({
 
     setChallenges(current => [...(current || []), newChallenge])
     setShowAIMatchmaking(false)
+    
+    toast.success(`Challenge sent to ${opponent.username}!`, {
+      description: `${DIFFICULTY_CONFIG[difficulty].name} difficulty`
+    })
   }
 
   const getPlayerSkillProfiles = (): PlayerSkillProfile[] => {
