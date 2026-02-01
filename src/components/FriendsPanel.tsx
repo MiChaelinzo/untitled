@@ -550,8 +550,8 @@ export function FriendsPanel({
     return (
       <AIOpponentFinder
         playerProfile={currentPlayerProfile}
-        availablePlayers={getPlayerSkillProfiles()}
-        onChallengeOpponent={handleChallengeFromAI}
+        onSelectOpponent={handleChallengeFromAI}
+        isOpen={showAIMatchmaking}
         onClose={() => setShowAIMatchmaking(false)}
       />
     )
