@@ -191,24 +191,24 @@ function App() {
   }, [phase, setDailyStreak])
 
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const user = await window.spark.user()
-        if (user) {
-          setCurrentUser({
-            id: String(user.id),
-            username: user.login || 'Player',
-            avatarUrl: user.avatarUrl || undefined
-          })
-          setIsLoggedIn(true)
-          setPhase('menu')
+    if (isLoggedIn) {
+      async function loadUser() {
+        try {
+          const user = await window.spark.user()
+          if (user) {
+            setCurrentUser({
+              id: String(user.id),
+              username: user.login || 'Player',
+              avatarUrl: user.avatarUrl || undefined
+            })
+          }
+        } catch (error) {
+          console.error('Failed to load user:', error)
         }
-      } catch (error) {
-        console.error('Failed to load user:', error)
       }
+      loadUser()
     }
-    loadUser()
-  }, [])
+  }, [isLoggedIn])
 
   useEffect(() => {
     if (!challengeData) return
