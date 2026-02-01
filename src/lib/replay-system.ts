@@ -1,0 +1,165 @@
+import { Difficulty } from './game-types'
+
+export interface ReplayEvent {
+  type: 'spawn' | 'hit' | 'miss' | 'combo' | 'powerup' | 'round_end'
+  timestamp: number
+  data: {
+    x?: number
+    y?: number
+    size?: number
+    duration?: number
+    reactionTime?: number
+    score?: number
+    combo?: number
+    powerUpType?: string
+    round?: number
+  }
+}
+
+export interface GameReplay {
+  id: string
+  userId: string
+  username: string
+  avatarUrl?: string
+  difficulty: Difficulty
+  finalScore: number
+  accuracy: number
+  averageReactionTime: number
+  maxCombo: number
+  duration: number
+  timestamp: number
+  events: ReplayEvent[]
+  metadata: {
+    targetsHit: number
+    targetsMissed: number
+    powerUpsUsed: number
+    perfectRounds: number
+  }
+}
+
+export interface ReplayPlaybackState {
+  currentTime: number
+  isPlaying: boolean
+  playbackSpeed: 0.5 | 1 | 2
+  currentEventIndex: number
+}
+
+export function createReplay(
+  userId: string,
+  username: string,
+  avatarUrl: string | undefined,
+  difficulty: Difficulty,
+  finalScore: number,
+  events: ReplayEvent[],
+  metadata: {
+    targetsHit: number
+    targetsMissed: number
+    powerUpsUsed: number
+    perfectRounds: number
+  }
+): GameReplay {
+  const hits = events.filter(e => e.type === 'hit' && e.data.reactionTime)
+  const averageReactionTime = hits.length > 0
+    ? hits.reduce((sum, e) => sum + (e.data.reactionTime || 0), 0) / hits.length
+    : 0
+  
+  const accuracy = metadata.targetsHit + metadata.targetsMissed > 0
+    ? (metadata.targetsHit / (metadata.targetsHit + metadata.targetsMissed)) * 100
+    : 0
+  
+  const maxCombo = Math.max(...events.filter(e => e.type === 'combo').map(e => e.data.combo || 0), 0)
+  
+  const duration = events.length > 0 
+    ? events[events.length - 1].timestamp - events[0].timestamp
+    : 0
+
+  return {
+    id: `replay-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    userId,
+    username,
+    avatarUrl,
+    difficulty,
+    finalScore,
+    accuracy,
+    averageReactionTime,
+    maxCombo,
+    duration,
+    timestamp: Date.now(),
+    events,
+    metadata
+  }
+}
+
+export function getEventAtTime(replay: GameReplay, currentTime: number): ReplayEvent | null {
+  const startTime = replay.events[0]?.timestamp || 0
+  const targetTime = startTime + currentTime
+  
+  const events = replay.events.filter(e => e.timestamp <= targetTime)
+  return events.length > 0 ? events[events.length - 1] : null
+}
+
+export function getEventsInRange(replay: GameReplay, startTime: number, endTime: number): ReplayEvent[] {
+  const replayStart = replay.events[0]?.timestamp || 0
+  return replay.events.filter(e => {
+    const relativeTime = e.timestamp - replayStart
+    return relativeTime >= startTime && relativeTime <= endTime
+  })
+}
+
+export function getReactionTimeHeatmap(replay: GameReplay): { fast: number; medium: number; slow: number } {
+  const hits = replay.events.filter(e => e.type === 'hit' && e.data.reactionTime)
+  const reactionTimes = hits.map(e => e.data.reactionTime!)
+  
+  const fast = reactionTimes.filter(t => t < 500).length
+  const medium = reactionTimes.filter(t => t >= 500 && t < 1000).length
+  const slow = reactionTimes.filter(t => t >= 1000).length
+  
+  return { fast, medium, slow }
+}
+
+export function getAccuracyTrend(replay: GameReplay): number[] {
+  const chunkSize = Math.ceil(replay.events.length / 10)
+  const trends: number[] = []
+  
+  for (let i = 0; i < replay.events.length; i += chunkSize) {
+    const chunk = replay.events.slice(i, i + chunkSize)
+    const hits = chunk.filter(e => e.type === 'hit').length
+    const misses = chunk.filter(e => e.type === 'miss').length
+    const total = hits + misses
+    
+    if (total > 0) {
+      trends.push((hits / total) * 100)
+    }
+  }
+  
+  return trends
+}
+
+export function formatReplayDuration(ms: number): string {
+  const seconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  
+  if (minutes > 0) {
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+  return `${seconds}s`
+}
+
+export function calculateReplaySize(replay: GameReplay): number {
+  return new Blob([JSON.stringify(replay)]).size
+}
+
+export function compressReplay(replay: GameReplay): GameReplay {
+  const compressedEvents = replay.events.map(event => ({
+    ...event,
+    data: Object.fromEntries(
+      Object.entries(event.data).filter(([_, value]) => value !== undefined)
+    )
+  }))
+  
+  return {
+    ...replay,
+    events: compressedEvents
+  }
+}

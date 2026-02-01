@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle, Globe, Eye, Broadcast } from '@phosphor-icons/react'
+import { Play, Trophy, Lightning, SpeakerHigh, SpeakerSlash, Waveform, Fire, ChartBar, Medal, DownloadSimple, Target, Users, Palette, Crosshair, UsersThree, Calendar, Sparkle, Globe, Eye, Broadcast, VideoCamera, ShareNetwork } from '@phosphor-icons/react'
 import { LeaderboardEntry, Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
@@ -35,6 +35,9 @@ import { ProChallengePanel } from '@/components/ProChallengePanel'
 import { LiveEventLeaderboard, addLiveEventEntry, LiveEventConfig } from '@/components/LiveEventLeaderboard'
 import { AccessibilitySettings } from '@/components/AccessibilitySettings'
 import { AdvancedAnalytics } from '@/components/AdvancedAnalytics'
+import { DashboardOverview } from '@/components/DashboardOverview'
+import { ReplaysLibrary } from '@/components/ReplaysLibrary'
+import { CommunityFeed } from '@/components/CommunityFeed'
 import { getActiveGameModes, SPECIAL_GAME_MODES } from '@/lib/special-game-modes'
 import { GlobalLeaderboardEntry } from '@/lib/global-leaderboard'
 import { exportLeaderboardToCSV, exportLeaderboardToJSON } from '@/lib/export-utils'
@@ -305,6 +308,14 @@ export function Menu({
               <TabsTrigger value="accessibility" className="flex items-center gap-2">
                 <Eye size={16} weight="fill" />
                 <span className="hidden sm:inline">Accessibility</span>
+              </TabsTrigger>
+              <TabsTrigger value="replays" className="flex items-center gap-2">
+                <VideoCamera size={16} weight="fill" />
+                <span className="hidden sm:inline">Replays</span>
+              </TabsTrigger>
+              <TabsTrigger value="community" className="flex items-center gap-2">
+                <ShareNetwork size={16} weight="fill" />
+                <span className="hidden sm:inline">Community</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -594,6 +605,11 @@ export function Menu({
               <ChartBar weight="fill" size={24} className="text-primary" />
               <h3 className="text-2xl font-bold text-foreground">Your Statistics</h3>
             </div>
+            <DashboardOverview 
+              stats={stats}
+              challengeData={challengeData}
+              unlockedAchievements={unlockedAchievements}
+            />
             {globalLeaderboard && globalLeaderboard.length > 0 && (
               <CommunityStatsWidget globalLeaderboard={globalLeaderboard} />
             )}
@@ -740,6 +756,14 @@ export function Menu({
                 }}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="replays" className="space-y-4 mt-6">
+            <ReplaysLibrary currentUserId={currentUserId} />
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-4 mt-6">
+            <CommunityFeed currentUserId={currentUserId} />
           </TabsContent>
         </Tabs>
 

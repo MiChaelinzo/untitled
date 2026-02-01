@@ -1,5 +1,21 @@
 # Planning Guide
 
+## Enhanced Edition - Major Update
+
+**What's New in This Release:**
+This enhanced edition introduces four major client-requested features that significantly improve user engagement and the competitive experience:
+
+1. **Replay System**: Complete game recording and playback with performance analysis tools
+2. **Community Feed**: Real-time social activity stream showing achievements across the player base  
+3. **CSS Grid API Integration**: Professional grid-based layouts throughout the application for better responsiveness
+4. **Enhanced Data Visualization**: Reaction time heatmaps, accuracy trends, and performance analytics
+
+These features address key user requests for:
+- Learning and improvement tools (replays for self-analysis)
+- Social engagement and FOMO (community feed with reactions)
+- Professional UI/UX (grid-based responsive layouts)
+- Deeper insights (performance analytics and trends)
+
 C9 Reflex Arena is an electrifying reaction-time challenge game designed for Cloud9 event booths where fans compete to prove they have pro-player reflexes by tapping glowing targets as fast as possible in increasingly difficult rounds. The game features comprehensive multiplayer capabilities, dynamic visual customization, and a robust social system that creates a competitive community experience.
 
 **Experience Qualities**: 
@@ -11,6 +27,34 @@ C9 Reflex Arena is an electrifying reaction-time challenge game designed for Clo
 The game features extensive multiplayer systems (1v1 tournaments, team competitions), social features (friends, challenges, matchmaking), dynamic backgrounds, persistent progression, customization options, and AI-powered adaptive difficulty - all built around competitive reflex gameplay.
 
 ## Essential Features
+
+**Grid-Based Responsive Layout System** (NEW):
+- Functionality: CSS Grid-powered layout system that automatically adapts to different screen sizes with sophisticated grid templates for dashboards, leaderboards, tournaments, and game arenas. Implements named grid areas, auto-fit columns, and responsive breakpoint adjustments for optimal space utilization.
+- Purpose: Provides professional, magazine-quality layouts that scale beautifully across devices, improves information density without clutter, enables complex multi-panel interfaces, and creates visual hierarchy through intentional grid placement
+- Trigger: Applied automatically across all major UI sections (menu tabs, game arena, tournament brackets, analytics dashboard)
+- Progression: Component renders → Grid container established → Child elements placed in named areas → Responsive queries adjust grid template → Layout reflows smoothly → Consistent spacing maintained
+- Success criteria: All layouts use Grid API where appropriate, responsive breakpoints work seamlessly, no layout shifts or jumps, information hierarchy clear, mobile layouts stack intelligently
+
+**Replay System & Match History** (NEW):
+- Functionality: Complete game replay system that records all target spawns, hit timings, miss events, combo chains, and scores. Players can review any past game with visual playback showing targets appearing and hits registering in real-time. Includes detailed performance analysis with reaction time distribution heatmaps (fast/medium/slow categories), event logs with timestamps, and comprehensive game statistics.
+- Purpose: Enables players to learn from mistakes, identify improvement opportunities, analyze performance patterns over time, and creates shareable content for competitive analysis. Supports self-improvement and skill development through detailed post-game review.
+- Trigger: Games automatically recorded (non-practice mode), accessed via "Replays" tab in main menu with search, filter, and sort capabilities
+- Progression: Game plays → All events timestamped and recorded → Replay saved to KV storage → Browse replay library with grid layout → Select replay → Full-screen playback view with controls (play/pause, speed adjustment 0.5x-2x, timeline scrubbing) → View performance summary and analysis → Delete unwanted replays
+- Success criteria: Replays accurately recreate gameplay with <100KB storage per game, playback controls responsive with smooth animations, analysis tools provide actionable insights (reaction time heatmaps show fast/medium/slow distribution), replay library searchable and filterable by player/difficulty, grid layout adapts beautifully to screen size
+
+**Community Social Feed** (NEW):
+- Functionality: Real-time activity feed displaying recent player achievements, high scores, challenge completions, perfect games, combo records, and streak milestones across the entire player base. Features grid-based card layout with user avatars, timestamps, activity descriptions, and interactive emoji reactions (fire, trophy, lightning, star). Includes filtering by activity type (scores, achievements, perfect games) and view modes (Recent/Trending). Activities automatically generate from gameplay with natural language descriptions.
+- Purpose: Creates sense of active community and drives competition through visibility of others' accomplishments, provides inspiration and goals through trending achievements, encourages social connections via reactions and profile views, and increases engagement through FOMO and competitive spirit
+- Trigger: "Community" tab in main menu, feed auto-populates from all player activities with most recent first
+- Progression: Player completes action → Activity automatically created and logged → Feed updates with new entry → Other players see activity in grid layout → React with emojis (fire/trophy/lightning/star) → Emoji counts update in real-time → Filter by activity types or switch to Trending view → Trending algorithm surfaces most-reacted activities from last 24 hours
+- Success criteria: Feed displays activities in responsive grid layout (auto-fill minmax for fluid columns), updates smoothly without performance impact, emoji reactions work reliably with visual feedback, activities feel relevant and interesting with natural language descriptions, filtering and sorting work instantly, empty states provide helpful guidance, grid layout stacks beautifully on mobile
+
+**Power-Ups System** (NEW):
+- Functionality: Collectible power-ups that spawn during gameplay providing temporary advantages: Slow Motion (halves game speed for 3s), Magnet (auto-attracts clicks to targets within 50px radius for 5s), Shield (protects from next miss), Double Points (2x score for 10s), and Time Freeze (pauses target timers for 2s). Power-ups appear as glowing icons between regular targets with distinct colors and animations.
+- Purpose: Adds strategic depth to reflexes-only gameplay, creates exciting comeback moments, rewards spatial awareness, provides content variety, and introduces risk-reward decisions
+- Trigger: Power-ups spawn randomly every 8-12 targets during gameplay, enabled/disabled in settings
+- Progression: Power-up spawns with particle effect → Player clicks to collect → Activation animation plays → Effect applied for duration → Visual indicator shows remaining time → Effect expires with feedback → Stats track power-up usage
+- Success criteria: Power-ups feel fair and balanced, spawn rate appropriate, visual effects clear but not distracting, collection satisfying, strategic value evident, can be disabled for purist gameplay
 
 **Authentication & User Profiles**
 - Functionality: Optional login system with GitHub authentication or custom account creation, guest play available, persistent user profiles with avatars and statistics
@@ -421,6 +465,14 @@ Animations should create moments of explosive feedback and cyberpunk flair witho
 Balance: Explosive moments on hits/scores create dopamine spikes with both visual and audio feedback, while UI animations are swift and purposeful to maintain pace.
 
 ## Component Selection
+
+**Grid API Implementation**:
+- **CSS Grid for Responsive Layouts**: All major components now use CSS Grid API for sophisticated, responsive layouts that adapt beautifully across device sizes
+- **Named Grid Areas**: Dashboard components use semantic grid areas (header/sidebar/main/footer) for clear layout structure
+- **Auto-fit Columns**: Leaderboards, replay libraries, and community feeds use `repeat(auto-fill, minmax())` for fluid responsive grids
+- **Grid Template Columns/Rows**: Tournament brackets, analytics dashboards, and performance metrics use explicit grid templates for precise control
+- **Responsive Grid Breakpoints**: Mobile layouts automatically stack grid columns vertically using media query classes
+- **Grid Gap Spacing**: Consistent spacing maintained through grid-gap properties rather than margin/padding on children
 
 - **Components**:
   - **Button** (shadcn): Primary actions with custom glow effects via Tailwind shadow utilities
