@@ -172,6 +172,7 @@ npm run build
 
 [Link to 3-minute demo video showcasing gameplay, features, and booth integration]
 
+
 ## 📜 License
 
 MIT License - See LICENSE file for details.
@@ -186,8 +187,8 @@ MIT License - See LICENSE file for details.
 ## 🔗 Links
 
 - [Hackathon Details](https://jetbrains-cloud9-hackathon.devpost.com/)
-- [Live Demo](#) - Coming soon
-- [Source Code](https://github.com/your-repo/c9-reflex-arena)
+- [[Live Demo](#)](https://untitled--MiChaelinzo.github.app) 
+- [[Source Code](https://github.com/MiChaelinzo/untitled)](https://github.com/MiChaelinzo/untitled)
 
 ---
 
