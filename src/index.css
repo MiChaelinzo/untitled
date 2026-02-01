@@ -16,38 +16,43 @@
 }
 
 :root {
-  --background: oklch(0.15 0.02 240);
+  --background: oklch(0.18 0.08 260);
   --foreground: oklch(0.98 0 0);
 
-  --card: oklch(0.18 0.03 240);
+  --card: oklch(0.22 0.08 260);
   --card-foreground: oklch(0.98 0 0);
   
-  --popover: oklch(0.18 0.03 240);
+  --popover: oklch(0.22 0.08 260);
   --popover-foreground: oklch(0.98 0 0);
 
-  --primary: oklch(0.65 0.24 240);
-  --primary-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.78 0.20 200);
+  --primary-foreground: oklch(0.15 0.05 260);
 
-  --secondary: oklch(0.25 0.05 240);
+  --secondary: oklch(0.30 0.08 260);
   --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.25 0.05 240);
-  --muted-foreground: oklch(0.65 0.08 240);
+  --muted: oklch(0.28 0.08 260);
+  --muted-foreground: oklch(0.60 0.08 260);
 
-  --accent: oklch(0.70 0.25 350);
+  --accent: oklch(0.72 0.28 340);
   --accent-foreground: oklch(0.98 0 0);
 
   --destructive: oklch(0.55 0.25 15);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.30 0.08 240);
-  --input: oklch(0.30 0.08 240);
-  --ring: oklch(0.65 0.24 240);
+  --border: oklch(0.35 0.08 260);
+  --input: oklch(0.30 0.08 260);
+  --ring: oklch(0.78 0.20 200);
 
-  --cyan: oklch(0.75 0.18 195);
-  --cyan-foreground: oklch(0.15 0.02 240);
+  --cyan: oklch(0.78 0.20 200);
+  --cyan-foreground: oklch(0.18 0.08 260);
 
-  --radius: 0.5rem;
+  --magenta: oklch(0.72 0.28 340);
+  --magenta-foreground: oklch(0.98 0 0);
+
+  --white-core: oklch(0.98 0.02 200);
+
+  --radius: 0.75rem;
 }
 
 @theme {
@@ -72,6 +77,9 @@
   --color-ring: var(--ring);
   --color-cyan: var(--cyan);
   --color-cyan-foreground: var(--cyan-foreground);
+  --color-magenta: var(--magenta);
+  --color-magenta-foreground: var(--magenta-foreground);
+  --color-white-core: var(--white-core);
 
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: var(--radius);
@@ -82,11 +90,45 @@
 }
 
 .glow-text {
-  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 0 60px currentColor;
 }
 
 .glow-box {
-  box-shadow: 0 0 20px -5px currentColor, 0 0 40px -10px currentColor;
+  box-shadow: 0 0 20px -5px currentColor, 0 0 40px -10px currentColor, 0 0 60px -15px currentColor;
+}
+
+.glow-intense {
+  box-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    0 0 80px currentColor,
+    0 0 120px currentColor;
+}
+
+.glow-cyan {
+  box-shadow: 
+    0 0 10px oklch(0.78 0.20 200),
+    0 0 20px oklch(0.78 0.20 200),
+    0 0 40px oklch(0.78 0.20 200),
+    0 0 80px oklch(0.78 0.20 200 / 0.5);
+}
+
+.glow-magenta {
+  box-shadow: 
+    0 0 10px oklch(0.72 0.28 340),
+    0 0 20px oklch(0.72 0.28 340),
+    0 0 40px oklch(0.72 0.28 340),
+    0 0 80px oklch(0.72 0.28 340 / 0.5);
+}
+
+.glow-white-core {
+  box-shadow: 
+    0 0 5px oklch(0.98 0.02 200),
+    0 0 10px oklch(0.98 0.02 200),
+    0 0 20px oklch(0.98 0.02 200),
+    0 0 40px oklch(0.78 0.20 200),
+    0 0 80px oklch(0.78 0.20 200 / 0.6);
 }
 
 @keyframes glitch {

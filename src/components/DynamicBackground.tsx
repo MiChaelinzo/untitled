@@ -67,13 +67,14 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
 
       draw() {
         if (!ctx) return
-        ctx.fillStyle = `rgba(100, 150, 255, ${this.opacity})`
+        const cyan = `rgba(129, 212, 250, ${this.opacity})`
+        ctx.fillStyle = cyan
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
         
-        ctx.shadowBlur = 8
-        ctx.shadowColor = `rgba(100, 150, 255, ${this.opacity * 0.5})`
+        ctx.shadowBlur = 12
+        ctx.shadowColor = cyan
         ctx.fill()
         ctx.shadowBlur = 0
       }
@@ -723,28 +724,28 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
 
     if (natureThemes.includes(variant)) {
       return {
-        color1: 'bg-emerald-500/20',
-        color2: 'bg-teal-500/20',
-        color3: 'bg-cyan-400/15'
+        color1: 'bg-cyan/15',
+        color2: 'bg-teal-500/15',
+        color3: 'bg-emerald-400/10'
       }
     } else if (spaceThemes.includes(variant)) {
       return {
-        color1: 'bg-purple-500/20',
-        color2: 'bg-indigo-500/20',
-        color3: 'bg-blue-400/15'
+        color1: 'bg-primary/12',
+        color2: 'bg-magenta/10',
+        color3: 'bg-purple-500/8'
       }
     } else if (techThemes.includes(variant)) {
       return {
-        color1: 'bg-primary/20',
-        color2: 'bg-accent/20',
-        color3: 'bg-cyan/15'
+        color1: 'bg-primary/15',
+        color2: 'bg-accent/12',
+        color3: 'bg-cyan/10'
       }
     }
     
     return {
-      color1: 'bg-primary/20',
-      color2: 'bg-accent/20',
-      color3: 'bg-cyan/15'
+      color1: 'bg-primary/15',
+      color2: 'bg-accent/12',
+      color3: 'bg-cyan/10'
     }
   }
 
@@ -762,12 +763,12 @@ export function DynamicBackground({ variant = 'particles' }: DynamicBackgroundPr
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${colors.color1} rounded-full blur-3xl opacity-30`} />
+        <div className={`absolute top-1/4 left-1/4 w-[600px] h-[600px] ${colors.color1} rounded-full blur-[100px] opacity-40`} />
         <div 
-          className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${colors.color2} rounded-full blur-3xl opacity-25`}
+          className={`absolute bottom-1/4 right-1/4 w-[600px] h-[600px] ${colors.color2} rounded-full blur-[100px] opacity-35`}
         />
         <div 
-          className={`absolute top-1/2 right-1/3 w-80 h-80 ${colors.color3} rounded-full blur-3xl opacity-20`}
+          className={`absolute top-1/2 right-1/3 w-[500px] h-[500px] ${colors.color3} rounded-full blur-[100px] opacity-30`}
         />
       </motion.div>
     </>

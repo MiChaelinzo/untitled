@@ -36,7 +36,11 @@ export function Target({ target, onHit, onMiss, size = 80, skin = 'default' }: T
 
   const progress = (timeRemaining / target.duration) * 100
   const scale = 0.5 + (progress / 100) * 0.5
-  const urgencyColor = progress < 30 ? 'oklch(0.55 0.25 15)' : progress < 60 ? 'oklch(0.70 0.25 350)' : 'oklch(0.65 0.24 240)'
+  
+  const cyanRing = 'oklch(0.78 0.20 200)'
+  const magentaCore = 'oklch(0.72 0.28 340)'
+  const whiteCore = 'oklch(0.98 0.02 200)'
+  const urgencyColor = progress < 30 ? 'oklch(0.65 0.25 15)' : progress < 60 ? magentaCore : cyanRing
 
   const renderSkin = () => {
     switch (skin) {
@@ -177,33 +181,145 @@ export function Target({ target, onHit, onMiss, size = 80, skin = 'default' }: T
         return (
           <>
             <motion.div
-              className="absolute inset-0 rounded-full glow-box"
-              animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 rounded-full"
+              animate={{ scale: [1.3, 1.4, 1.3], opacity: [0.2, 0.3, 0.2] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               style={{
-                backgroundColor: urgencyColor,
-                boxShadow: `0 0 ${20 * (progress / 100)}px ${urgencyColor}, 0 0 ${40 * (progress / 100)}px ${urgencyColor}`
+                background: `radial-gradient(circle, transparent 60%, ${cyanRing} 80%, transparent 100%)`,
+                boxShadow: `0 0 60px ${cyanRing}, 0 0 100px ${cyanRing}`
               }}
             />
-            <div className="absolute inset-0 rounded-full backdrop-blur-sm border-2" style={{
-              backgroundColor: `${urgencyColor}30`,
-              borderColor: urgencyColor
-            }} />
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
+            
+            <motion.div
+              className="absolute inset-0 rounded-full border-4"
+              animate={{ 
+                scale: [1, 1.05, 1], 
+                opacity: [0.8, 1, 0.8],
+                rotate: [0, 360]
+              }}
+              transition={{ 
+                scale: { duration: 1.2, repeat: Infinity, ease: 'easeInOut' },
+                opacity: { duration: 1.2, repeat: Infinity, ease: 'easeInOut' },
+                rotate: { duration: 8, repeat: Infinity, ease: 'linear' }
+              }}
+              style={{
+                borderColor: cyanRing,
+                boxShadow: `
+                  0 0 10px ${cyanRing},
+                  0 0 20px ${cyanRing},
+                  0 0 40px ${cyanRing},
+                  inset 0 0 20px ${cyanRing}40
+                `
+              }}
+            />
+            
+            <motion.div
+              className="absolute inset-[12%] rounded-full border-3"
+              animate={{ 
+                scale: [1, 1.08, 1],
+                opacity: [0.6, 0.9, 0.6]
+              }}
+              transition={{ 
+                duration: 1, 
+                repeat: Infinity, 
+                ease: 'easeInOut',
+                delay: 0.3
+              }}
+              style={{
+                borderColor: cyanRing,
+                borderWidth: '3px',
+                boxShadow: `0 0 15px ${cyanRing}, 0 0 30px ${cyanRing}`
+              }}
+            />
+            
+            <motion.div
+              className="absolute inset-[25%] rounded-full"
+              animate={{ 
+                scale: [1, 1.15, 1],
+                opacity: [0.7, 1, 0.7]
+              }}
+              transition={{ 
+                duration: 0.8, 
+                repeat: Infinity, 
+                ease: 'easeInOut'
+              }}
+              style={{
+                background: `radial-gradient(circle, ${whiteCore} 0%, ${magentaCore} 40%, transparent 80%)`,
+                boxShadow: `
+                  0 0 20px ${whiteCore},
+                  0 0 40px ${magentaCore},
+                  0 0 60px ${magentaCore},
+                  0 0 80px ${magentaCore}40
+                `
+              }}
+            />
+            
+            <motion.div
+              className="absolute inset-[35%] rounded-full"
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [1, 0.8, 1]
+              }}
+              transition={{ 
+                duration: 0.6, 
+                repeat: Infinity, 
+                ease: 'easeInOut'
+              }}
+              style={{
+                backgroundColor: whiteCore,
+                boxShadow: `
+                  0 0 10px ${whiteCore},
+                  0 0 20px ${whiteCore},
+                  0 0 30px ${magentaCore},
+                  0 0 50px ${magentaCore}
+                `
+              }}
+            />
+
+            <svg className="absolute inset-0 w-full h-full -rotate-90 opacity-80">
               <circle
                 cx="50%"
                 cy="50%"
-                r="40%"
+                r="45%"
                 fill="none"
-                stroke={urgencyColor}
-                strokeWidth="3"
-                strokeDasharray={`${progress * 2.5} 250`}
-                opacity="0.8"
+                stroke={cyanRing}
+                strokeWidth="2"
+                strokeDasharray={`${progress * 2.8} 280`}
+                style={{
+                  filter: `drop-shadow(0 0 8px ${cyanRing})`
+                }}
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-accent animate-pulse" />
-            </div>
+
+            <motion.div 
+              className="absolute inset-0"
+              animate={{ opacity: [0.05, 0.15, 0.05] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: cyanRing,
+                    left: '50%',
+                    top: '50%',
+                    transform: `rotate(${i * 30}deg) translateX(${size * 0.4}px)`,
+                    boxShadow: `0 0 4px ${cyanRing}`
+                  }}
+                  animate={{
+                    opacity: [0.3, 1, 0.3],
+                    scale: [0.8, 1.2, 0.8]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.1,
+                    ease: 'easeInOut'
+                  }}
+                />
+              ))}
+            </motion.div>
           </>
         )
     }

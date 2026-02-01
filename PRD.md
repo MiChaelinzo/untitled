@@ -402,22 +402,22 @@ The game features extensive multiplayer systems (1v1 tournaments, team competiti
 
 ## Design Direction
 
-The design should feel like stepping into a cyberpunk training facility meets esports arena - electric, high-energy, and unmistakably Cloud9. Think neon lights cutting through darkness, aggressive geometric shapes, glitch effects on transitions, and the kind of UI that makes you feel like a competitor the moment you tap in. Every interaction should pulse with intensity.
+The design should evoke a premium futuristic HUD interface with stunning neon glow effects - think high-end sci-fi visualization with circular glowing targets, intense bloom lighting, geometric HUD frames, and floating UI panels. Every element should feel like it's projected from advanced holographic technology with vibrant cyan outer rings and hot pink/magenta energy cores. The aesthetic should be polished, theatrical, and mesmerizing with particle trails and atmospheric lighting that creates depth and dimension.
 
 ## Color Selection
 
-A dark, high-contrast cyberpunk palette with electrifying accents that pop against near-black backgrounds.
+A rich deep space palette with electric neon accents creating dramatic bloom and glow effects.
 
-- **Primary Color**: Cloud9 Electric Blue (oklch(0.65 0.24 240)) - The signature C9 brand color representing trust, precision, and competitive excellence
+- **Primary Color**: Neon Cyan Glow (oklch(0.78 0.20 200)) - Brilliant cyan for outer target rings, highlights, and primary UI borders creating that signature holographic look
 - **Secondary Colors**: 
-  - Deep Space Navy (oklch(0.15 0.02 240)) - Main background creating dramatic contrast
-  - Neon Cyan (oklch(0.75 0.18 195)) - Active states and highlights
-- **Accent Color**: Plasma Pink (oklch(0.70 0.25 350)) - CTAs, hit effects, and combo multipliers demanding immediate attention
+  - Deep Space Indigo (oklch(0.18 0.08 260)) - Rich dark background with subtle blue undertones for depth
+  - Electric Magenta (oklch(0.72 0.28 340)) - Hot pink/magenta for target centers, energy cores, and critical alerts with intense bloom
+- **Accent Color**: Bright White Core (oklch(0.98 0.02 200)) - Pure bright centers with slight cyan tint for maximum bloom and intensity
 - **Foreground/Background Pairings**: 
-  - Deep Space Navy (oklch(0.15 0.02 240)): White text (oklch(0.98 0 0)) - Ratio 14.2:1 ✓
-  - Electric Blue (oklch(0.65 0.24 240)): White text (oklch(0.98 0 0)) - Ratio 5.8:1 ✓
-  - Plasma Pink (oklch(0.70 0.25 350)): White text (oklch(0.98 0 0)) - Ratio 6.1:1 ✓
-  - Neon Cyan (oklch(0.75 0.18 195)): Deep Navy (oklch(0.15 0.02 240)) - Ratio 8.5:1 ✓
+  - Deep Space Indigo (oklch(0.18 0.08 260)): White text (oklch(0.98 0 0)) - Ratio 12.8:1 ✓
+  - Neon Cyan (oklch(0.78 0.20 200)): Deep Space (oklch(0.18 0.08 260)) - Ratio 9.2:1 ✓
+  - Electric Magenta (oklch(0.72 0.28 340)): White text (oklch(0.98 0 0)) - Ratio 6.5:1 ✓
+  - HUD Frame Gray (oklch(0.45 0.02 260)): Deep Space (oklch(0.18 0.08 260)) - Ratio 4.2:1 ✓
 
 ## Font Selection
 
