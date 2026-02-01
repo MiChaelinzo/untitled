@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'fram
 import {
-  Sparkle,
   CircleNotch,
-  Trophy,
-  Lightning,
-  Sword,
+  Lightn
   TrendUp,
-  CheckCircle,
   Info,
+} from '@
+import {
+  findMa
+} from '@/
+interface AIOp
+  avail
   X
 } from '@phosphor-icons/react'
 import { Difficulty } from '@/lib/game-types'
@@ -30,117 +30,117 @@ interface AIOpponentFinderProps {
   onClose: () => void
 }
 
-export function AIOpponentFinder({
-  playerProfile,
-  availablePlayers,
-  onChallengeOpponent,
-  onClose
-}: AIOpponentFinderProps) {
-  const [isSearching, setIsSearching] = useState(false)
-  const [matches, setMatches] = useState<any[]>([])
-  const [aiAnalysis, setAiAnalysis] = useState<string>('')
-  const [selectedMatch, setSelectedMatch] = useState<any>(null)
-  const [matchPreview, setMatchPreview] = useState<string>('')
-  const [loadingPreview, setLoadingPreview] = useState(false)
-
   useEffect(() => {
-    handleFindOpponents()
   }, [])
-
-  const handleFindOpponents = async () => {
-    if (availablePlayers.length === 0) {
-      toast.info('No opponents available', {
-        description: 'Add friends to find opponents'
+  const handleFindO
+      toast.info('No o
       })
-      return
     }
-
     setIsSearching(true)
-    try {
-      const result = await findMatchingOpponents(playerProfile, availablePlayers, 5)
-      setMatches(result.matches)
+      const result = await findMatchingOpponents(pl
       setAiAnalysis(result.aiAnalysis)
-      
       if (result.matches.length > 0) {
-        toast.success('Found matching opponents!', {
-          description: `${result.matches.length} players at your skill level`
-        })
+          description: `${result.matches.length} players at yo
       } else {
-        toast.info('No matches found', {
-          description: 'Try adding more friends to the system'
-        })
+
       }
-    } catch (error) {
-      toast.error('Failed to find opponents')
-      console.error(error)
-    } finally {
-      setIsSearching(false)
-    }
-  }
+      toast.error('Failed
+    } fi
 
-  const handleViewMatch = async (match: any) => {
+
     setSelectedMatch(match)
-    setLoadingPreview(true)
     
-    try {
-      const preview = await generateMatchPreview(playerProfile, match.opponent)
-      setMatchPreview(preview)
-    } catch (error) {
-      console.error('Failed to generate preview:', error)
-      setMatchPreview('This should be an exciting match!')
-    } finally {
-      setLoadingPreview(false)
-    }
-  }
+      const preview = await generateMatchPreview(pla
+    } ca
+      setMat
+     
 
-  const getSkillTier = (rating: number): { label: string; color: string } => {
-    if (rating >= 3500) return { label: 'Pro', color: 'text-accent' }
-    if (rating >= 2500) return { label: 'Advanced', color: 'text-primary' }
-    if (rating >= 1500) return { label: 'Intermediate', color: 'text-cyan' }
+  const getSkillTier = (
+    if (r
     return { label: 'Beginner', color: 'text-muted-foreground' }
-  }
 
-  const getMatchQuality = (score: number): { label: string; color: string } => {
-    if (score >= 0.9) return { label: 'Perfect Match', color: 'text-accent' }
-    if (score >= 0.75) return { label: 'Great Match', color: 'text-primary' }
-    if (score >= 0.6) return { label: 'Good Match', color: 'text-cyan' }
-    return { label: 'Fair Match', color: 'text-muted-foreground' }
+    if (score >= 0.9) return { label: 
+    if
   }
-
   return (
-    <div className="flex flex-col h-full gap-6 p-6 overflow-hidden">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-            <Sparkle weight="fill" className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              AI Opponent Finder
-              <Badge variant="outline" className="text-accent border-accent">
-                BETA
-              </Badge>
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Find perfectly matched opponents for competitive play
+          
+          </di
+            <h2 className="text-2xl font
+              <Badge variant="outline" className="text-accent 
+          
+       
             </p>
-          </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="w-5 h-5" />
-        </Button>
+          <X className="w-
       </div>
+      <Card className="p-4 
+     
+   
 
-      <Card className="p-4 bg-card/50 border-primary/30">
-        <div className="flex items-center gap-3">
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={playerProfile.avatarUrl} />
-            <AvatarFallback>{playerProfile.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="font-semibold">{playerProfile.username}</div>
-            <div className="text-sm text-muted-foreground">
-              {playerProfile.skillRating} rating • {playerProfile.playStyle}
+            <div className="text-sm text-muted-fo
+            </div>
+        </div>
+
+        <
+          <h3 className="text-xl font-bold mb-2">Analyzing Players...</h3>
+            AI is finding the 
+        </Card>
+        <div className="flex flex-col gap-4">
+            <Card className="p-4 bg-accent/10 border-accen
+               
+              </div>
+     
+   
+
+            </p>
+              <Lightning weight="fill" className="w-5 h-5 mr-2" />
+            </Button>
+        </div>
+        <div className="space-y-3 overflow-y-auto flex-1">
+   
+
+            <Button variant="ghost" size="sm" onClick={handleFindOpponents}>
+              Refresh
+          </div>
+          {aiAnalysis && (
+              <div className="flex items-start gap-3">
+   
+
+
+            const tier = getSkillTier(match.opponent.skillRating)
+            
+              <Card
+                className="p-4 bg-card/80 hover:bg-card border-border hover:border-primar
+                <div className="flex items-start gap-3 mb-3">
+                
+               
+                  </Avatar>
+                    <div classNa
+                      <Badge variant="outline" className={tier.color}>
+                    
+                    <d
+                 
+                </div>
+                <div className="space-y-2 mb-3">
+                
+                
+              
+                    <span className="text-muted-foreground">
+                  </div>
+
+            
+
+                  <Button
+                    className="flex-1"
+                      e.stopPropagation(
+                    }}
+                    <Sword weight="fill" className="w-4 h-4 mr-2" />
+                  <
+                    variant="outli
+                      e.stopPropagation()
+                    }}
+                    <TrendUp weight="fill" className="w-4 h-4" />
             </div>
           </div>
         </div>
