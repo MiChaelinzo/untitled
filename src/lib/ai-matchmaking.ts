@@ -48,6 +48,13 @@ export interface TournamentMatchup {
   recommendedHandicap?: number
 }
 
+export interface OpponentMatch {
+  opponent: PlayerSkillProfile
+  matchScore: number
+  skillDifference: number
+  reasoning: string
+}
+
 export function calculateSkillRating(stats: PlayerStats): number {
   const {
     totalGamesPlayed,
