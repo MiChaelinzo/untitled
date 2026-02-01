@@ -20,7 +20,8 @@ import {
   createTournament,
   getPlayerNextMatch,
   getTournamentWinner,
-  updateMatchScore
+  updateMatchScore,
+  advanceTournament
 } from '@/lib/tournament-system'
 import { Difficulty, DIFFICULTY_CONFIG } from '@/lib/game-types'
 import { formatScore } from '@/lib/game-utils'
@@ -67,6 +68,25 @@ export function TournamentPanel({
     }
   }, [tournament, onTournamentUpdate])
 
+  useEffect(() => {
+    if (!tournament || tournament.status === 'completed') return
+
+    const currentRoundMatches = tournament.matches.filter(
+      m => m.roundNumber === tournament.currentRound
+    )
+    const allCompleted = currentRoundMatches.every(m => m.status === 'completed')
+
+    if (allCompleted && currentRoundMatches.length > 0) {
+      const timer = setTimeout(() => {
+        setTournament(current => {
+          if (!current) return null
+          return advanceTournament(current)
+        })
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [tournament])
+
   const handleCreateTournament = () => {
     if (!tournamentName.trim()) {
       toast.error('Please enter a tournament name')
@@ -106,12 +126,17 @@ export function TournamentPanel({
     if (!tournament) return
 
     const botId = match.player1.id === currentUserId ? match.player2.id : match.player1.id
-    const botScore = Math.floor(Math.random() * 30000) + 10000
+    const baseScore = 10000
+    const variance = 30000
+    const botScore = Math.floor(Math.random() * variance) + baseScore
 
     setTimeout(() => {
-      const updatedTournament = updateMatchScore(tournament, match.id, botId, botScore)
-      setTournament(updatedTournament)
-    }, 500)
+      setTournament(current => {
+        if (!current) return null
+        const updatedTournament = updateMatchScore(current, match.id, botId, botScore)
+        return updatedTournament
+      })
+    }, 1000)
   }
 
   const nextMatch = tournament ? getPlayerNextMatch(tournament, currentUserId) : null
@@ -374,20 +399,25 @@ export function TournamentPanel({
         </motion.div>
       )}
 
-      {nextMatch && (
+      {nextMatch && tournament.status !== 'completed' && (
         <Card className="p-6 bg-primary/10 border-primary">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-bold font-['Orbitron']">Your Next Match</h3>
               <p className="text-sm text-muted-foreground">
-                Round {nextMatch.roundNumber} • Match {nextMatch.matchNumber}
+                Round {nextMatch.roundNumber} of {tournament.rounds} • Match {nextMatch.matchNumber}
               </p>
             </div>
             <Button
               onClick={() => {
                 onStartMatch(tournament.difficulty, nextMatch.id)
                 simulateBotMatch(nextMatch)
+                toast.info('Starting match...', {
+                  description: `You vs ${nextMatch.player2?.username || 'Opponent'}`
+                })
               }}
+              size="lg"
+              className="bg-accent hover:bg-accent/90"
             >
               <Play size={20} className="mr-2" weight="fill" />
               Start Match
@@ -405,7 +435,7 @@ export function TournamentPanel({
               </div>
             </div>
 
-            <div className="text-muted-foreground font-bold">VS</div>
+            <div className="text-muted-foreground font-bold text-2xl">VS</div>
 
             <div className="flex items-center gap-3">
               <div>

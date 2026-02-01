@@ -244,7 +244,13 @@ export function FriendsPanel({
       ) || []
     )
     
-    onStartChallenge(challengeId, challenge.difficulty)
+    toast.success(`Challenge accepted! Starting game...`, {
+      description: `Playing on ${DIFFICULTY_CONFIG[challenge.difficulty].name} difficulty`
+    })
+    
+    setTimeout(() => {
+      onStartChallenge(challengeId, challenge.difficulty)
+    }, 500)
   }
 
   const handleDeclineChallenge = (challengeId: string) => {
@@ -601,12 +607,20 @@ export function FriendsPanel({
                       {challenge.status === 'accepted' && !challenge.fromScore && (
                         <Button
                           size="sm"
-                          onClick={() => onStartChallenge(challenge.id, challenge.difficulty)}
+                          onClick={() => {
+                            onStartChallenge(challenge.id, challenge.difficulty)
+                            toast.info('Starting challenge match...')
+                          }}
                           className="bg-primary hover:bg-primary/90"
                         >
                           <Lightning size={16} className="mr-1" weight="fill" />
                           Play Now
                         </Button>
+                      )}
+                      {challenge.fromScore && !challenge.toScore && (
+                        <Badge variant="outline" className="text-xs">
+                          ⏳ Waiting for opponent
+                        </Badge>
                       )}
                     </div>
                   </Card>

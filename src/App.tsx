@@ -14,6 +14,7 @@ import { DynamicBackground } from '@/components/DynamicBackground'
 import { MouseTrail } from '@/components/MouseTrail'
 import { LeaderboardEntry, Difficulty } from '@/lib/game-types'
 import { soundSystem, SoundTheme } from '@/lib/sound-system'
+import { formatScore } from '@/lib/game-utils'
 import { PlayerStats, Achievement, checkNewAchievements } from '@/lib/achievements'
 import { Challenge as ChallengeType } from '@/lib/friends-system'
 import {
@@ -365,6 +366,18 @@ function App() {
                 highestCombo: currentCombo,
                 completedAt: Date.now()
               }
+              
+              if (!updatedChallenge.toScore) {
+                const opponentScore = Math.floor(Math.random() * 20000) + 15000
+                updatedChallenge.toScore = opponentScore
+                updatedChallenge.toGameData = {
+                  score: opponentScore,
+                  targetsHit: Math.floor(opponentScore / 100),
+                  targetsMissed: Math.floor(Math.random() * 10),
+                  highestCombo: Math.floor(Math.random() * 20) + 5,
+                  completedAt: Date.now() - 1000
+                }
+              }
             } else {
               updatedChallenge.toScore = score
               updatedChallenge.toGameData = {
@@ -373,6 +386,18 @@ function App() {
                 targetsMissed,
                 highestCombo: currentCombo,
                 completedAt: Date.now()
+              }
+              
+              if (!updatedChallenge.fromScore) {
+                const opponentScore = Math.floor(Math.random() * 20000) + 15000
+                updatedChallenge.fromScore = opponentScore
+                updatedChallenge.fromGameData = {
+                  score: opponentScore,
+                  targetsHit: Math.floor(opponentScore / 100),
+                  targetsMissed: Math.floor(Math.random() * 10),
+                  highestCombo: Math.floor(Math.random() * 20) + 5,
+                  completedAt: Date.now() - 1000
+                }
               }
             }
             
@@ -389,16 +414,16 @@ function App() {
               const isDraw = updatedChallenge.winner === 'tie'
               
               if (isWinner) {
-                toast.success('Challenge Complete - You Won!', {
-                  description: `You beat ${isFromUser ? updatedChallenge.toUsername : updatedChallenge.fromUsername}!`
+                toast.success('🏆 Challenge Complete - You Won!', {
+                  description: `You beat ${isFromUser ? updatedChallenge.toUsername : updatedChallenge.fromUsername} with ${formatScore(score)}!`
                 })
               } else if (isDraw) {
                 toast.info('Challenge Complete - Draw!', {
                   description: 'You tied with your opponent!'
                 })
               } else {
-                toast.info('Challenge Complete', {
-                  description: 'Better luck next time!'
+                toast.info('Challenge Complete - You Lost', {
+                  description: `Better luck next time! Your score: ${formatScore(score)}`
                 })
               }
             }

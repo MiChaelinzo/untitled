@@ -72,31 +72,31 @@ function generateFirstRoundMatches(
   difficulty: Difficulty
 ): Match[] {
   const matches: Match[] = []
-  const powerOfTwo = Math.pow(2, Math.ceil(Math.log2(players.length)))
-  const byePlayers = powerOfTwo - players.length
-
+  const sortedPlayers = [...players].sort((a, b) => a.seed - b.seed)
+  
   let matchNumber = 1
-  for (let i = 0; i < players.length; i += 2) {
-    if (i + 1 < players.length) {
+  for (let i = 0; i < sortedPlayers.length; i += 2) {
+    if (i + 1 < sortedPlayers.length) {
       matches.push({
         id: `match_1_${matchNumber}`,
         roundNumber: 1,
         matchNumber,
-        player1: players[i],
-        player2: players[i + 1],
+        player1: sortedPlayers[i],
+        player2: sortedPlayers[i + 1],
         status: 'pending',
         difficulty
       })
       matchNumber++
-    } else if (byePlayers > 0) {
+    } else {
       matches.push({
         id: `match_1_${matchNumber}`,
         roundNumber: 1,
         matchNumber,
-        player1: players[i],
-        player2: players[i],
+        player1: sortedPlayers[i],
+        player2: { ...sortedPlayers[i], username: 'BYE' },
         player1Score: 0,
-        winnerId: players[i].id,
+        player2Score: 0,
+        winnerId: sortedPlayers[i].id,
         status: 'completed',
         difficulty
       })
