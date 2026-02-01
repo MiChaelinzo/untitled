@@ -265,7 +265,7 @@ export function TeamTournamentPanel({
           <div>
             <h2 className="text-2xl font-bold font-['Orbitron']">{tournament.name}</h2>
             <p className="text-sm text-muted-foreground">
-              Round {tournament.currentRound} of {tournament.rounds} • {tournament.teamSize.toUpperCase()} • {DIFFICULTY_CONFIG[tournament.difficulty].name}
+              Round {tournament.currentRound} of {tournament.rounds} • {tournament.teamSize.toUpperCase()} • {DIFFICULTY_CONFIG[tournament.difficulty]?.name || tournament.difficulty}
             </p>
           </div>
         </div>
@@ -280,22 +280,22 @@ export function TeamTournamentPanel({
             <div className="flex items-center gap-3">
               <div 
                 className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold"
-                style={{ backgroundColor: `${userTeam.color}20`, color: userTeam.color }}
+                style={{ backgroundColor: `${userTeam.color || '#888'}20`, color: userTeam.color || '#888' }}
               >
-                {userTeam.name.charAt(0)}
+                {userTeam.name?.charAt(0) || 'T'}
               </div>
               <div>
-                <p className="font-bold font-['Orbitron']">{userTeam.name}</p>
+                <p className="font-bold font-['Orbitron']">{userTeam.name || 'Your Team'}</p>
                 <p className="text-xs text-muted-foreground">Your Team</p>
               </div>
             </div>
             <div className="flex gap-2">
               <Badge variant="outline">
                 <Trophy size={12} className="mr-1" />
-                {userTeam.wins}W
+                {userTeam.wins || 0}W
               </Badge>
               <Badge variant="outline">
-                {userTeam.losses}L
+                {userTeam.losses || 0}L
               </Badge>
             </div>
           </div>
@@ -315,24 +315,24 @@ export function TeamTournamentPanel({
             
             <div 
               className="w-20 h-20 mx-auto mb-4 rounded-xl flex items-center justify-center text-3xl font-bold"
-              style={{ backgroundColor: `${winner.color}20`, color: winner.color }}
+              style={{ backgroundColor: `${winner.color || '#888'}20`, color: winner.color || '#888' }}
             >
-              {winner.name.charAt(0)}
+              {winner.name?.charAt(0) || 'T'}
             </div>
             
-            <p className="text-2xl font-bold mb-4" style={{ color: winner.color }}>
-              {winner.name}
+            <p className="text-2xl font-bold mb-4" style={{ color: winner.color || '#888' }}>
+              {winner.name || 'Champion Team'}
             </p>
 
             <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {winner.players.map((player) => (
-                <div key={player.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50">
+              {winner.players?.map((player) => (
+                <div key={player?.id || Math.random()} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={player.avatarUrl} />
-                    <AvatarFallback>{player.username[0]}</AvatarFallback>
+                    <AvatarImage src={player?.avatarUrl} />
+                    <AvatarFallback>{player?.username?.[0] || 'P'}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-semibold">{player.username}</span>
-                  {player.role === 'captain' && (
+                  <span className="text-sm font-semibold">{player?.username || 'Player'}</span>
+                  {player?.role === 'captain' && (
                     <Crown size={12} weight="fill" className="text-accent" />
                   )}
                 </div>
@@ -437,9 +437,9 @@ export function TeamTournamentPanel({
                     <Badge variant="default" className="text-xs">
                       <Trophy size={12} className="mr-1" />
                       Winner:{' '}
-                      {match.team1.id === match.winnerTeamId
-                        ? match.team1.name
-                        : match.team2.name}
+                      {match.team1?.id === match.winnerTeamId
+                        ? (match.team1?.name || 'Team 1')
+                        : (match.team2?.name || 'Team 2')}
                     </Badge>
                   </div>
                 )}
@@ -463,19 +463,23 @@ function TeamDisplay({
   showScore?: boolean
   score?: number
 }) {
+  if (!team) {
+    return null
+  }
+  
   return (
     <div className={`space-y-2 ${align === 'right' ? 'text-right' : 'text-left'}`}>
       <div className={`flex items-center gap-2 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
         <div 
           className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0"
-          style={{ backgroundColor: `${team.color}20`, color: team.color }}
+          style={{ backgroundColor: `${team.color || '#888'}20`, color: team.color || '#888' }}
         >
-          {team.name.charAt(0)}
+          {team.name?.charAt(0) || 'T'}
         </div>
         <div>
-          <p className="font-bold text-sm">{team.name}</p>
+          <p className="font-bold text-sm">{team.name || 'Team'}</p>
           <p className="text-xs text-muted-foreground">
-            {team.averageSkill.toFixed(0)} AVG
+            {(team.averageSkill || 0).toFixed(0)} AVG
           </p>
         </div>
       </div>

@@ -64,7 +64,7 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
 
   const availableCountries = useMemo(() => {
     const codes = new Set(leaderboard.map(e => e.countryCode).filter(Boolean))
-    return COUNTRIES.filter(c => codes.has(c.code) && c.name && c.flag).sort((a, b) => a.name.localeCompare(b.name))
+    return COUNTRIES.filter(c => c && c.code && c.name && c.flag && codes.has(c.code)).sort((a, b) => a.name.localeCompare(b.name))
   }, [leaderboard])
 
   const filteredLeaderboard = useMemo(() => 
@@ -311,7 +311,7 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                                     <p className="font-semibold text-foreground truncate">
                                       {entry.username}
                                     </p>
-                                    {entry.countryCode && (
+                                    {entry.countryCode && getCountryFlag(entry.countryCode) && (
                                       <span className="text-lg" title={entry.country || entry.countryCode}>
                                         {getCountryFlag(entry.countryCode)}
                                       </span>
@@ -376,8 +376,8 @@ export function GlobalLeaderboard({ leaderboard, currentUserId, onClose }: Globa
                     onSelectCountry={(countryCode) => {
                       setFilter({ ...filter, country: countryCode })
                       setActiveTab('global')
-                      const country = COUNTRIES.find(c => c.code === countryCode)
-                      if (country) {
+                      const country = COUNTRIES.find(c => c && c.code === countryCode)
+                      if (country && country.name) {
                         toast.success(`Filtering by ${country.name}`)
                       }
                     }}

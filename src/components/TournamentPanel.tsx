@@ -299,7 +299,7 @@ export function TournamentPanel({
                 <SelectContent>
                   {Object.entries(DIFFICULTY_CONFIG).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
-                      {config.name} - {config.description}
+                      {config?.name || key} - {config?.description || ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -408,11 +408,11 @@ export function TournamentPanel({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-xl font-bold">
-                {nextMatch.player1.username[0].toUpperCase()}
+                {nextMatch.player1?.username?.[0]?.toUpperCase() || 'P'}
               </div>
               <div>
-                <p className="font-bold">{nextMatch.player1.username}</p>
-                <Badge variant="outline" className="text-xs">Seed {nextMatch.player1.seed}</Badge>
+                <p className="font-bold">{nextMatch.player1?.username || 'Player 1'}</p>
+                <Badge variant="outline" className="text-xs">Seed {nextMatch.player1?.seed || 1}</Badge>
               </div>
             </div>
 
@@ -420,11 +420,11 @@ export function TournamentPanel({
 
             <div className="flex items-center gap-3">
               <div>
-                <p className="font-bold text-right">{nextMatch.player2.username}</p>
-                <Badge variant="outline" className="text-xs">Seed {nextMatch.player2.seed}</Badge>
+                <p className="font-bold text-right">{nextMatch.player2?.username || 'Player 2'}</p>
+                <Badge variant="outline" className="text-xs">Seed {nextMatch.player2?.seed || 2}</Badge>
               </div>
               <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-xl font-bold">
-                {nextMatch.player2.username[0].toUpperCase()}
+                {nextMatch.player2?.username?.[0]?.toUpperCase() || 'P'}
               </div>
             </div>
           </div>
@@ -462,7 +462,7 @@ export function TournamentPanel({
 
                 <div className="grid grid-cols-3 gap-4 items-center">
                   <div className="text-center">
-                    <p className="font-bold text-sm mb-1">{match.player1.username}</p>
+                    <p className="font-bold text-sm mb-1">{match.player1?.username || 'Player 1'}</p>
                     {match.player1Score !== undefined && (
                       <p className="text-lg font-bold text-primary">
                         {formatScore(match.player1Score)}
@@ -473,7 +473,7 @@ export function TournamentPanel({
                   <div className="text-center text-muted-foreground font-bold">VS</div>
 
                   <div className="text-center">
-                    <p className="font-bold text-sm mb-1">{match.player2.username}</p>
+                    <p className="font-bold text-sm mb-1">{match.player2?.username || 'Player 2'}</p>
                     {match.player2Score !== undefined && (
                       <p className="text-lg font-bold text-accent">
                         {formatScore(match.player2Score)}
@@ -487,9 +487,9 @@ export function TournamentPanel({
                     <Badge variant="default" className="text-xs">
                       <Trophy size={12} className="mr-1" />
                       Winner:{' '}
-                      {match.player1.id === match.winnerId
-                        ? match.player1.username
-                        : match.player2.username}
+                      {match.player1?.id === match.winnerId
+                        ? (match.player1?.username || 'Player 1')
+                        : (match.player2?.username || 'Player 2')}
                     </Badge>
                   </div>
                 )}

@@ -143,7 +143,7 @@ export function Menu({
     }
   }
 
-  const difficultyConfig = DIFFICULTY_CONFIG[selectedDifficulty || 'medium']
+  const difficultyConfig = DIFFICULTY_CONFIG[selectedDifficulty || 'medium'] || DIFFICULTY_CONFIG.medium
 
   const handleExport = (format: 'csv' | 'json') => {
     if (leaderboard.length === 0) {
@@ -389,7 +389,7 @@ export function Menu({
                 </Card>
                 
                 <div className="text-center text-sm text-muted-foreground">
-                  Score multiplier: <span className="text-accent font-bold">{difficultyConfig.scoreMultiplier}x</span>
+                  Score multiplier: <span className="text-accent font-bold">{difficultyConfig?.scoreMultiplier || 1}x</span>
                 </div>
               </div>
 
@@ -422,23 +422,23 @@ export function Menu({
             >
               <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
                 <Lightning weight="fill" size={32} className="text-accent mx-auto" />
-                <div className="font-bold text-foreground">Round 1: {difficultyConfig.rounds[1].name}</div>
+                <div className="font-bold text-foreground">Round 1: {difficultyConfig?.rounds?.[1]?.name || 'Warm Up'}</div>
                 <div className="text-sm text-muted-foreground">
-                  {difficultyConfig.rounds[1].targets} targets • {(difficultyConfig.rounds[1].duration / 1000).toFixed(1)}s each
+                  {difficultyConfig?.rounds?.[1]?.targets || 10} targets • {((difficultyConfig?.rounds?.[1]?.duration || 3000) / 1000).toFixed(1)}s each
                 </div>
               </Card>
               <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
                 <Lightning weight="fill" size={32} className="text-primary mx-auto" />
-                <div className="font-bold text-foreground">Round 2: {difficultyConfig.rounds[2].name}</div>
+                <div className="font-bold text-foreground">Round 2: {difficultyConfig?.rounds?.[2]?.name || 'Pro League'}</div>
                 <div className="text-sm text-muted-foreground">
-                  {difficultyConfig.rounds[2].targets} targets • {(difficultyConfig.rounds[2].duration / 1000).toFixed(1)}s each
+                  {difficultyConfig?.rounds?.[2]?.targets || 15} targets • {((difficultyConfig?.rounds?.[2]?.duration || 2000) / 1000).toFixed(1)}s each
                 </div>
               </Card>
               <Card className="p-6 bg-card/50 backdrop-blur text-center space-y-2">
                 <Lightning weight="fill" size={32} className="text-cyan mx-auto" />
-                <div className="font-bold text-foreground">Round 3: {difficultyConfig.rounds[3].name}</div>
+                <div className="font-bold text-foreground">Round 3: {difficultyConfig?.rounds?.[3]?.name || 'Championship'}</div>
                 <div className="text-sm text-muted-foreground">
-                  {difficultyConfig.rounds[3].targets} targets • {(difficultyConfig.rounds[3].duration / 1000).toFixed(1)}s each
+                  {difficultyConfig?.rounds?.[3]?.targets || 20} targets • {((difficultyConfig?.rounds?.[3]?.duration || 1500) / 1000).toFixed(1)}s each
                 </div>
               </Card>
             </motion.div>
@@ -746,13 +746,13 @@ export function Menu({
               <CustomDifficultyBuilder
                 customDifficulties={customDifficulties}
                 onCreateDifficulty={(difficulty) => {
-                  toast.success(`Custom difficulty created: ${difficulty.name}`)
+                  toast.success(`Custom difficulty created: ${difficulty?.name || 'New Difficulty'}`)
                 }}
                 onDeleteDifficulty={(id) => {
                   toast.success('Custom difficulty deleted')
                 }}
                 onPlayDifficulty={(difficulty) => {
-                  toast.info(`Playing ${difficulty.name} - Coming soon!`)
+                  toast.info(`Playing ${difficulty?.name || 'Custom Difficulty'} - Coming soon!`)
                 }}
               />
             )}
