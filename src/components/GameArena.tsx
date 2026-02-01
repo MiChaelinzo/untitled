@@ -521,13 +521,16 @@ export function GameArena({ onGameOver, difficulty, onComboUpdate, isPractice = 
   }, [powerUps])
 
   useEffect(() => {
-    if (gameState.phase === 'playing' && !gameState.currentTarget && physicsTargets.length === 0) {
+    const shouldSpawn = gameState.phase === 'playing' && 
+      (isPhysicsMode ? physicsTargets.length === 0 : !gameState.currentTarget)
+    
+    if (shouldSpawn) {
       const timeout = setTimeout(() => {
         spawnTarget()
       }, 500)
       return () => clearTimeout(timeout)
     }
-  }, [gameState.phase, gameState.currentTarget, spawnTarget, physicsTargets.length])
+  }, [gameState.phase, gameState.currentTarget, spawnTarget, physicsTargets.length, isPhysicsMode])
 
   useEffect(() => {
     if (!isPhysicsMode || gameState.phase !== 'playing') {
