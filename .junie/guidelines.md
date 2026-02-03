@@ -2,6 +2,13 @@
 
 This document provides coding standards and best practices for Junie AI when working with the C9 Reflex Arena project.
 
+## Related Documentation
+
+- [SETUP.md](./SETUP.md) — How to initialize and connect Junie AI to this project
+- [AGENTS.md](./AGENTS.md) — Guidelines for AI agents, workflows, and integrations
+- [junie.config.yaml](./junie.config.yaml) — Structured configuration for Junie AI
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — Developer documentation for extending Junie integration
+
 ## Project Overview
 
 C9 Reflex Arena is a reaction-time challenge game built for Cloud9 event booths. It's a React 19 + TypeScript application using Vite, Tailwind CSS, and various modern web technologies.
