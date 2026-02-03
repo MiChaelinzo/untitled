@@ -1,0 +1,211 @@
+# Junie AI Configuration
+# C9 Reflex Arena - Cloud9 x JetBrains Hackathon Project
+
+version: "1.0"
+
+# Project metadata
+project:
+  name: "C9 Reflex Arena"
+  description: "Reaction-time challenge game for Cloud9 event booths"
+  repository: "https://github.com/MiChaelinzo/untitled"
+  license: "MIT"
+  category: "event-game"
+
+# Technology stack configuration
+stack:
+  language: "typescript"
+  framework: "react"
+  version:
+    node: ">=18.0.0"
+    react: "19.x"
+    typescript: "5.7.x"
+  build_tool: "vite"
+  package_manager: "npm"
+
+# Guidelines configuration
+guidelines:
+  primary: "guidelines.md"
+  additional:
+    - "AGENTS.md"
+    - "SETUP.md"
+    - "CONTRIBUTING.md"
+
+# Code generation settings
+code_generation:
+  style:
+    quotes: "single"
+    semicolons: true
+    indent: 2
+    line_width: 100
+  
+  typescript:
+    strict: true
+    explicit_return_types: true
+    prefer_interfaces: true
+    no_any: true
+  
+  react:
+    component_style: "functional"
+    export_style: "named"
+    hooks_only: true
+    memo_optimization: true
+  
+  imports:
+    sort: true
+    group_order:
+      - "react"
+      - "external"
+      - "internal"
+      - "relative"
+      - "styles"
+
+# File organization
+file_structure:
+  components: "src/components"
+  hooks: "src/hooks"
+  utilities: "src/lib"
+  styles: "src/styles"
+  types: "src/types"
+  
+  naming:
+    components: "PascalCase"
+    hooks: "camelCase"
+    utilities: "camelCase"
+    constants: "SCREAMING_SNAKE_CASE"
+    types: "PascalCase"
+
+# Styling configuration
+styling:
+  framework: "tailwindcss"
+  version: "4.x"
+  theme_file: "theme.json"
+  
+  preferences:
+    utility_first: true
+    custom_classes: false
+    css_variables: true
+    design_system: "cyberpunk-esports"
+
+# Quality assurance
+quality:
+  linting:
+    enabled: true
+    tool: "eslint"
+    config: "eslint.config.js"
+  
+  type_checking:
+    enabled: true
+    strict_mode: true
+    config: "tsconfig.json"
+  
+  formatting:
+    enabled: true
+    on_save: true
+
+# Performance requirements
+performance:
+  animation_fps: 60
+  bundle_size_limit: "2MB"
+  lazy_loading: true
+  code_splitting: true
+
+# Accessibility requirements
+accessibility:
+  level: "WCAG 2.1 AA"
+  requirements:
+    - keyboard_navigation
+    - semantic_html
+    - aria_labels
+    - color_contrast
+    - focus_indicators
+
+# Security settings
+security:
+  xss_prevention: true
+  input_validation: true
+  secure_dependencies: true
+  no_hardcoded_secrets: true
+
+# AI integration settings
+ai_integration:
+  model: "gpt-4o-mini"
+  features:
+    - adaptive_difficulty
+    - matchmaking
+    - match_predictions
+  
+  response_format: "json"
+  confidence_scoring: true
+  fallback_enabled: true
+
+# Agent behavior configuration
+agents:
+  code_generation:
+    max_file_size: 500
+    include_tests: false
+    include_docs: true
+    
+  code_review:
+    severity_levels:
+      - critical
+      - warning
+      - suggestion
+    auto_approve: false
+    
+  refactoring:
+    preserve_api: true
+    update_imports: true
+    maintain_backwards_compat: true
+
+# Build configuration
+build:
+  commands:
+    install: "npm install"
+    dev: "npm run dev"
+    build: "npm run build"
+    lint: "npm run lint"
+    preview: "npm run preview"
+  
+  output_directory: "dist"
+  source_maps: true
+
+# Documentation settings
+documentation:
+  style: "jsdoc"
+  readme: "README.md"
+  changelog: "CHANGELOG.md"
+  auto_generate: true
+
+# Integration hooks
+hooks:
+  pre_commit:
+    - "npm run lint"
+  
+  pre_push:
+    - "npm run build"
+
+# Excluded paths (Junie should ignore)
+exclude:
+  - "node_modules"
+  - "dist"
+  - ".git"
+  - "*.log"
+  - ".env*"
+  - "coverage"
+
+# Custom rules for this project
+custom_rules:
+  - name: "game-performance"
+    description: "All game animations must maintain 60fps"
+    scope: "src/components"
+    severity: "critical"
+    
+  - name: "state-updates"
+    description: "Use functional updates for Spark KV Storage"
+    scope: "src/hooks"
+    severity: "warning"
+    
+  - name: "theme-consistency"
+    description: "Follow cyberpunk esports aesthetic"
+    scope: "src"
+    severity: "suggestion"
